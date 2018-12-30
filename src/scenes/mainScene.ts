@@ -173,9 +173,15 @@ export class MainScene extends Phaser.Scene {
         this.createElephant();
         this.spawnAnimals(0, 0, 600, 400, 10);
 
-        var collisionCallback = (function (event, bodyA, bodyB) {
-                this.checkOneSideCollision(event, bodyA, bodyB);
-                this.checkOneSideCollision(event, bodyB, bodyA);
+        var collisionCallback = (function (event) {
+                var pairs = event.pairs;
+
+                for (var i = 0, j = pairs.length; i != j; ++i) {
+                    var pair = pairs[i];
+
+                    this.checkOneSideCollision(event, pair.bodyA, pair.bodyB);
+                    this.checkOneSideCollision(event, pair.bodyB, pair.bodyA);
+                }
             }
         ).bind(this);
 
