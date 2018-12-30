@@ -24,6 +24,7 @@ const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
 const FOLLOWING_MIN_DIST_SQ = 200 ** 2;
 const ANIMAL_SPEED = 2;
 const CAMERA_SPEED = -1;
+const ANIMALS_SPAWN = 10;
 
 //For each frame, yOffset in percent, for the collision mesh and the image to fit together.
 const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
@@ -120,6 +121,7 @@ export class MainScene extends Phaser.Scene {
         animal.body.allowRotation = false;
         animal.setCollisionCategory(this.obstacleCat);
         animal.setCollidesWith([this.elephantCat, this.obstacleCat]);
+        animal.setSensor(true);
         this.insideScreenObjects.push(animal);
     }
     /***
@@ -145,14 +147,12 @@ export class MainScene extends Phaser.Scene {
      * @param bodyB
      */
     checkOneSideCollision(event, bodyA, bodyB): void{
-        if(bodyA.label == 'animal'){
-            console.log(bodyA.label, bodyB.label);
-        }
         if(bodyA.label == 'animal' && (bodyB.label == 'elephant' || bodyB.label == 'followingAnimal')){
 
             bodyA.label = 'followingAnimal';
             this.followingAnimals.push(bodyA.gameObject);
             bodyA.gameObject.setCollidesWith(this.obstacleCat);
+            bodyA.gameObject.setSensor(false);
         }
     }
     create (): void {
@@ -178,9 +178,9 @@ export class MainScene extends Phaser.Scene {
                 this.checkOneSideCollision(event, bodyB, bodyA);
             }
         ).bind(this);
+
         this.matter.world.on('collisionstart', collisionCallback);
-        this.matter.world.on('collisionactive', collisionCallback);
-        this.matter.world.on('collisionend', collisionCallback);
+
 
 
     }
@@ -259,7 +259,9 @@ export class MainScene extends Phaser.Scene {
     }
     private updateScrolling() : void {
         if(this.camera.scrollY < -this.spawnCount * this.sys.game.canvas.height){
-            this.spawnAnimals(0,  - this.spawnCount * this.sys.game.canvas.height, this.sys.game.canvas.width, - (this.spawnCount + 1) * this.sys.game.canvas.height, 10);
+            this.spawnAnimals(0,  - this.spawnCount * this.sys.game.canvas.height,
+                this.sys.game.canvas.width, - (this.spawnCount + 1) * this.sys.game.canvas.height,
+                ANIMALS_SPAWN);
             this.spawnCount ++;
         }
     }
