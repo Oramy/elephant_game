@@ -23,7 +23,7 @@ const ANIMAL_SCALE = 0.35;
 const MOVE_DELAY_COEFF = 0.1;
 const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
 const ANIMAL_BASE_SPEED = 140;
-const ANIMAL_SPEED_XY RATIO = 1/20;
+const ANIMAL_SPEED_XY_RATIO = 1/20;
 const CAMERA_BASE_SPEED = -3;
 const ANIMAL_ACC = 3;
 const CAMERA_ACC = -0.1;
@@ -98,7 +98,7 @@ export class MainScene extends Phaser.Scene {
     }
     createElephant(): void{
 
-        this.elephant = this.matter.add.sprite(400, 400, 'round','elephant.png',
+        this.elephant = this.matter.add.sprite(400, 400, 'round','sloth.png',
             {
                 shape:{
                     type:'circle',
@@ -269,7 +269,7 @@ export class MainScene extends Phaser.Scene {
             dir.normalize();
 
             var scaleY = ((distance - this.elephant.width * this.elephant.scaleX * 0.2) * 2 / this.camera.height);
-            var scaleX = this.animalSpeed / 20;
+            var scaleX = this.animalSpeed * ANIMAL_SPEED_XY_RATIO;
             scaleY *= this.animalSpeed ;
             scaleY *= 0.05 + 0.95 * 1/(1 + (i+1));
             dir.x = dir.x * scaleX;
