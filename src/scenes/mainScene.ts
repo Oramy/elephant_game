@@ -10,6 +10,8 @@ import Image = Phaser.Physics.Matter.Image;
 import Sprite = Phaser.Physics.Matter.Sprite;
 import Composite = MatterJS.Composite;
 import combined = Phaser.Cameras.Sprite3D.combined;
+import { Menu } from "./menu";
+
 function arrayRemove(arr, value) {
 
     return arr.filter(function(ele){
@@ -68,6 +70,10 @@ export class MainScene extends Phaser.Scene {
     private acquiredScore: number;
     private scoreText: Phaser.GameObjects.Text;
 
+
+    private highscores: any;
+    private friends : any;
+
     constructor() {
         super({
             key: "MainScene",
@@ -83,9 +89,32 @@ export class MainScene extends Phaser.Scene {
     }
     preload(): void
     {
-        this.load.image('sky', 'assets/skies/space3.png');
-        this.load.atlasXML('round', 'assets/atlas/round.png', 'assets/atlas/round.xml');
-        this.load.atlasXML('square', 'assets/atlas/square.png', 'assets/atlas/square.xml');
+    }
+
+    loadLeaderboards(): void{
+
+        // @ts-ignore
+        this.facebook.on('getleaderboard', (function (leaderboard)
+        {
+            if(leaderboard.name == 'Highscores') {
+
+                this.highscores = leaderboard;
+                //leaderboard.on('getscores', (function(scores){
+                //    this.createHighscoreTab(scores);
+                //}).bind(this));
+                this.highscores.getScores(10, 0);
+            }
+            else if(leaderboard.name == 'Amis')
+                this.friends = leaderboard;
+
+
+
+        }).bind(this), this);
+
+        // @ts-ignore
+        this.facebook.getLeaderboard('Highscores');
+        // @ts-ignore
+        //this.facebook.getLeaderboard('Amis');
     }
     createBackground(): void{
         this.background = this.add.image(0, 0, 'sky').setOrigin(0,0);
@@ -213,6 +242,7 @@ export class MainScene extends Phaser.Scene {
 
         var atlasTexture = this.textures.get('round');
         this.roundFrames = atlasTexture.getFrameNames();
+        this.loadLeaderboards();
         this.createUI();
         this.createBackground();
         this.createElephant();
@@ -356,6 +386,10 @@ export class MainScene extends Phaser.Scene {
             if(this.spawnCount % 8 == 1)
                 this.spawnShelter(this.camera.width / 2, - (this.spawnCount + 1/2) * this.sys.game.canvas.height);
             this.spawnCount ++;
+
+            if(this.spawnCount >= 19){
+                this.gameOver();
+            }
         }
     }
 
@@ -373,5 +407,16 @@ export class MainScene extends Phaser.Scene {
             return ele != gameObject;
         });
         gameObject.destroy();
+    }
+
+    gameOver(): void{
+        var data = {
+            character: 'elephant'
+        }
+
+        this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
+        //this.friends.setScore(this.computeScore(), data);
+
+        this.scene.start('Menu');
     }
 }

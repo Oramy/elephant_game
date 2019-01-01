@@ -8,21 +8,11 @@
 
 import "phaser";
 import { MainScene } from "./scenes/mainScene";
+import { Menu } from "./scenes/menu";
+import {Preloader} from "./scenes/preloader";
 
 // main game configuration
-const config: GameConfig = {
-  width: 480,
-  height: 480*15/9,
-  type: Phaser.AUTO,
-  parent: "game",
-  scene: MainScene,
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 200 }
-    }
-  }
-};
+
 
 // game class
 export class Game extends Phaser.Game {
@@ -31,7 +21,21 @@ export class Game extends Phaser.Game {
   }
 }
 
-// when the page is loaded, create our game instance
-window.onload = () => {
-  var game = new Game(config);
-};
+// @ts-ignore
+FBInstant.initializeAsync().then(function(){
+
+  var config: GameConfig = {
+    width: window.innerHeight * 9 / 16,
+    height: window.innerHeight,
+    type: Phaser.AUTO,
+    parent: "game",
+    scene: [Preloader, Menu, MainScene],
+    physics: {
+      default: "matter",
+      matter: {
+        gravity: { y: 0 }
+      }
+    }
+  };
+  new Game(config);
+});
