@@ -16,6 +16,8 @@ import {Preloader} from "./scenes/preloader";
 
 // game class
 export class Game extends Phaser.Game {
+
+  private highscores : any;
   constructor(config: GameConfig) {
     super(config);
   }
@@ -24,9 +26,17 @@ export class Game extends Phaser.Game {
 // @ts-ignore
 FBInstant.initializeAsync().then(function(){
 
-  var config: GameConfig = {
-    width: window.innerHeight * 9 / 16,
-    height: window.innerHeight,
+
+
+
+
+  var config: any = {
+    width: 1080,
+    height: 1920,
+    scale:{
+      // @ts-ignore
+      mode: Phaser.DOM.SHOW_ALL
+    },
     type: Phaser.AUTO,
     parent: "game",
     scene: [Preloader, Menu, MainScene],
@@ -35,7 +45,8 @@ FBInstant.initializeAsync().then(function(){
       matter: {
         gravity: { y: 0 }
       }
-    }
+    },
+
   };
   new Game(config);
 });

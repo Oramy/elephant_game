@@ -11,6 +11,8 @@ import Sprite = Phaser.Physics.Matter.Sprite;
 import Composite = MatterJS.Composite;
 import combined = Phaser.Cameras.Sprite3D.combined;
 import { Menu } from "./menu";
+import "../prefabs/prefabs.ts";
+import {addObstaclesAndAnimals, addObstaclesWithShelter, spawnAnimals} from "../prefabs/prefabs";
 
 function arrayRemove(arr, value) {
 
@@ -19,21 +21,21 @@ function arrayRemove(arr, value) {
     });
 
 }
-const ELEPHANT_SCALE = 0.8;
-const ANIMAL_SCALE = 0.35;
+export const ELEPHANT_SCALE = 2;
+export const ANIMAL_SCALE = 0.75;
 //1 = NO DELAY
-const MOVE_DELAY_COEFF = 0.1;
-const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
-const ANIMAL_BASE_SPEED = 140;
-const ANIMAL_SPEED_XY_RATIO = 1/20;
-const CAMERA_BASE_SPEED = -3;
-const ANIMAL_ACC = 3;
-const CAMERA_ACC = -0.1;
-const ANIMALS_SPAWN = 5;
-const SCORE_MULTIPLIER = 1.3;
+export const MOVE_DELAY_COEFF = 0.1;
+export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
+export const ANIMAL_BASE_SPEED = 280;
+export const ANIMAL_SPEED_XY_RATIO = 1/20;
+export const CAMERA_BASE_SPEED = -6;
+export const ANIMAL_ACC = 6;
+export const CAMERA_ACC = -0.2;
+export const ANIMALS_SPAWN = 5;
+export const SCORE_MULTIPLIER = 1.3;
 
 //For each frame, yOffset in percent, for the collision mesh and the image to fit together.
-const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
+export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
     0, 0.1, 0.07, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.04, -0.03, 0.08, 0.05];
 
 
@@ -50,7 +52,7 @@ export class MainScene extends Phaser.Scene {
     private liveShelters: Array<Image>;
 
     //List of atlas 'round' frame names.
-    private roundFrames: string[];
+    roundFrames: string[];
 
     //Counting how many times we spawned animals.
     private spawnCount: number;
@@ -59,8 +61,8 @@ export class MainScene extends Phaser.Scene {
     private insideScreenObjects: Array<Image>;
 
     //Collision categories.
-    private obstacleCat: number;
-    private elephantCat: number;
+    obstacleCat: number;
+    elephantCat: number;
 
 
     private background: Phaser.GameObjects.Image;
@@ -68,12 +70,15 @@ export class MainScene extends Phaser.Scene {
     private cameraSpeed: number;
     private animalSpeed: number;
     private acquiredScore: number;
-    private scoreText: Phaser.GameObjects.Text;
+    private scoreText: Phaser.GameObjects.BitmapText;
 
 
     private highscores: any;
     private friends : any;
 
+    private gameOverB : any;
+    private height: number;
+    private width: number;
     constructor() {
         super({
             key: "MainScene",
@@ -99,10 +104,6 @@ export class MainScene extends Phaser.Scene {
             if(leaderboard.name == 'Highscores') {
 
                 this.highscores = leaderboard;
-                //leaderboard.on('getscores', (function(scores){
-                //    this.createHighscoreTab(scores);
-                //}).bind(this));
-                this.highscores.getScores(10, 0);
             }
             else if(leaderboard.name == 'Amis')
                 this.friends = leaderboard;
@@ -118,16 +119,18 @@ export class MainScene extends Phaser.Scene {
     }
     createBackground(): void{
         this.background = this.add.image(0, 0, 'sky').setOrigin(0,0);
+        this.background.setScale(2);
+        this.background.setScrollFactor(0);
     }
     createUI(): void{
-        this.scoreText = this.add.text(20,20,'Score: ' + this.acquiredScore).setOrigin(0, 0);
-        this.scoreText.setColor("white");
+        this.scoreText = this.add.bitmapText(20,20,'jungle', 'Score: ' + this.acquiredScore, 100).setOrigin(0, 0);
+        this.scoreText.tint = 0xFFFFFF;
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
     }
     createElephant(): void{
 
-        this.elephant = this.matter.add.sprite(400, 400, 'round','sloth.png',
+        this.elephant = this.matter.add.sprite(400, 400, 'round','elephant.png',
             {
                 shape:{
                     type:'circle',
@@ -148,60 +151,8 @@ export class MainScene extends Phaser.Scene {
 
     }
 
-    /**
-     * Spawn a random animal at position x, y
-     * @param x
-     * @param y
-     */
-    spawnAnimal(x,y): void{
-        var i = Phaser.Math.Between(0, this.roundFrames.length - 1);
 
-        var animal = this.matter.add.image(x,y, 'round', this.roundFrames[i], {
-            shape: {
-                type: 'circle',
-                radius: 64
-            },
-            render: {sprite: {xOffset: 0, yOffset: ROUND_Y_OFFSETS[i]}},
-            label: 'animal',
 
-        });
-        animal.setScale(ANIMAL_SCALE);
-        animal.body.allowRotation = false;
-        animal.setCollisionCategory(this.obstacleCat);
-        animal.setCollidesWith([this.elephantCat, this.obstacleCat]);
-        animal.setSensor(true);
-        this.insideScreenObjects.push(animal);
-    }
-    /***
-     * Spawns count animals in rectangle of coordinates (x,y,x2,y2).
-     * @param x
-     * @param y
-     * @param x2
-     * @param y2
-     * @param count
-     */
-    spawnAnimals(x, y, x2, y2, count): void{
-        for (var j = 0; j < count; j++) {
-            var animalX = Phaser.Math.Between(x, x2);
-            var animalY = Phaser.Math.Between(y, y2);
-            this.spawnAnimal(animalX, animalY);
-        }
-    }
-    spawnShelter(x,y): void{
-
-        var shelter = this.matter.add.image(x,y, 'square', 'elephant.png');
-        shelter.setScale(5,1);
-        shelter.body.label = "shelter";
-        shelter.setSensor(true);
-        shelter.setStatic(true);
-        shelter.setCollidesWith(this.obstacleCat);
-        shelter.setCollisionCategory(this.obstacleCat);
-
-        this.insideScreenObjects.push(shelter);
-        this.liveShelters.push(shelter);
-        // @ts-ignore
-        shelter.score = 0;
-    }
 
     /**
      * Collision logic, with assymetrical roles for bodyA and bodyB.
@@ -238,7 +189,12 @@ export class MainScene extends Phaser.Scene {
         this.insideScreenObjects = [];
         this.liveShelters = [];
         this.acquiredScore = 0;
+
+        this.height = 1920;
+        this.width = 1080;
+
         this.camera = this.cameras.main;
+
 
         var atlasTexture = this.textures.get('round');
         this.roundFrames = atlasTexture.getFrameNames();
@@ -246,7 +202,6 @@ export class MainScene extends Phaser.Scene {
         this.createUI();
         this.createBackground();
         this.createElephant();
-        this.spawnAnimals(0, 0, 600, 400, 10);
 
 
         var collisionCallback = (function (event) {
@@ -322,6 +277,9 @@ export class MainScene extends Phaser.Scene {
         return score;
 
     }
+    inScreen(gameObject): boolean{
+        return gameObject.y - gameObject.displayHeight / 2 < this.camera.scrollY + this.camera.height;
+    }
     deleteOutsideScreen(): void{
 
         //Checking that objects are inside the screen.
@@ -329,7 +287,7 @@ export class MainScene extends Phaser.Scene {
         for(var i = 0; i < this.insideScreenObjects.length; i++){
             var gameObject = this.insideScreenObjects[i];
 
-            if(gameObject.y - gameObject.height * gameObject.scaleY / 2> this.camera.scrollY + this.camera.height){
+            if(!this.inScreen(gameObject)){
                 gameObject.destroy();
                 toDestroy.push(gameObject);
                 // @ts-ignore
@@ -375,21 +333,22 @@ export class MainScene extends Phaser.Scene {
         this.cameraSpeed += delta * CAMERA_ACC / 1000;
         this.camera.scrollY += this.cameraSpeed;
 
-        this.background.setPosition(0, this.camera.scrollY);
 
     }
     private updateScrolling() : void {
-        if(this.camera.scrollY < -this.spawnCount * this.sys.game.canvas.height){
-            this.spawnAnimals(0,  - this.spawnCount * this.sys.game.canvas.height,
-                this.sys.game.canvas.width, - (this.spawnCount + 1) * this.sys.game.canvas.height,
-                ANIMALS_SPAWN);
+        if(this.camera.scrollY < -this.spawnCount * this.height){
             if(this.spawnCount % 8 == 1)
-                this.spawnShelter(this.camera.width / 2, - (this.spawnCount + 1/2) * this.sys.game.canvas.height);
+                addObstaclesWithShelter(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height)
+            else if(this.spawnCount == 0)
+                addObstaclesAndAnimals(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height, this.spawnCount);
+            else
+                addObstaclesAndAnimals(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height);
+
             this.spawnCount ++;
 
-            if(this.spawnCount >= 19){
-                this.gameOver();
-            }
+        }
+        if(!this.inScreen(this.elephant)){
+            this.gameOver();
         }
     }
 
@@ -413,10 +372,27 @@ export class MainScene extends Phaser.Scene {
         var data = {
             character: 'elephant'
         }
+        var menu = this.scene.get("menu");
 
+        this.scene.pause("MainScene");
+
+        // @ts-ignore
+        this.highscores.on('setscore', function (key)
+        {
+            this.scene.start('Menu');
+
+        }, this);
         this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
-        //this.friends.setScore(this.computeScore(), data);
+    }
 
-        this.scene.start('Menu');
+    addInsideScreenObject(object: Phaser.Physics.Matter.Image) {
+        this.insideScreenObjects.push(object);
+    }
+
+    addShelter(shelter: Phaser.Physics.Matter.Image) {
+        this.insideScreenObjects.push(shelter);
+        this.liveShelters.push(shelter);
+        // @ts-ignore
+        shelter.score = 0;
     }
 }
