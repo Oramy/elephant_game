@@ -4,6 +4,7 @@ import Image = Phaser.GameObjects.Image;
 import BitmapText = Phaser.GameObjects.BitmapText;
 
 const LEADERBOARD_DRAW = 3;
+var SC;
 export class Menu extends Phaser.Scene{
     private highscores: any;
     private friends : any;
@@ -164,8 +165,10 @@ export class Menu extends Phaser.Scene{
     }
     create ()
     {
-        this.height = 1920;
-        this.width = 1080;
+
+        this.height = this.sys.canvas.height;
+        this.width = this.sys.canvas.width;
+        SC = this.height / 1920;
         this.camera = this.cameras.main;
         var atlasTexture = this.textures.get('round');
         this.characterFrames = atlasTexture.getFrameNames();
@@ -207,31 +210,31 @@ export class Menu extends Phaser.Scene{
 
 
         this.characterImage = this.add.image(0, 0, 'square_nodetailsOutline', 'elephant.png');
-        this.characterImage.setScale(1.8);
+        this.characterImage.setScale(1.8*SC);
 
         this.playImage = this.add.image(0, 0, 'icons', 'forward.png');
-        this.playImage.setScale(3);
-        var secondQuarterZone = this.add.zone(this.width / 2,  270 + 2 * this.height / 8, this.width, this.height*3 / 8);
+        this.playImage.setScale(3 * SC);
+        var secondQuarterZone = this.add.zone(this.width / 2,  270 * SC + 2 * this.height / 8, this.width, this.height*3 / 8);
         Phaser.Display.Align.In.Center(this.characterImage, secondQuarterZone);
         Phaser.Display.Align.In.Center(this.playImage, secondQuarterZone);
 
         this.nextCharacterImage = this.add.image(0, 0, 'square_nodetailsOutline', 'frog.png');
-        this.nextCharacterImage.setScale(1.8);
+        this.nextCharacterImage.setScale(1.8 * SC);
 
         var next = this.add.image(0, 0, 'icons', 'arrowRight.png');
-        next.setScale(3);
+        next.setScale(3 * SC);
 
-        var zone = this.add.zone(this.width / 2 + (64 + 128) * 1.8,  270  + 2 * this.height / 8, this.width, this.height*3 / 8);
+        var zone = this.add.zone(this.width / 2 + (64 + 128) * 1.8 *SC,  270 *SC  + 2 * this.height / 8, this.width, this.height*3 / 8);
         Phaser.Display.Align.In.Center(next, zone);
         Phaser.Display.Align.In.Center(this.nextCharacterImage, zone);
 
         this.prevCharacterImage = this.add.image(0, 0, 'square_nodetailsOutline', 'duck.png');
-        this.prevCharacterImage.setScale(1.8);
+        this.prevCharacterImage.setScale(1.8 * SC);
 
         var prev = this.add.image(0, 0, 'icons', 'arrowLeft.png');
-        prev.setScale(3);
+        prev.setScale(3 * SC);
 
-        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8,  270  + 2 * this.height / 8, this.width, this.height*3 / 8);
+        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,  270 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
         Phaser.Display.Align.In.Center(prev, zone);
         Phaser.Display.Align.In.Center(this.prevCharacterImage, zone);
 
@@ -243,13 +246,13 @@ export class Menu extends Phaser.Scene{
         this.prevCharacterImage.setInteractive();
         this.characterImage.setInteractive();
 
-        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8,    -50 + 2 * this.height / 8, this.width, this.height*3 / 8);
+        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,    -50 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
         var unlockedImage = this.add.image(0, 0 ,'icons', 'unlocked.png');
-        unlockedImage.setScale(2);
+        unlockedImage.setScale(2 *SC);
         unlockedImage.setAlpha(0.5);
 
         this.unlocked = this.add.bitmapText(0, 0, 'jungle','');
-        this.unlocked.setFontSize(70);
+        this.unlocked.setFontSize(70*SC);
         this.unlocked.tint = 0xCCCCCC;
 
 
@@ -265,10 +268,10 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         //this.facebook.getLeaderboard('Amis.'+FBInstant.context.getID());
         // @ts-ignore
-        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "Welcome " + this.facebook.playerName + "! Touch anywhere to start." , 40);
-        var title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120);
+        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "Welcome " + this.facebook.playerName + "! Touch anywhere to start." , 40*SC);
+        var title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120*SC);
         var screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
-        var topZone = this.add.zone(this.width / 2, 200, this.width, this.height / 2);
+        var topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
         Phaser.Display.Align.In.Center(title, topZone);
 
@@ -286,7 +289,7 @@ export class Menu extends Phaser.Scene{
         this.input.on("gameobjectdown",  (this.play).bind(this));
         if(this.lastScore !== undefined){
             var text = this.add.bitmapText(0, 0, 'jungle', 'Last score: ' + this.lastScore);
-            text.setFontSize(70);
+            text.setFontSize(70*SC);
             var topZone = this.add.zone(this.width /2 , this.height /20, this.width, this.height / 10);
             Phaser.Display.Align.In.Center(text, topZone);
         }
@@ -315,8 +318,8 @@ export class Menu extends Phaser.Scene{
     }
 
     addScoreEntryPhoto(imageID, y): void{
-        var pic = this.add.image(320, y + 40, imageID);
-        pic.setScale(0.3);
+        var pic = this.add.image(320*SC, y + 40*SC, imageID);
+        pic.setScale(0.3*SC);
     }
     addScoreEntry(entry,  y) : boolean
     {
@@ -326,18 +329,18 @@ export class Menu extends Phaser.Scene{
 
         }).bind(this));
         var data = JSON.parse(entry.data);
-        var character = this.add.image(215, y + 40, "square_nodetailsOutline", data.character + ".png");
-        character.setScale(0.75);
-        var rankText = this.add.bitmapText(200, y + 13, "jungle",entry.rank);
-        var nameText = this.add.bitmapText(400, y , "jungle", entry.playerName);
-        var scoreText = this.add.bitmapText(400, y+ 50, "jungle", "Score: " + entry.scoreFormatted);
+        var character = this.add.image(215*SC, y + 40*SC, "square_nodetailsOutline", data.character + ".png");
+        character.setScale(0.75 *SC);
+        var rankText = this.add.bitmapText(200*SC, y + 13*SC, "jungle",entry.rank);
+        var nameText = this.add.bitmapText(400*SC, y , "jungle", entry.playerName);
+        var scoreText = this.add.bitmapText(400*SC, y+ 50*SC, "jungle", "Score: " + entry.scoreFormatted);
 
         rankText.tint = 0x11604f;
 
 
-        rankText.setFontSize(50);
-        nameText.setFontSize(50);
-        scoreText.setFontSize(50);
+        rankText.setFontSize(50*SC);
+        nameText.setFontSize(50*SC);
+        scoreText.setFontSize(50*SC);
         // @ts-ignore
         if(entry.playerID == this.facebook.playerID){
             nameText.tint = 0xFF5757;
@@ -347,24 +350,24 @@ export class Menu extends Phaser.Scene{
     }
     createPlayerScoreLine(){
         if(!this.inLeaderboard){
-            var baseY = this.height / 2 + 100;
+            var baseY = this.height / 2 + 100*SC;
             var entry = this.highscores.playerScore;
             // @ts-ignore
-            this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1)*100 + 25);
-            this.addScoreEntryPhoto(entry.playerID, baseY + (LEADERBOARD_DRAW + 1)*100 + 25);
+            this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1)*100*SC + 25*SC);
+            this.addScoreEntryPhoto(entry.playerID, baseY + (LEADERBOARD_DRAW + 1)*100*SC + 25*SC);
         }
     }
     createHighscoreTab(scores): void{
         this.scores = scores;
         this.scores = this.scores.concat(scores);
 
-        var baseY = this.height / 2 + 100;
+        var baseY = this.height / 2 + 100*SC;
 
         this.inLeaderboard = false;
         for(var i = 0; i < scores.length; i++){
             var entry = scores[i];
 
-            if(this.addScoreEntry(entry, baseY + i * 100))
+            if(this.addScoreEntry(entry, baseY + i * 100*SC))
                 this.inLeaderboard = true;
         }
 
@@ -378,7 +381,7 @@ export class Menu extends Phaser.Scene{
         var profile = this.add.image(0, 0, this.facebook.playerID);
 
         var secondQuarterZone = this.add.zone(this.width / 2,  2 * this.height / 8, this.width, this.height*3 / 8);
-        profile.setScale(0.75);
+        profile.setScale(0.75 * SC);
         Phaser.Display.Align.In.Center(profile, secondQuarterZone);
     }
     startGame ()

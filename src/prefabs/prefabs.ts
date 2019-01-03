@@ -13,10 +13,13 @@ var notused_offsets = [];
 const OBSTACLE_MAX_ID = 9;
 const VARIANTS_MAX_ID = [11, 2, 1, 0, 0, 0, 0, 1,1,6];
 const SHELTER_MAX_ID = 0;
+
+var SC;
 export class Prefabs{
     private width: any;
     private height: any;
     private scene: MainScene;
+
     constructor(scene:MainScene, width, height){
         this.scene = scene;
         this.width = width;
@@ -27,7 +30,8 @@ export class Prefabs{
         });
         sum += OBSTACLE_MAX_ID + 1;
         sum == SHELTER_MAX_ID + 1;
-        console.log(sum + " situations différentes");
+
+        SC = scene.sys.canvas.height / 1920;
     }
     spawnAnimal(x = 0,y = 0): GameObject{
         var scene = this.scene;
@@ -57,7 +61,7 @@ export class Prefabs{
         notused_offsets = notused_offsets.filter(function (el, j) {
             return i!=j;
         });
-        animal.setScale(ANIMAL_SCALE);
+        animal.setScale(ANIMAL_SCALE * SC);
         animal.body.allowRotation = false;
         animal.setCollisionCategory(scene.obstacleCat);
         animal.setCollidesWith([scene.elephantCat, scene.obstacleCat]);
@@ -66,37 +70,7 @@ export class Prefabs{
 
         if(gold){
             animal.tint = 0xDAA520;
-            var logoSource = {
-                getRandomPoint: (function (vec)
-                {
-                    if(animal.body === undefined){
-                        console.log("destroy");
-                        particles.destroy();
-                        return vec;
-                    }
-                    else {
-                        do {
-                            var x = Phaser.Math.Between(0, animal.width);
-                            var y = Phaser.Math.Between(0, animal.height);
-                            var pixel = scene.textures.getPixel(x, y, key, frame);
-                        } while (pixel == null || pixel.alpha < 255);
 
-                        return vec.setTo(x + animal.getTopLeft().x, y + animal.getTopLeft().y);
-                    }
-                }).bind(this)
-            };
-            var particles =scene.add.particles('yellow');
-
-            particles.createEmitter({
-                x: 0,
-                y: 0,
-                lifespan: 1000,
-                gravityY: 0,
-                scale: { start: 0, end: 0.25, ease: 'Quad.easeOut' },
-                alpha: { start: 1, end: 0, ease: 'Quad.easeIn' },
-                blendMode: 'ADD',
-                emitZone: { type: 'random', source: logoSource }
-            });
         }
         return animal;
     }
@@ -140,7 +114,7 @@ export class Prefabs{
     addBarrier( x = 0, y = 0, scale = 1){
         var scene = this.scene;
         var barrier = scene.matter.add.image(x,y, "topdownsprites", "treeBrown_small.png");
-        barrier.setScale(scale*3);
+        barrier.setScale(scale*3 * SC);
         barrier.setStatic(true);
 
         barrier.setCollisionCategory(scene.obstacleCat);
@@ -165,7 +139,7 @@ export class Prefabs{
     spawnShelter(x,y): void{
         var scene = this.scene;
         var shelter = scene.matter.add.image(x,y, 'square', this.scene.getCharacter() + '.png');
-        shelter.setScale(3);
+        shelter.setScale(3 * SC);
         shelter.body.label = "shelter";
         shelter.setSensor(true);
         shelter.setStatic(true);
@@ -192,8 +166,8 @@ export class Prefabs{
         if (obstacle_id === 0) {// Left and right 1/4 barrier.
             var left = this.genBarriers(2);
             var right = this.genBarriers( 2);
-            var leftLine = new Line(x + 64, y + h / 2, x + w / 4 + 64, y + h / 2);
-            var rightLine = new Line(x + w - 64, y + h / 2, x + w * 3 / 4 - 64, y + h / 2);
+            var leftLine = new Line(x + 64*SC, y  + h / 2, x + 64*SC + w / 4, y + h / 2);
+            var rightLine = new Line(x + w - 64*SC, y  + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
 
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -204,9 +178,9 @@ export class Prefabs{
             var right = this.genBarriers( 2);
             var left2 = this.genBarriers( 2);
 
-            var leftLine = new Line(x + 64, y + h / 4, x + w / 4 + 64, y + h / 4);
-            var rightLine = new Line(x + w - 64, y + h / 2, x + w * 3 / 4 - 64, y + h / 2);
-            var leftLine2 = new Line(x + 64, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
+            var leftLine = new Line(x + 64 *SC, y + h / 4, x + w / 4 + 64 *SC, y + h / 4);
+            var rightLine = new Line(x + w - 64*SC, y  + h / 2, x + w * 3 / 4 - 64 * SC, y  + h / 2);
+            var leftLine2 = new Line(x + 64 * SC, y  + h * 3 / 4, x  + w / 4 + 64 * SC, y  + h * 3 / 4);
 
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -217,9 +191,9 @@ export class Prefabs{
             var right = this.genBarriers( 4);
             var left2 = this.genBarriers( 4);
 
-            var leftLine = new Line(x + 64, y + h / 4, x + w / 2 + 64, y + h / 4);
-            var rightLine = new Line(x + w - 64, y + h / 2, x + w / 2 - 64, y + h / 2);
-            var leftLine2 = new Line(x + 64, y + h * 3 / 4, x + w / 2 + 64, y + h * 3 / 4);
+            var leftLine = new Line(x + 64 * SC, y + h / 4, x + w / 2 + 64 * SC, y + h / 4);
+            var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w / 2 - 64 * SC, y + h / 2);
+            var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 2 + 64 * SC, y + h * 3 / 4);
 
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -230,9 +204,9 @@ export class Prefabs{
             var right = this.genBarriers( 2);
             var right2 = this.genBarriers( 2);
 
-            var leftLine = new Line(x + 64, y + h / 2, x + w / 4 + 64, y + h / 2);
-            var rightLine = new Line(x + w - 64, y + h / 4, x + w * 3 / 4 - 64, y + h / 4);
-            var rightLine2 = new Line(x + w - 64, y + h * 3 / 4, x + w * 3 / 4 - 64, y + h * 3 / 4);
+            var leftLine = new Line(x + 64*SC, y + h / 2, x + w / 4 + 64*SC, y + h / 2);
+            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w * 3 / 4 - 64*SC, y + h / 4);
+            var rightLine2 = new Line(x + w - 64*SC, y + h * 3 / 4, x + w * 3 / 4 - 64*SC, y + h * 3 / 4);
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
             Phaser.Actions.PlaceOnLine(right, rightLine);
@@ -242,9 +216,9 @@ export class Prefabs{
             var right = this.genBarriers( 4);
             var right2 = this.genBarriers( 4);
 
-            var leftLine = new Line(x + 64, y + h / 2, x + w / 2 + 64, y + h / 2);
-            var rightLine = new Line(x + w - 64, y + h / 4, x + w / 2 - 64, y + h / 4);
-            var rightLine2 = new Line(x + w - 64, y + h * 3 / 4, x + w / 2 - 64, y + h * 3 / 4);
+            var leftLine = new Line(x + 64*SC, y + h / 2, x + w / 2 + 64*SC, y + h / 2);
+            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w / 2 - 64*SC, y + h / 4);
+            var rightLine2 = new Line(x + w - 64*SC, y + h * 3 / 4, x + w / 2 - 64*SC, y + h * 3 / 4);
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
             Phaser.Actions.PlaceOnLine(right, rightLine);
@@ -257,14 +231,14 @@ export class Prefabs{
 
         } else if (obstacle_id === 7) {// Middle 1/2
             var middle = this.genBarriers( 4);
-            var middleLine = new Line(x + w / 4 + 64, y + h / 2, x + w * 3 / 4 + 64, y + h / 2);
+            var middleLine = new Line(x + w / 4 + 64*SC, y + h / 2, x + w * 3 / 4 + 64*SC, y + h / 2);
 
 
             Phaser.Actions.PlaceOnLine(middle, middleLine);
 
         } else if (obstacle_id === 8) {// Middle 1/4
             var middle = this.genBarriers( 2);
-            var middleLine = new Line(x + w * 3 / 8 + 64, y + h / 2, x + w * 5 / 8 + 64, y + h / 2);
+            var middleLine = new Line(x + w * 3 / 8 + 64*SC, y + h / 2, x + w * 5 / 8 + 64*SC, y + h / 2);
 
 
             Phaser.Actions.PlaceOnLine(middle, middleLine);
@@ -272,8 +246,8 @@ export class Prefabs{
         } else if (obstacle_id === 9) {//L&R, mid, L&R
             var left = this.genBarriers( 2);
             var right = this.genBarriers( 2);
-            var leftLine = new Line(x + 64, y + h / 4, x + w / 4 + 64, y + h / 4);
-            var rightLine = new Line(x + w - 64, y + h / 4, x + w * 3 / 4 - 64, y + h / 4);
+            var leftLine = new Line(x + 64*SC, y + h / 4, x + w / 4 + 64*SC, y + h / 4);
+            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w * 3 / 4 - 64*SC, y + h / 4);
 
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -281,15 +255,15 @@ export class Prefabs{
 
             left = this.genBarriers( 2);
             right = this.genBarriers( 2);
-            leftLine = new Line(x + 64, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
-            rightLine = new Line(x + w - 64, y + h * 3 / 4, x + w * 3 / 4 - 64, y + h * 3 / 4);
+            leftLine = new Line(x + 64*SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
+            rightLine = new Line(x + w - 64*SC, y + h * 3 / 4, x + w * 3 / 4 - 64*SC, y + h * 3 / 4);
 
 
             Phaser.Actions.PlaceOnLine(left, leftLine);
             Phaser.Actions.PlaceOnLine(right, rightLine);
 
             var middle = this.genBarriers( 4);
-            var middleLine = new Line(x + w / 4 + 64, y + h / 2, x + w * 3 / 4 + 64, y + h / 2);
+            var middleLine = new Line(x + w / 4 + 64*SC, y + h / 2, x + w * 3 / 4 + 64*SC, y + h / 2);
 
 
             Phaser.Actions.PlaceOnLine(middle, middleLine);
@@ -305,59 +279,59 @@ export class Prefabs{
             case 0: // Left and right 1/4 barrier.
                 switch (variant_id) {
                     case 0: // 1 Front Left
-                        this.spawnAnimal( x+64, y+ h/2+ 128);
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
                         break;
                     case 1:// 2 Front Left
-                        this.spawnAnimal( x+64, y+ h/2+ 128);
-                        this.spawnAnimal( x+64+128, y+ h/2+ 128);
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2+ 128*SC);
                         break;
                     case 2: // 1 Front Right
-                        this.spawnAnimal( x+w-64, y+ h/2+ 128);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
                         break;
                     case 3: // 2 Front Right
-                        this.spawnAnimal( x+w-64, y+ h/2+ 128);
-                        this.spawnAnimal( x+w-64-128, y+ h/2+ 128);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2+ 128*SC);
                         break;
                     case 4: // 2 Front Left-Right
-                        this.spawnAnimal( x+w-64, y+ h/2+ 128);
-                        this.spawnAnimal( x+64, y+ h/2+ 128);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
                         break;
                     case 5: // 4 Front Left-Right
-                        this.spawnAnimal( x+w-64, y+ h/2+ 128);
-                        this.spawnAnimal( x+w-64-128, y+ h/2+ 128);
-                        this.spawnAnimal( x+64, y+ h/2+ 128);
-                        this.spawnAnimal( x+64+128, y+ h/2+ 128);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2+ 128*SC);
                         break;
                     case 6: // 1 Behind Left
-                        this.spawnAnimal( x+64, y+ h/2- 128);
+                        this.spawnAnimal( x+64*SC, y+ h/2- 128*SC);
                         break
 
                     case 7: // 1 Behind Right
-                        this.spawnAnimal( x+w-64, y+ h/2- 128);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2- 128*SC);
                         break;
                     case 8: // 2 Behind Left-Right
-                        this.spawnAnimal( x+64, y+ h/2- 128);
-                        this.spawnAnimal( x+w-64-128, y+ h/2- 128);
+                        this.spawnAnimal( x+64*SC, y+ h/2- 128*SC);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2- 128*SC);
                         break;
                     case 9: // 2 Middle
-                        this.spawnAnimal( x + w/2 - 128, y + h / 2);
-                        this.spawnAnimal( x + w/2 + 128, y + h / 2);
+                        this.spawnAnimal( x + w/2 - 128*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2 + 128*SC, y + h / 2);
                         break;
                     case 10: // 4 Middle
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h / 2);
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h / 2);
-                        this.spawnAnimal( x + w/2  - 64, y + h / 2);
-                        this.spawnAnimal( x + w/2  + 64, y + h / 2);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h / 2);
                         break;
                     case 11: // 8 Middle Jackpot
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h / 2);
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h / 2);
-                        this.spawnAnimal( x + w/2  - 64, y + h / 2);
-                        this.spawnAnimal( x + w/2  + 64, y + h / 2);
-                        this.spawnAnimal( x + w/2  - 64, y + 128 + h / 2);
-                        this.spawnAnimal( x + w/2  + 64, y + 128 + h / 2);
-                        this.spawnAnimal( x + w/2  - 64, y - 128 +  h / 2);
-                        this.spawnAnimal( x + w/2  + 64, y - 128 + h / 2);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h / 2);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + 128*SC + h / 2);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + 128*SC + h / 2);
+                        this.spawnAnimal( x + w/2  - 64*SC, y - 128*SC +  h / 2);
+                        this.spawnAnimal( x + w/2  + 64*SC, y - 128*SC + h / 2);
                         break;
 
 
@@ -371,9 +345,9 @@ export class Prefabs{
                         this.spawnAnimalRel( 0.70, 0.50, x, y);
                         break;
                     case 1: // Behind obstacles
-                        this.spawnAnimalRel( 0, 0.75, x + 64, y-128);
-                        this.spawnAnimalRel( 0, 0.25, x + 64, y-128);
-                        this.spawnAnimalRel( 1, 0.5, x - 64, y-128);
+                        this.spawnAnimalRel( 0, 0.75, x + 64*SC, y-128*SC);
+                        this.spawnAnimalRel( 0, 0.25, x + 64*SC, y-128*SC);
+                        this.spawnAnimalRel( 1, 0.5, x - 64*SC, y-128*SC);
                         break;
                     case 2: // Sinusoidal jackpot
                         for(var i = 0; i < 10; i++){
@@ -413,10 +387,10 @@ export class Prefabs{
                         this.animalCircle( x + w/2,y+  h/2, w * 3/8, 0.02, 10);
                         break;
                     case 1: //Fill line
-                        this.spawnAnimal( x+64, y+ h/2);
-                        this.spawnAnimal( x+64+128, y+ h/2);
-                        this.spawnAnimal( x+w-64, y+ h/2);
-                        this.spawnAnimal( x+w-64-128, y+ h/2);
+                        this.spawnAnimal( x+64*SC, y+ h/2);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2);
                         break;
                 }
                 break;
@@ -426,12 +400,12 @@ export class Prefabs{
                         this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.02, 10);
                         break;
                     case 1: // Fill line
-                        this.spawnAnimal( x+64, y+ h/2);
-                        this.spawnAnimal( x+64+128, y+ h/2);
-                        this.spawnAnimal( x+64+256, y+ h/2);
-                        this.spawnAnimal( x+w-64, y+ h/2);
-                        this.spawnAnimal( x+w-64-128, y+ h/2);
-                        this.spawnAnimal( x+w-64-256, y+ h/2);
+                        this.spawnAnimal( x+64*SC, y+ h/2);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2);
+                        this.spawnAnimal( x+64*SC+256*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC-256*SC, y+ h/2);
                         break;
                 }
                 break;
@@ -441,48 +415,48 @@ export class Prefabs{
                         this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.02, 10);
                         break;
                     case 1: //Fill mid line
-                        this.spawnAnimal( x+64, y+ h/2);
-                        this.spawnAnimal( x+64+128, y+ h/2);
-                        this.spawnAnimal( x+w-64, y+ h/2);
-                        this.spawnAnimal( x+w-64-128, y+ h/2);
+                        this.spawnAnimal( x+64*SC, y+ h/2);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2);
                         break;
                     case 2: // 4 Behind
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h / 4);
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h / 4);
-                        this.spawnAnimal( x + w/2  - 64, y + h / 4);
-                        this.spawnAnimal( x + w/2  + 64, y + h / 4);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 4);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 4);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h / 4);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h / 4);
                         break;
                     case 3: // 4 Front
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h*3 / 4);
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h*3 / 4);
-                        this.spawnAnimal( x + w/2  - 64, y + h*3 / 4);
-                        this.spawnAnimal( x + w/2  + 64, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h*3 / 4);
                         break;
                     case 4://Slalom L (Front MidLeft, Mid Right, Behind MidLeft)
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h*3 / 4);
-                        this.spawnAnimal( x + w/2  - 64, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h*3 / 4);
 
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h / 4);
-                        this.spawnAnimal( x + w/2  - 64, y + h / 4);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 4);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h / 4);
 
-                        this.spawnAnimal( x+w-64, y+ h/2);
-                        this.spawnAnimal( x+w-64-128, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC, y+ h/2);
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2);
                         break;
                     case 5://Slalom R (Front MidR, Mid L, Behind MidR)
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h*3 / 4);
-                        this.spawnAnimal( x + w/2  + 64, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h*3 / 4);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h*3 / 4);
 
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h / 4);
-                        this.spawnAnimal( x + w/2  + 64, y + h / 4);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 4);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h / 4);
 
-                        this.spawnAnimal( x+64, y+ h/2);
-                        this.spawnAnimal( x+64+128, y+ h/2);
+                        this.spawnAnimal( x+64*SC, y+ h/2);
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2);
                         break;
                     case 6://4 MidFront
-                        this.spawnAnimal( x + w/2 - 128 - 64, y + h / 2 + 128);
-                        this.spawnAnimal( x + w/2 + 128 + 64, y + h / 2 + 128);
-                        this.spawnAnimal( x + w/2  - 64, y + h / 2 + 128);
-                        this.spawnAnimal( x + w/2  + 64, y + h / 2 + 128);
+                        this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 2 + 128*SC);
+                        this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 2 + 128*SC);
+                        this.spawnAnimal( x + w/2  - 64*SC, y + h / 2 + 128*SC);
+                        this.spawnAnimal( x + w/2  + 64*SC, y + h / 2 + 128*SC);
                         break;
                 }
                 break;

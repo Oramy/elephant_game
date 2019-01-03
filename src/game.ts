@@ -31,8 +31,8 @@ FBInstant.initializeAsync().then(function(){
 
 
   var config: any = {
-    width: 1080,
-    height: 1920,
+    width: 720,
+    height: 1280,
     scale:{
       // @ts-ignore
       mode: Phaser.DOM.SHOW_ALL

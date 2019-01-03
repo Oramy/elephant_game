@@ -41,6 +41,7 @@ export const BASE_SCORE = 10;
 export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
     0, 0.1, 0.07, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.04, -0.03, 0.08, 0.05];
 
+var SC;
 
 export class MainScene extends Phaser.Scene {
     private elephant: Sprite;
@@ -137,58 +138,59 @@ export class MainScene extends Phaser.Scene {
         //this.facebook.getLeaderboard('Amis');
     }
     createBackground(): void{
-        this.background = this.add.tileSprite(0, 0, this.width, this.height, 'sky').setOrigin(0,0);
-        this.background.setScale(1);
+
+        this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0);
+        this.background.setScale(SC);
         this.background.setScrollFactor(0);
 
-        var particles = this.add.particles('fire1');
+        /**var particles = this.add.particles('fire1');
         // @ts-ignore
         particles.setDepth(2);
         var emitter = particles.createEmitter({
             x: {min:0, max:this.width},
-            y: this.height + 50,
+            y: this.height,
             lifespan: 1000,
-            speedY: { min: -200, max: -600 },
-            scale: {min: { start:4, end: 0 }, max:{start:8}},
+            speedY: { min: -200*SC, max: -600*SC },
+            scale: {start: 4, end: 0},
             quantity: 3,
             blendMode: 'ADD',
 
         });
 
         emitter.setScrollFactor(0);
-
+        **/
     }
     computeMeters(): integer{
         return Math.trunc(-this.camera.scrollY / this.width * 20);
     }
     createUI(): void{
-        this.scoreText = this.add.bitmapText(20,20,'jungle', 'Score: ' + this.acquiredScore, 100).setOrigin(0, 0);
+        this.scoreText = this.add.bitmapText(20*SC,20*SC,'jungle', 'Score: ' + this.acquiredScore, 100*SC).setOrigin(0, 0);
         this.scoreText.tint = 0xFFFFFF;
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
 
-        this.metersText = this.add.bitmapText(20,120,'jungle', this.computeScore() + 'm', 100).setOrigin(0, 0);
+        this.metersText = this.add.bitmapText(20*SC,120*SC,'jungle', this.computeScore() + 'm', 100*SC).setOrigin(0, 0);
         this.metersText.tint = 0xFFFFFF;
         this.metersText.setScrollFactor(0);
         this.metersText.setDepth(Infinity);
 
-        this.multiplierText = this.add.bitmapText(this.width - 200,0,'jungle', 'x2', 100).setOrigin(0, 0);
+        this.multiplierText = this.add.bitmapText(this.width - 200*SC,0,'jungle', 'x2', 100*SC).setOrigin(0, 0);
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
         this.multiplierText.setScrollFactor(0);
         this.multiplierText.setDepth(Infinity);
         this.multiplierText.setOrigin(-0.5, 0);
 
-        this.xyText = this.add.bitmapText(20, this.height - 100,'jungle', 'X: Y:', 50).setOrigin(0, 0);
+        this.xyText = this.add.bitmapText(20*SC, this.height - 100*SC,'jungle', 'X: Y:', 50*SC).setOrigin(0, 0);
         this.xyText.tint = 0xFFFFFF;
         this.xyText.setScrollFactor(0);
         this.xyText.setDepth(Infinity);
-        var zone = this.add.zone(this.width/2, this.height/2, this.width + 100, this.height + 50);
+        var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
         Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
 
     }
     createElephant(): void{
 
-        this.elephant = this.matter.add.sprite(400, 400, 'round', this.character + '.png',
+        this.elephant = this.matter.add.sprite(400*SC, 400*SC, 'round', this.character + '.png',
             {
                 shape:{
                     type:'circle',
@@ -198,14 +200,14 @@ export class MainScene extends Phaser.Scene {
                 render: { sprite: { xOffset: 0, yOffset: -0.08} }
             });
         this.elephant.setDepth(1);
-        this.elephant.setScale(ELEPHANT_SCALE);
+        this.elephant.setScale(ELEPHANT_SCALE*SC);
         this.elephant.setCollisionCategory(this.elephantCat);
         this.elephant.setCollidesWith(this.obstacleCat);
         //We forbid the engine to use physics on the rotation parameter.
         this.elephant.body.allowRotation = false;
 
         this.elephantDirection = new Phaser.Math.Vector2(0, 1);
-        this.lastPosition = [400, 400];
+        this.lastPosition = [0.5 * this.width, 0.5 * this.height];
 
     }
 
@@ -242,13 +244,15 @@ export class MainScene extends Phaser.Scene {
                     yoyo: true,
                     ease: 'Cubic.easeIn',
 
-                    y: 20 + Math.log(shelter.score) * 5
+                    y: (20 + Math.log(shelter.score) * 5)*SC
 
                 });
             }
         }
     }
     create (): void {
+
+        SC = this.sys.canvas.height / 1920;
         this.gameOverB = false;
         //Initializing categories.
         this.obstacleCat = this.matter.world.nextCategory();
@@ -260,8 +264,8 @@ export class MainScene extends Phaser.Scene {
         this.liveShelters = [];
         this.acquiredScore = 0;
 
-        this.height = 1920;
-        this.width = 1080;
+        this.height = this.sys.canvas.height;
+        this.width = this.sys.canvas.width;
 
         this.camera = this.cameras.main;
 
@@ -284,7 +288,9 @@ export class MainScene extends Phaser.Scene {
 
                     this.checkOneSideCollision(event, pair.bodyA, pair.bodyB);
                     this.checkOneSideCollision(event, pair.bodyB, pair.bodyA);
+
                 }
+
             }
         ).bind(this);
 
@@ -346,9 +352,9 @@ export class MainScene extends Phaser.Scene {
             if(!isNaN(logAdvance)){
                 this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color);
                 this.multiplierText.setText('x'+truncValue);
-                this.multiplierText.setFontSize(100 + logAdvance/10)
+                this.multiplierText.setFontSize((100 + logAdvance/10)*SC)
 
-                var zone = this.add.zone(this.width/2, this.height/2, this.width + 100, this.height + 50);
+                var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
                 Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
             }
 
@@ -376,13 +382,13 @@ export class MainScene extends Phaser.Scene {
             var distance = dir.length();
             dir.normalize();
 
-            var scaleY = ((distance - this.elephant.width * this.elephant.scaleX * 0.2) * 2 / this.camera.height);
+            var scaleY = ((distance - this.elephant.width * this.elephant.scaleX * 0.2) * 2 / this.height);
             var scaleX = this.animalSpeed * ANIMAL_SPEED_XY_RATIO;
             scaleY *= this.animalSpeed ;
             scaleY *= 0.05 + 0.95 * 1/(1 + (i+1));
             dir.x = dir.x * scaleX;
             dir.y = dir.y * scaleY;
-            animal.setVelocity(dir.x, dir.y);
+            animal.setVelocity(dir.x * SC, dir.y * SC);
 
 
 
@@ -435,9 +441,9 @@ export class MainScene extends Phaser.Scene {
     }
     updateElephant(): void{
         var nx = this.input.x + this.camera.scrollX;
-        var ny = this.input.y + this.camera.scrollY;
+        var ny = this.input.y + this.camera.scrollY +  this.cameraSpeed;
         var x = this.elephant.getCenter().x;
-        var y = this.elephant.getCenter().y;
+        var y = this.elephant.getCenter().y ;
         this.elephant.setVelocity((nx-x)*MOVE_DELAY_COEFF,(ny-y)*MOVE_DELAY_COEFF);
 
         var move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0],
@@ -453,9 +459,9 @@ export class MainScene extends Phaser.Scene {
 
     }
     updateCamera(time, delta): void{
-        this.cameraSpeed += delta * CAMERA_ACC / 1000;
+        this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
         this.camera.scrollY += this.cameraSpeed;
-        this.background.tilePositionY = this.camera.scrollY;
+        this.background.tilePositionY = this.camera.scrollY / SC;
 
     }
     private updateScrolling() : void {

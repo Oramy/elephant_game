@@ -21,7 +21,7 @@ export class Preloader extends Phaser.Scene{
 
 
     create () {
-        window.addEventListener('resize', this.resize);
+        window.addEventListener('resize', this.resize.bind(this));
         this.resize();
     }
     preload ()
