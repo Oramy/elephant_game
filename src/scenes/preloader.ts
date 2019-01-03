@@ -32,12 +32,18 @@ export class Preloader extends Phaser.Scene{
         this.facebook.showLoadProgress(this);
         this.load.bitmapFont('jungle', 'assets/font/jungle_0.png', 'assets/font/jungle.xml');
         this.load.bitmapFont('ice', 'assets/font/iceicebaby.png', 'assets/font/iceicebaby.xml');
-        this.load.image('sky', 'assets/skies/space3.png');
+        this.load.image('sky', 'assets/background/background.png');
         this.load.image('mask', 'assets/ui/mask1.png');
         this.load.atlasXML('round', 'assets/atlas/round.png', 'assets/atlas/round.xml');
+        this.load.atlasXML('roundOutline', 'assets/atlas/roundOutline.png', 'assets/atlas/roundOutline.xml');
         this.load.atlasXML('square', 'assets/atlas/square.png', 'assets/atlas/square.xml');
         this.load.atlasXML('square_nodetailsOutline', 'assets/atlas/square_nodetailsOutline.png', 'assets/atlas/square_nodetailsOutline.xml');
         this.load.atlasXML('icons', 'assets/atlas/sheet_black1x.png', 'assets/atlas/sheet_black1x.xml');
+        this.load.atlasXML('topdownsprites', 'assets/atlas/allSprites_default.png', 'assets/atlas/allSprites_default.xml');
+
+        this.load.image('fire1', 'assets/particles/fire1.png');
+        this.load.image('yellow', 'assets/particles/yellow.png');
+
     }
 
     startGame ()

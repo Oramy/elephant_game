@@ -31,12 +31,18 @@ export class Prefabs{
     }
     spawnAnimal(x = 0,y = 0): GameObject{
         var scene = this.scene;
+
+        var gold = Phaser.Math.FloatBetween(0, 1) < 1/20;
+
         if(notused.length == 0){
             notused = notused.concat(scene.roundFrames);
             notused_offsets = ROUND_Y_OFFSETS;
         }
         var i = Phaser.Math.Between(0, notused.length - 1);
-        var animal = scene.matter.add.image(x,y, 'round',notused[i], {
+        var key = gold ? 'roundOutline': 'round';
+
+        var frame = notused[i];
+        var animal = scene.matter.add.image(x,y, key, frame, {
             shape: {
                 type: 'circle',
                 radius: 64
@@ -57,6 +63,41 @@ export class Prefabs{
         animal.setCollidesWith([scene.elephantCat, scene.obstacleCat]);
         animal.setSensor(true);
         scene.addInsideScreenObject(animal);
+
+        if(gold){
+            animal.tint = 0xDAA520;
+            var logoSource = {
+                getRandomPoint: (function (vec)
+                {
+                    if(animal.body === undefined){
+                        console.log("destroy");
+                        particles.destroy();
+                        return vec;
+                    }
+                    else {
+                        do {
+                            var x = Phaser.Math.Between(0, animal.width);
+                            var y = Phaser.Math.Between(0, animal.height);
+                            var pixel = scene.textures.getPixel(x, y, key, frame);
+                        } while (pixel == null || pixel.alpha < 255);
+
+                        return vec.setTo(x + animal.getTopLeft().x, y + animal.getTopLeft().y);
+                    }
+                }).bind(this)
+            };
+            var particles =scene.add.particles('yellow');
+
+            particles.createEmitter({
+                x: 0,
+                y: 0,
+                lifespan: 1000,
+                gravityY: 0,
+                scale: { start: 0, end: 0.25, ease: 'Quad.easeOut' },
+                alpha: { start: 1, end: 0, ease: 'Quad.easeIn' },
+                blendMode: 'ADD',
+                emitZone: { type: 'random', source: logoSource }
+            });
+        }
         return animal;
     }
     spawnAnimalRel(u = 0, v = 0, offsetX = 0, offsetY = 0){
@@ -98,10 +139,9 @@ export class Prefabs{
     }
     addBarrier( x = 0, y = 0, scale = 1){
         var scene = this.scene;
-        var barrier = scene.matter.add.image(x,y, "square_nodetailsOutline", this.scene.getCharacter() + ".png");
-        barrier.setScale(scale);
+        var barrier = scene.matter.add.image(x,y, "topdownsprites", "treeBrown_small.png");
+        barrier.setScale(scale*3);
         barrier.setStatic(true);
-        barrier.tint = 0x888888;
 
         barrier.setCollisionCategory(scene.obstacleCat);
 

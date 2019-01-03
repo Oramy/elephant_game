@@ -28,7 +28,12 @@ export class Menu extends Phaser.Scene{
     private playImage: Phaser.GameObjects.Image;
     private unlocked : BitmapText;
 
-    private indices = {'elephant':'', 'frog':'Score over 5000 to unlock this animal.'};
+    private indices = {'elephant':'', 'frog':'Score over 5000 to unlock this animal.',
+    'gorilla': 'Have more than 50 animals following you \n' +
+        '                              to unlock this animal.',
+    'giraffe': 'Score over 20000 to unlock this animal.',
+    'snake' : 'Escape the fire on 5000m to unlock this animal.'};
+    private characterNames: string[];
     constructor ()
     {
         super('Menu');
@@ -37,7 +42,6 @@ export class Menu extends Phaser.Scene{
 
 
     updateCharacter(character=this.character){
-        console.log("updateCharacter");
         this.character = character;
         this.characterImage.setFrame(character + ".png");
         var ind = this.characterFrames.findIndex((function (el) {
@@ -46,8 +50,8 @@ export class Menu extends Phaser.Scene{
         this.updateCharacterImages(ind);
     }
     updateCharacterImages(ind){
-        var next = (ind + 1) % this.characterFrames.length;
-        var prev = (ind + this.characterFrames.length - 1) % this.characterFrames.length;
+        var next = this.nextUnlockableIndex(ind);
+        var prev = this.prevUnlockableIndex(ind);
         this.character = this.characterFrames[ind];
         this.character = this.character.slice(0, this.character.length - 4);
 
@@ -72,35 +76,45 @@ export class Menu extends Phaser.Scene{
 
         }
         var unlockedCount = 0;
-        for(var i = 0; i < this.characterFrames.length; i++){
-            if(this.playerData.get(this.characterFrames[i].slice(0, this.characterFrames[i].length - 4)) === 'unlocked')
+        for(var i = 0; i < this.characterNames.length; i++){
+            if(this.playerData.get(this.characterNames[i]) === 'unlocked')
             {
                 unlockedCount +=1;
             }
         }
-        this.unlocked.setText(unlockedCount+ '/'+ this.characterFrames.length);
+        this.unlocked.setText(unlockedCount+ '/'+ Object.keys(this.indices).length);
 
+    }
+    nextUnlockableIndex(ind){
+        ind = (ind + 1) % this.characterNames.length;
+        while(this.indices[this.characterNames[ind]] === undefined){
+            ind = (ind + 1) % this.characterNames.length;
+        }
+        return ind;
+    }
+    prevUnlockableIndex(ind){
+        ind = (ind + this.characterNames.length - 1) % this.characterNames.length;
+        while(this.indices[this.characterNames[ind]] === undefined){
+            ind = (ind + this.characterNames.length - 1) % this.characterNames.length;
+        }
+        return ind;
     }
     next(pointer, gameObject){
         if(gameObject == this.nextCharacterImage) {
-            var ind = this.characterFrames.findIndex((function (el) {
-                return el == this.character + ".png"
+            var ind = this.characterNames.findIndex((function (el) {
+                return el == this.character
             }).bind(this));
-            ind = (ind + 1) % this.characterFrames.length;
+            ind = this.nextUnlockableIndex(ind);
 
             this.updateCharacterImages(ind);
         }
     }
     prev(pointer, gameObject){
         if(gameObject == this.prevCharacterImage) {
-            var ind = this.characterFrames.findIndex((function (el) {
-                return el == this.character + ".png"
+            var ind = this.characterNames.findIndex((function (el) {
+                return el == this.character
             }).bind(this));
-            ind = (ind + this.characterFrames.length - 1) % this.characterFrames.length;
-            var next = (ind + 1) % this.characterFrames.length;
-            var prev = (ind + this.characterFrames.length - 1) % this.characterFrames.length;
-            this.character = this.characterFrames[ind];
-            this.character = this.character.slice(0, this.character.length - 4);
+            ind = this.prevUnlockableIndex(ind);
             this.updateCharacterImages(ind);
         }
     }
@@ -109,7 +123,6 @@ export class Menu extends Phaser.Scene{
             this.startGame();
         }
     }createSave() {
-        console.log("createSave");
         var data = {
            'bear':'locked',
        'buffalo':'locked',
@@ -156,6 +169,9 @@ export class Menu extends Phaser.Scene{
         this.camera = this.cameras.main;
         var atlasTexture = this.textures.get('round');
         this.characterFrames = atlasTexture.getFrameNames();
+        this.characterNames = this.characterFrames.map(function(frame){
+            return frame.slice(0, frame.length - 4);
+        });
         
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard)
@@ -289,14 +305,12 @@ export class Menu extends Phaser.Scene{
                 this.playerData = this.facebook.data;
                 if(this.facebook.data.get('elephant') === undefined){
                     this.createSave();
-                }else
-                {
-                    console.log(this.playerData);
                 }
                 //In order to update images and texts.
                 this.updateCharacter(this.character);
             }).bind(this), this);
         }
+
     }
 
     addScoreEntryPhoto(imageID, y): void{

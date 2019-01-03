@@ -13,6 +13,8 @@ import combined = Phaser.Cameras.Sprite3D.combined;
 import { Menu } from "./menu";
 import "../prefabs/prefabs.ts";
 import {Prefabs} from "../prefabs/prefabs";
+import ScaleModes = Phaser.ScaleModes;
+import Color = Phaser.Display.Color;
 
 function arrayRemove(arr, value) {
 
@@ -68,7 +70,7 @@ export class MainScene extends Phaser.Scene {
     elephantCat: number;
 
 
-    private background: Phaser.GameObjects.Image;
+    private background;
 
     private cameraSpeed: number;
     private animalSpeed: number;
@@ -85,6 +87,13 @@ export class MainScene extends Phaser.Scene {
     private xyText: Phaser.GameObjects.BitmapText;
 
     private prefabs: Prefabs;
+    private multiplierText: Phaser.GameObjects.BitmapText;
+    private tween: Phaser.Tweens.Tween;
+    private multiplier: number;
+    private multiplierTween: Phaser.Tweens.Tween;
+
+    private unlockList= [];
+    private metersText: Phaser.GameObjects.BitmapText;
     constructor() {
         super({
             key: "MainScene",
@@ -128,9 +137,29 @@ export class MainScene extends Phaser.Scene {
         //this.facebook.getLeaderboard('Amis');
     }
     createBackground(): void{
-        this.background = this.add.image(0, 0, 'sky').setOrigin(0,0);
-        this.background.setScale(2);
+        this.background = this.add.tileSprite(0, 0, this.width, this.height, 'sky').setOrigin(0,0);
+        this.background.setScale(1);
         this.background.setScrollFactor(0);
+
+        var particles = this.add.particles('fire1');
+        // @ts-ignore
+        particles.setDepth(2);
+        var emitter = particles.createEmitter({
+            x: {min:0, max:this.width},
+            y: this.height + 50,
+            lifespan: 1000,
+            speedY: { min: -200, max: -600 },
+            scale: {min: { start:4, end: 0 }, max:{start:8}},
+            quantity: 3,
+            blendMode: 'ADD',
+
+        });
+
+        emitter.setScrollFactor(0);
+
+    }
+    computeMeters(): integer{
+        return Math.trunc(-this.camera.scrollY / this.width * 20);
     }
     createUI(): void{
         this.scoreText = this.add.bitmapText(20,20,'jungle', 'Score: ' + this.acquiredScore, 100).setOrigin(0, 0);
@@ -138,10 +167,24 @@ export class MainScene extends Phaser.Scene {
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
 
+        this.metersText = this.add.bitmapText(20,120,'jungle', this.computeScore() + 'm', 100).setOrigin(0, 0);
+        this.metersText.tint = 0xFFFFFF;
+        this.metersText.setScrollFactor(0);
+        this.metersText.setDepth(Infinity);
+
+        this.multiplierText = this.add.bitmapText(this.width - 200,0,'jungle', 'x2', 100).setOrigin(0, 0);
+        this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
+        this.multiplierText.setScrollFactor(0);
+        this.multiplierText.setDepth(Infinity);
+        this.multiplierText.setOrigin(-0.5, 0);
+
         this.xyText = this.add.bitmapText(20, this.height - 100,'jungle', 'X: Y:', 50).setOrigin(0, 0);
         this.xyText.tint = 0xFFFFFF;
         this.xyText.setScrollFactor(0);
         this.xyText.setDepth(Infinity);
+        var zone = this.add.zone(this.width/2, this.height/2, this.width + 100, this.height + 50);
+        Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
+
     }
     createElephant(): void{
 
@@ -189,9 +232,20 @@ export class MainScene extends Phaser.Scene {
             var shelter = bodyB.gameObject;
 
             if(shelter.score == 0)
-                shelter.score = BASE_SCORE;
+                shelter.score = BASE_SCORE * SCORE_MULTIPLIER;
             else
                 shelter.score *= SCORE_MULTIPLIER;
+            if(this.tween === undefined || !this.tween.isPlaying()) {
+                this.tween = this.tweens.add({
+                    targets: this.scoreText,
+                    duration: 50,
+                    yoyo: true,
+                    ease: 'Cubic.easeIn',
+
+                    y: 20 + Math.log(shelter.score) * 5
+
+                });
+            }
         }
     }
     create (): void {
@@ -254,16 +308,62 @@ export class MainScene extends Phaser.Scene {
         this.updateAnimals(delta);
         this.deleteOutsideScreen();
         this.updateUI();
+        this.updateAchievements();
 
     }
 
     updateUI(): void{
         this.scoreText.setText("Score: " + Math.round(this.computeScore()));
-
+        this.metersText.setText(this.computeMeters() + 'm');
         this.xyText.setText("X: " + Math.round(this.input.activePointer.x)
             + " - Y: "+ Math.round(this.input.activePointer.y)
         +  "\n X2: " + (this.input.activePointer.x / this.width).toFixed(2)
         + "- Y2: " + (this.input.activePointer.y / this.height).toFixed(2));
+
+        var multiplier_log = Math.trunc(this.followingAnimals.length / 5);
+        var multiplier = Math.trunc(Math.pow(2,multiplier_log));
+        if(this.multiplier != multiplier) {
+
+            this.multiplierText.setText("x" + multiplier);
+
+
+            this.multiplierTween = this.tweens.addCounter({
+                duration: 500,
+                yoyo: false,
+                ease: 'Cubic.easeInOut',
+                from: this.multiplier,
+                to: multiplier
+
+            });
+            this.multiplier = multiplier;
+        }
+        if(this.multiplierTween !== undefined){
+
+            var truncValue = Math.trunc(this.multiplierTween.getValue());
+
+            var logAdvance:integer;
+            logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255) ;
+            if(!isNaN(logAdvance)){
+                this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color);
+                this.multiplierText.setText('x'+truncValue);
+                this.multiplierText.setFontSize(100 + logAdvance/10)
+
+                var zone = this.add.zone(this.width/2, this.height/2, this.width + 100, this.height + 50);
+                Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
+            }
+
+        }
+
+
+    }
+    updateAchievements(): void{
+        if(this.followingAnimals.length >= 50){
+            this.unlock('gorilla');
+        }
+        if(this.computeMeters() >= 5000){
+            this.unlock('snake');
+        }
+
     }
     updateAnimals(delta): void {
         this.animalSpeed += delta * ANIMAL_ACC /1000;
@@ -355,17 +455,20 @@ export class MainScene extends Phaser.Scene {
     updateCamera(time, delta): void{
         this.cameraSpeed += delta * CAMERA_ACC / 1000;
         this.camera.scrollY += this.cameraSpeed;
-
+        this.background.tilePositionY = this.camera.scrollY;
 
     }
     private updateScrolling() : void {
         if(this.camera.scrollY < -this.spawnCount * this.height){
+            var x = 0;
+            var y = - (this.spawnCount + 1) * this.height;
+
             if(this.spawnCount % 8 == 1)
-                this.prefabs.addObstaclesWithShelter(0, - (this.spawnCount + 1) * this.height)
+                this.prefabs.addObstaclesWithShelter(x, y);
             else if(this.spawnCount == 0)
-                this.prefabs.addObstaclesAndAnimals( 0, - (this.spawnCount + 1) * this.height, this.spawnCount);
+                this.prefabs.addObstaclesAndAnimals(x, y, this.spawnCount);
             else
-                this.prefabs.addObstaclesAndAnimals( 0, - (this.spawnCount + 1) * this.height);
+                this.prefabs.addObstaclesAndAnimals(x, y);
 
             this.spawnCount ++;
 
@@ -390,11 +493,20 @@ export class MainScene extends Phaser.Scene {
         });
         gameObject.destroy();
     }
-
+    unlock(character){
+        if(!this.unlockList.includes(character))
+            this.unlockList.push(character);
+    }
     gameOver(): void{
         if(!this.gameOverB) {
             this.gameOverB = true;
 
+            if (this.computeScore() >= 5000) {
+                this.unlock('frog');
+            }
+            if (this.computeScore() >= 20000) {
+                this.unlock('giraffe');
+            }
             var data = {
                 character: this.character
             }
@@ -405,22 +517,20 @@ export class MainScene extends Phaser.Scene {
             // @ts-ignore
             this.highscores.on('setscore', function (key) {
 
-                var returnToMenu = (function (data) {
-                    console.log("ouf");
-
-
-                }).bind(this);
-
-                if (this.computeScore() >= 5000) {
+                if (this.unlockList.length > 0) {
                     // @ts-ignore
-                    this.facebook.data.set('frog', 'unlocked');
+                    this.unlockList.forEach((function(character){
+                        this.facebook.data.set(character, 'unlocked');
+                    }).bind(this));
+
                     this.facebook.on('savedata', this.scene.get('Menu').updateCharacter);
                 }
                 this.scene.start('Menu');
                 this.scene.get('Menu').lastScore = Math.trunc(this.computeScore());
 
-            }, this);
+            }.bind(this), this);
             this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
+
         }
 
     }
