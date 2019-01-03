@@ -1,0 +1,14 @@
+{ "columns":10,
+ "image":"terrainTiles_default_extruded.png",
+ "imageheight":264,
+ "imagewidth":660,
+ "margin":1,
+ "name":"terrainTiles_default_extruded",
+ "spacing":2,
+ "tilecount":40,
+ "tiledversion":"1.2.1",
+ "tileheight":64,
+ "tilewidth":64,
+ "type":"tileset",
+ "version":1.2
+}
