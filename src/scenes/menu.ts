@@ -172,6 +172,7 @@ export class Menu extends Phaser.Scene{
         this.characterNames = this.characterFrames.map(function(frame){
             return frame.slice(0, frame.length - 4);
         });
+        this.character = 'elephant';
         
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard)
@@ -307,7 +308,7 @@ export class Menu extends Phaser.Scene{
                     this.createSave();
                 }
                 //In order to update images and texts.
-                this.updateCharacter(this.character);
+                this.updateCharacter();
             }).bind(this), this);
         }
 
