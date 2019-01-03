@@ -98,7 +98,7 @@ export class Prefabs{
     }
     addBarrier( x = 0, y = 0, scale = 1){
         var scene = this.scene;
-        var barrier = scene.matter.add.image(x,y, "square_nodetailsOutline", "elephant.png");
+        var barrier = scene.matter.add.image(x,y, "square_nodetailsOutline", this.scene.getCharacter() + ".png");
         barrier.setScale(scale);
         barrier.setStatic(true);
         barrier.tint = 0x888888;
@@ -124,7 +124,7 @@ export class Prefabs{
     }
     spawnShelter(x,y): void{
         var scene = this.scene;
-        var shelter = scene.matter.add.image(x,y, 'square', 'elephant.png');
+        var shelter = scene.matter.add.image(x,y, 'square', this.scene.getCharacter() + '.png');
         shelter.setScale(3);
         shelter.body.label = "shelter";
         shelter.setSensor(true);

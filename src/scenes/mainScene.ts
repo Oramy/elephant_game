@@ -52,6 +52,8 @@ export class MainScene extends Phaser.Scene {
     private followingAnimals: Array<Image>;
     private liveShelters: Array<Image>;
 
+
+    character: string;
     //List of atlas 'round' frame names.
     roundFrames: string[];
 
@@ -96,6 +98,10 @@ export class MainScene extends Phaser.Scene {
             }
         });
     }
+
+    updateCharacter(character: string){
+        this.character = character;
+    }
     preload(): void
     {
     }
@@ -139,7 +145,7 @@ export class MainScene extends Phaser.Scene {
     }
     createElephant(): void{
 
-        this.elephant = this.matter.add.sprite(400, 400, 'round','elephant.png',
+        this.elephant = this.matter.add.sprite(400, 400, 'round', this.character + '.png',
             {
                 shape:{
                     type:'circle',
@@ -189,6 +195,7 @@ export class MainScene extends Phaser.Scene {
         }
     }
     create (): void {
+        this.gameOverB = false;
         //Initializing categories.
         this.obstacleCat = this.matter.world.nextCategory();
         this.elephantCat = this.matter.world.nextCategory();
@@ -385,20 +392,37 @@ export class MainScene extends Phaser.Scene {
     }
 
     gameOver(): void{
-        var data = {
-            character: 'elephant'
+        if(!this.gameOverB) {
+            this.gameOverB = true;
+
+            var data = {
+                character: this.character
+            }
+            var menu = this.scene.get("menu");
+
+            this.scene.pause("MainScene");
+
+            // @ts-ignore
+            this.highscores.on('setscore', function (key) {
+
+                var returnToMenu = (function (data) {
+                    console.log("ouf");
+
+
+                }).bind(this);
+
+                if (this.computeScore() >= 5000) {
+                    // @ts-ignore
+                    this.facebook.data.set('frog', 'unlocked');
+                    this.facebook.on('savedata', this.scene.get('Menu').updateCharacter);
+                }
+                this.scene.start('Menu');
+                this.scene.get('Menu').lastScore = Math.trunc(this.computeScore());
+
+            }, this);
+            this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
         }
-        var menu = this.scene.get("menu");
 
-        this.scene.pause("MainScene");
-
-        // @ts-ignore
-        this.highscores.on('setscore', function (key)
-        {
-            this.scene.start('Menu');
-
-        }, this);
-        this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
     }
 
     addInsideScreenObject(object: Phaser.Physics.Matter.Image) {
@@ -410,5 +434,9 @@ export class MainScene extends Phaser.Scene {
         this.liveShelters.push(shelter);
         // @ts-ignore
         shelter.score = 0;
+    }
+
+    getCharacter() {
+        return this.character;
     }
 }
