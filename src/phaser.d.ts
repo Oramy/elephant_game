@@ -9105,8 +9105,8 @@ declare namespace Phaser {
              * Remove the listeners of a given event.
              * @param event The event name.
              * @param fn Only remove the listeners that match this function.
-             * @param context Only remove the listeners that have this context.
-             * @param once Only remove one-time listeners.
+             * @param [context=] Only remove the listeners that have this context.
+             * @param [once=] Only remove one-time listeners.
              */
             removeListener(event: string | symbol, fn: Function, context: any, once: boolean): Phaser.Events.EventEmitter;
 

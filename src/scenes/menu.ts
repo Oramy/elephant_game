@@ -1,5 +1,6 @@
 
 import { MainScene } from "./mainScene";
+import Image = Phaser.GameObjects.Image;
 
 const LEADERBOARD_DRAW = 3;
 export class Menu extends Phaser.Scene{
@@ -13,6 +14,10 @@ export class Menu extends Phaser.Scene{
     private width: number;
     private height: number;
     private camera: Phaser.Cameras.Scene2D.Camera;
+
+    private character: string;
+    private characterImage: Image;
+    private characterFrames: string[];
     constructor ()
     {
         super('Menu');
@@ -20,29 +25,19 @@ export class Menu extends Phaser.Scene{
 
 
 
-
-
-    resize() {
-        var canvas = this.sys.canvas, width = window.innerWidth, height = window.innerHeight;
-        var wratio = width / height, ratio = canvas.width / canvas.height;
-
-        if (wratio < ratio) {
-            canvas.style.width = width + "px";
-            canvas.style.height = (width / ratio) + "px";
-        } else {
-            canvas.style.width = (height * ratio) + "px";
-            canvas.style.height = height + "px";
-        }
+    updateCharacter(character: string){
+        this.character = character;
+        this.characterImage.setFrame(character + ".png");
     }
-
 
     create ()
     {
-        window.addEventListener('resize', this.resize);
-        this.resize();
         this.height = 1920;
         this.width = 1080;
         this.camera = this.cameras.main;
+        var atlasTexture = this.textures.get('round');
+        this.characterFrames = atlasTexture.getFrameNames();
+        
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard)
         {
@@ -56,7 +51,8 @@ export class Menu extends Phaser.Scene{
                     // @ts-ignore
                     this.highscores.on('getplayerscore', function (score, name)
                     {
-
+                        var data = JSON.parse(score.data);
+                        this.updateCharacter(data.character);
                         this.createPlayerScoreLine();
 
                     }.bind(this), this);
@@ -72,6 +68,13 @@ export class Menu extends Phaser.Scene{
 
 
         }).bind(this), this);
+        
+        this.characterImage = this.add.image(0, 0, 'square_nodetailsOutline', 'elephant.png');
+        this.characterImage.setScale(1.8);
+        this.characterImage.setInteractive();
+        var secondQuarterZone = this.add.zone(this.width / 2,  250 + 2 * this.height / 8, this.width, this.height*3 / 8);
+       Phaser.Display.Align.In.Center(this.characterImage, secondQuarterZone);
+
         this.camera.setBackgroundColor('#5a756f');
         // @ts-ignore
         this.facebook.getLeaderboard('Highscores');
@@ -160,7 +163,7 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         var profile = this.add.image(0, 0, this.facebook.playerID);
 
-        var secondQuarterZone = this.add.zone(this.width / 2,  3 * this.height / 8, this.width, this.height / 4);
+        var secondQuarterZone = this.add.zone(this.width / 2,  2 * this.height / 8, this.width, this.height*3 / 8);
         profile.setScale(0.75);
         Phaser.Display.Align.In.Center(profile, secondQuarterZone);
     }

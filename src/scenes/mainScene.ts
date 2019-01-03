@@ -12,7 +12,7 @@ import Composite = MatterJS.Composite;
 import combined = Phaser.Cameras.Sprite3D.combined;
 import { Menu } from "./menu";
 import "../prefabs/prefabs.ts";
-import {addObstaclesAndAnimals, addObstaclesWithShelter, spawnAnimals} from "../prefabs/prefabs";
+import {Prefabs} from "../prefabs/prefabs";
 
 function arrayRemove(arr, value) {
 
@@ -28,11 +28,12 @@ export const MOVE_DELAY_COEFF = 0.1;
 export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
 export const ANIMAL_BASE_SPEED = 280;
 export const ANIMAL_SPEED_XY_RATIO = 1/20;
-export const CAMERA_BASE_SPEED = -6;
+export const CAMERA_BASE_SPEED = -6; // -6;
 export const ANIMAL_ACC = 6;
-export const CAMERA_ACC = -0.2;
+export const CAMERA_ACC = -0.2; // -0.2;
 export const ANIMALS_SPAWN = 5;
-export const SCORE_MULTIPLIER = 1.3;
+export const SCORE_MULTIPLIER = 1.148698355; // 2 ^ (1/5)
+export const BASE_SCORE = 10;
 
 //For each frame, yOffset in percent, for the collision mesh and the image to fit together.
 export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
@@ -79,6 +80,9 @@ export class MainScene extends Phaser.Scene {
     private gameOverB : any;
     private height: number;
     private width: number;
+    private xyText: Phaser.GameObjects.BitmapText;
+
+    private prefabs: Prefabs;
     constructor() {
         super({
             key: "MainScene",
@@ -127,6 +131,11 @@ export class MainScene extends Phaser.Scene {
         this.scoreText.tint = 0xFFFFFF;
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
+
+        this.xyText = this.add.bitmapText(20, this.height - 100,'jungle', 'X: Y:', 50).setOrigin(0, 0);
+        this.xyText.tint = 0xFFFFFF;
+        this.xyText.setScrollFactor(0);
+        this.xyText.setDepth(Infinity);
     }
     createElephant(): void{
 
@@ -174,7 +183,7 @@ export class MainScene extends Phaser.Scene {
             var shelter = bodyB.gameObject;
 
             if(shelter.score == 0)
-                shelter.score = 1;
+                shelter.score = BASE_SCORE;
             else
                 shelter.score *= SCORE_MULTIPLIER;
         }
@@ -203,6 +212,8 @@ export class MainScene extends Phaser.Scene {
         this.createBackground();
         this.createElephant();
 
+        this.prefabs = new Prefabs(this, this.width, this.height);
+        //this.prefabs.addObstaclesAndAnimals(0, -1000, 8, 0);
 
         var collisionCallback = (function (event) {
                 var pairs = event.pairs;
@@ -241,6 +252,11 @@ export class MainScene extends Phaser.Scene {
 
     updateUI(): void{
         this.scoreText.setText("Score: " + Math.round(this.computeScore()));
+
+        this.xyText.setText("X: " + Math.round(this.input.activePointer.x)
+            + " - Y: "+ Math.round(this.input.activePointer.y)
+        +  "\n X2: " + (this.input.activePointer.x / this.width).toFixed(2)
+        + "- Y2: " + (this.input.activePointer.y / this.height).toFixed(2));
     }
     updateAnimals(delta): void {
         this.animalSpeed += delta * ANIMAL_ACC /1000;
@@ -338,11 +354,11 @@ export class MainScene extends Phaser.Scene {
     private updateScrolling() : void {
         if(this.camera.scrollY < -this.spawnCount * this.height){
             if(this.spawnCount % 8 == 1)
-                addObstaclesWithShelter(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height)
+                this.prefabs.addObstaclesWithShelter(0, - (this.spawnCount + 1) * this.height)
             else if(this.spawnCount == 0)
-                addObstaclesAndAnimals(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height, this.spawnCount);
+                this.prefabs.addObstaclesAndAnimals( 0, - (this.spawnCount + 1) * this.height, this.spawnCount);
             else
-                addObstaclesAndAnimals(this, 0, - (this.spawnCount + 1) * this.height, this.width, this.height);
+                this.prefabs.addObstaclesAndAnimals( 0, - (this.spawnCount + 1) * this.height);
 
             this.spawnCount ++;
 

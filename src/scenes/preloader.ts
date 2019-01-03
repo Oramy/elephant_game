@@ -6,9 +6,23 @@ export class Preloader extends Phaser.Scene{
     {
         super('Preloader');
     }
-    create(){
+    resize() {
+    var canvas = this.sys.canvas, width = window.innerWidth, height = window.innerHeight;
+    var wratio = width / height, ratio = canvas.width / canvas.height;
+
+    if (wratio < ratio) {
+        canvas.style.width = width + "px";
+        canvas.style.height = (width / ratio) + "px";
+    } else {
+        canvas.style.width = (height * ratio) + "px";
+        canvas.style.height = height + "px";
+    }
+}
 
 
+    create () {
+        window.addEventListener('resize', this.resize);
+        this.resize();
     }
     preload ()
     {
@@ -23,6 +37,7 @@ export class Preloader extends Phaser.Scene{
         this.load.atlasXML('round', 'assets/atlas/round.png', 'assets/atlas/round.xml');
         this.load.atlasXML('square', 'assets/atlas/square.png', 'assets/atlas/square.xml');
         this.load.atlasXML('square_nodetailsOutline', 'assets/atlas/square_nodetailsOutline.png', 'assets/atlas/square_nodetailsOutline.xml');
+        this.load.atlasXML('icons', 'assets/atlas/sheet_black1x.png', 'assets/atlas/sheet_black1x.xml');
     }
 
     startGame ()
