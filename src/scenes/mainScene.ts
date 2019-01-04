@@ -98,6 +98,10 @@ export class MainScene extends Phaser.Scene {
 
     private leftWall: Sprite;
     private rightWall: Sprite;
+    private playerData: any;
+    private savedAnimals: number;
+    private characterNames: string[];
+    private characterFrames: string[];
 
     constructor() {
         super({
@@ -106,7 +110,7 @@ export class MainScene extends Phaser.Scene {
                 default: 'matter',
                 matter: {
                     gravity: {y: 0},
-                    debug: true,
+                    debug: false,
                     enableSleeping: false
                 }
             }
@@ -231,6 +235,9 @@ export class MainScene extends Phaser.Scene {
     }
     createElephant(): void{
 
+        if(this.character === undefined){
+            this.character = 'elephant';
+        }
         this.elephant = this.matter.add.sprite(400*SC, 400*SC, 'round', this.character + '.png',
             {
                 shape:{
@@ -238,7 +245,7 @@ export class MainScene extends Phaser.Scene {
                     radius: 64,
 
                 },
-                render: { sprite: { xOffset: 0, yOffset: -0.08} }
+                render: { sprite: { xOffset: 0, yOffset: ROUND_Y_OFFSETS[this.characterNames.indexOf(this.character)]} }
             });
         this.elephant.setDepth(1);
         this.elephant.setScale(ELEPHANT_SCALE*SC);
@@ -272,6 +279,7 @@ export class MainScene extends Phaser.Scene {
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
 
             bodyA.label == 'dead';
+            this.savedAnimals += 1;
             var shelter = bodyB.gameObject;
 
             var multiplier = SCORE_MULTIPLIER;
@@ -298,7 +306,12 @@ export class MainScene extends Phaser.Scene {
         }
     }
     create (): void {
-
+        var atlasTexture = this.textures.get('round');
+        this.characterFrames = atlasTexture.getFrameNames();
+        this.characterNames = this.characterFrames.map(function(frame){
+            return frame.slice(0, frame.length - 4);
+        });
+        this.savedAnimals = 0;
         SC = this.sys.canvas.height / 1920;
         this.gameOverB = false;
         //Initializing categories.
@@ -325,7 +338,7 @@ export class MainScene extends Phaser.Scene {
         this.createElephant();
         this.createSideWalls();
         this.prefabs = new Prefabs(this, this.width, this.height);
-        //this.prefabs.addObstaclesAndAnimals(0, -1000, 8, 0);
+        //this.prefabs.addObstaclesAndAnimals(0, 0, 10, 0);
 
         var collisionCallback = (function (event) {
                 var pairs = event.pairs;
@@ -579,10 +592,21 @@ export class MainScene extends Phaser.Scene {
             }
             var menu = this.scene.get("menu");
 
+            var oldAnimalCount = this.playerData.values.coins;
+            this.playerData.values.coins += this.savedAnimals;
+
             this.scene.pause("MainScene");
 
             // @ts-ignore
             this.highscores.on('setscore', function (key) {
+                var unlocked = [];
+                for(var i = 0; i < this.characterNames.length; i++){
+                    if(this.playerData.get(this.characterNames[i]) === 'unlocked')
+                    {
+                        unlocked.push(this.characterNames[i]);
+                    }
+                }
+                this.scene.get('GameOverScene').initStats(Math.trunc(this.computeScore()), this.unlockList, unlocked, this.character, oldAnimalCount, this.savedAnimals, this.playerData);
 
                 if (this.unlockList.length > 0) {
                     // @ts-ignore
@@ -593,7 +617,9 @@ export class MainScene extends Phaser.Scene {
                     this.facebook.on('savedata', this.scene.get('Menu').updateCharacter);
                 }
 
-                this.scene.start('Menu');
+
+                this.scene.start('GameOverScene');
+
                 this.scene.get('Menu').lastScore = Math.trunc(this.computeScore());
 
             }.bind(this), this);
@@ -634,5 +660,8 @@ export class MainScene extends Phaser.Scene {
 
     getCharacter() {
         return this.character;
+    }
+    setPlayerData(playerData){
+        this.playerData = playerData;
     }
 }

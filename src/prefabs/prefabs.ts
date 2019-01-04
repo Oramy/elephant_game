@@ -2,6 +2,7 @@ import {ANIMAL_SCALE, ANIMALS_SPAWN, MainScene, ROUND_Y_OFFSETS} from "../scenes
 import Line = Phaser.Geom.Line;
 import Rectangle = Phaser.Geom.Rectangle;
 import GameObject = Phaser.GameObjects.GameObject;
+import FloatBetween = Phaser.Math.FloatBetween;
 
 var notused = [];
 var notused_offsets = [];
@@ -10,8 +11,8 @@ var notused_offsets = [];
  * @param x
  * @param y
  */
-const OBSTACLE_MAX_ID = 9;
-const VARIANTS_MAX_ID = [11, 2, 1, 0, 0, 0, 0, 1,1,6];
+const OBSTACLE_MAX_ID = 10;
+const VARIANTS_MAX_ID = [11, 2, 1, 0, 0, 0, 0, 1,1,6, 1];
 const SHELTER_MAX_ID = 0;
 
 var SC;
@@ -19,6 +20,8 @@ export class Prefabs{
     private width: any;
     private height: any;
     private scene: MainScene;
+
+
 
     constructor(scene:MainScene, width, height){
         this.scene = scene;
@@ -55,6 +58,7 @@ export class Prefabs{
             label: 'animal',
 
         });
+
         notused = notused.filter(function (el,j) {
             return i!=j;
         });
@@ -93,24 +97,34 @@ export class Prefabs{
             this.spawnAnimal(animalX, animalY);
         }
     }
-    animalCircle(x:number, y:number, radius:number,  angle:number, count:integer){
+    objectCircle(x:number, y:number, radius:number,  angle:number, objects, aliveCondition){
         var scene = this.scene;
-        var animals = this.genAnimals( count);
         var circle = new Phaser.Geom.Circle(x,y,radius);
         var updateCircle;
         updateCircle = (function(event){
-            animals = animals.filter(function(animal){
-                return animal.body != undefined && animal.body.label === "animal";});
-            Phaser.Actions.RotateAroundDistance(animals,{x: x, y:y}, angle, radius);
+            objects = objects.filter(aliveCondition);
+            Phaser.Actions.RotateAroundDistance(objects,{x: x, y:y}, angle, radius);
 
-            if(animals.length == 0){
+            if(objects.length == 0){
                 // @ts-ignore
                 scene.events.removeListener("update", updateCircle);
             }
         }).bind(this);
         scene.events.on("update", updateCircle, this);
-        Phaser.Actions.PlaceOnCircle(animals, circle);
-        return animals;
+        Phaser.Actions.PlaceOnCircle(objects, circle);
+        return objects;
+    }
+    animalCircle(x:number, y:number, radius:number,  angle:number, count:integer){
+        var aliveCondition = function(animal){
+                return animal.body != undefined && animal.body.label === "animal";};
+        var animals = this.genAnimals(count);
+        return this.objectCircle(x, y, radius, angle, animals, aliveCondition);
+    }
+    barrierCircle(x:number, y:number, radius:number, angle:number, count:integer){
+        var aliveCondition = function(barrier){
+            return barrier.body != undefined};
+        var barriers = this.genBarriers(count);
+        return this.objectCircle(x, y, radius, angle, barriers, aliveCondition);
     }
     addBarrier( x = 0, y = 0, scale = 1){
         var scene = this.scene;
@@ -160,115 +174,131 @@ export class Prefabs{
 
     }
     addObstacles( x:number, y:number,
-                 obstacle_id = Phaser.Math.Between(0,OBSTACLE_MAX_ID),
-                 variant_id=Phaser.Math.Between(0, VARIANTS_MAX_ID[obstacle_id])) {
+                  obstacle_id = Phaser.Math.Between(0,OBSTACLE_MAX_ID),
+                  variant_id=Phaser.Math.Between(0, VARIANTS_MAX_ID[obstacle_id])) {
         var w = this.width;
         var h = this.height;
-        if (obstacle_id === 0) {// Left and right 1/4 barrier.
-            var left = this.genBarriers(2);
-            var right = this.genBarriers( 2);
-            var leftLine = new Line(x + 64*SC, y  + h / 2, x + 64*SC + w / 4, y + h / 2);
-            var rightLine = new Line(x + w - 64*SC, y  + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
+        switch (obstacle_id) {
+
+            case 0:// Left and right 1/4 barrier.
+                var left = this.genBarriers(2);
+                var right = this.genBarriers(2);
+                var leftLine = new Line(x + 64 * SC, y + h / 2, x + 64 * SC + w / 4, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
 
 
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
 
-        } else if (obstacle_id === 1) {// Left-right-left 1/4
-            var left = this.genBarriers( 2);
-            var right = this.genBarriers( 2);
-            var left2 = this.genBarriers( 2);
+                break;
+            case 1:// Left-right-left 1/4
+                var left = this.genBarriers(2);
+                var right = this.genBarriers(2);
+                var left2 = this.genBarriers(2);
 
-            var leftLine = new Line(x + 64 *SC, y + h / 4, x + w / 4 + 64 *SC, y + h / 4);
-            var rightLine = new Line(x + w - 64*SC, y  + h / 2, x + w * 3 / 4 - 64 * SC, y  + h / 2);
-            var leftLine2 = new Line(x + 64 * SC, y  + h * 3 / 4, x  + w / 4 + 64 * SC, y  + h * 3 / 4);
-
-
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
-            Phaser.Actions.PlaceOnLine(left2, leftLine2);
-        } else if (obstacle_id === 2) {// Left-right-left 1/2
-            var left = this.genBarriers( 4);
-            var right = this.genBarriers( 4);
-            var left2 = this.genBarriers( 4);
-
-            var leftLine = new Line(x + 64 * SC, y + h / 4, x + w / 2 + 64 * SC, y + h / 4);
-            var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w / 2 - 64 * SC, y + h / 2);
-            var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 2 + 64 * SC, y + h * 3 / 4);
+                var leftLine = new Line(x + 64 * SC, y + h / 4, x + w / 4 + 64 * SC, y + h / 4);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
+                var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64 * SC, y + h * 3 / 4);
 
 
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
-            Phaser.Actions.PlaceOnLine(left2, leftLine2);
-        } else if (obstacle_id === 3) {// Right-Left-Right 1/4
-            var left = this.genBarriers( 2);
-            var right = this.genBarriers( 2);
-            var right2 = this.genBarriers( 2);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
+                break;
+            case 2:// Left-right-left 1/2
+                var left = this.genBarriers(4);
+                var right = this.genBarriers(4);
+                var left2 = this.genBarriers(4);
 
-            var leftLine = new Line(x + 64*SC, y + h / 2, x + w / 4 + 64*SC, y + h / 2);
-            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w * 3 / 4 - 64*SC, y + h / 4);
-            var rightLine2 = new Line(x + w - 64*SC, y + h * 3 / 4, x + w * 3 / 4 - 64*SC, y + h * 3 / 4);
-
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
-            Phaser.Actions.PlaceOnLine(right2, rightLine2);
-        } else if (obstacle_id === 4) {// Right-Left-Right 1/2
-            var left = this.genBarriers( 4);
-            var right = this.genBarriers( 4);
-            var right2 = this.genBarriers( 4);
-
-            var leftLine = new Line(x + 64*SC, y + h / 2, x + w / 2 + 64*SC, y + h / 2);
-            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w / 2 - 64*SC, y + h / 4);
-            var rightLine2 = new Line(x + w - 64*SC, y + h * 3 / 4, x + w / 2 - 64*SC, y + h * 3 / 4);
-
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
-            Phaser.Actions.PlaceOnLine(right2, rightLine2);
-        } else if (obstacle_id === 5) {// Random
-            var items = this.genBarriers( 3);
-            var rect = new Rectangle(x, y, w, h);
-            Phaser.Actions.RandomRectangle(items, rect);
-        } else if (obstacle_id === 6) {// Nothing
-
-        } else if (obstacle_id === 7) {// Middle 1/2
-            var middle = this.genBarriers( 4);
-            var middleLine = new Line(x + w / 4 + 64*SC, y + h / 2, x + w * 3 / 4 + 64*SC, y + h / 2);
+                var leftLine = new Line(x + 64 * SC, y + h / 4, x + w / 2 + 64 * SC, y + h / 4);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w / 2 - 64 * SC, y + h / 2);
+                var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 2 + 64 * SC, y + h * 3 / 4);
 
 
-            Phaser.Actions.PlaceOnLine(middle, middleLine);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
+                break;
+            case 3:// Right-Left-Right 1/4
+                var left = this.genBarriers(2);
+                var right = this.genBarriers(2);
+                var right2 = this.genBarriers(2);
 
-        } else if (obstacle_id === 8) {// Middle 1/4
-            var middle = this.genBarriers( 2);
-            var middleLine = new Line(x + w * 3 / 8 + 64*SC, y + h / 2, x + w * 5 / 8 + 64*SC, y + h / 2);
+                var leftLine = new Line(x + 64 * SC, y + h / 2, x + w / 4 + 64 * SC, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 3 / 4 - 64 * SC, y + h / 4);
+                var rightLine2 = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(right2, rightLine2);
+                break;
+            case 4:// Right-Left-Right 1/2
+                var left = this.genBarriers(4);
+                var right = this.genBarriers(4);
+                var right2 = this.genBarriers(4);
+
+                var leftLine = new Line(x + 64 * SC, y + h / 2, x + w / 2 + 64 * SC, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w / 2 - 64 * SC, y + h / 4);
+                var rightLine2 = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w / 2 - 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(right2, rightLine2);
+                break;
+            case 5:// Random
+                var items = this.genBarriers(3);
+                var rect = new Rectangle(x, y, w, h);
+                Phaser.Actions.RandomRectangle(items, rect);
+                break;
+            case 6:// Nothing
+
+                break;
+            case 7:// Middle 1/2
+                var middle = this.genBarriers(4);
+                var middleLine = new Line(x + w / 4 + 64 * SC, y + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2);
 
 
-            Phaser.Actions.PlaceOnLine(middle, middleLine);
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
 
-        } else if (obstacle_id === 9) {//L&R, mid, L&R
-            var left = this.genBarriers( 2);
-            var right = this.genBarriers( 2);
-            var leftLine = new Line(x + 64*SC, y + h / 4, x + w / 4 + 64*SC, y + h / 4);
-            var rightLine = new Line(x + w - 64*SC, y + h / 4, x + w * 3 / 4 - 64*SC, y + h / 4);
-
-
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
-
-            left = this.genBarriers( 2);
-            right = this.genBarriers( 2);
-            leftLine = new Line(x + 64*SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
-            rightLine = new Line(x + w - 64*SC, y + h * 3 / 4, x + w * 3 / 4 - 64*SC, y + h * 3 / 4);
+                break;
+            case 8:// Middle 1/4
+                var middle = this.genBarriers(2);
+                var middleLine = new Line(x + w * 3 / 8 + 64 * SC, y + h / 2, x + w * 5 / 8 + 64 * SC, y + h / 2);
 
 
-            Phaser.Actions.PlaceOnLine(left, leftLine);
-            Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
 
-            var middle = this.genBarriers( 4);
-            var middleLine = new Line(x + w / 4 + 64*SC, y + h / 2, x + w * 3 / 4 + 64*SC, y + h / 2);
+                break;
+            case 9://L&R, mid, L&R
+                var left = this.genBarriers(2);
+                var right = this.genBarriers(2);
+                var leftLine = new Line(x + 64 * SC, y + h / 4, x + w / 4 + 64 * SC, y + h / 4);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 3 / 4 - 64 * SC, y + h / 4);
 
 
-            Phaser.Actions.PlaceOnLine(middle, middleLine);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
 
+                left = this.genBarriers(2);
+                right = this.genBarriers(2);
+                leftLine = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
+                rightLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
+
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
+                var middle = this.genBarriers(4);
+                var middleLine = new Line(x + w / 4 + 64 * SC, y + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+                break;
+            case 10:
+                var angle = 0.02;
+                angle *= variant_id % 2 == 0 ? 1 : -1;
+                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2);
+                break;
         }
     }
     addAnimals(x:number, y:number,
@@ -461,6 +491,15 @@ export class Prefabs{
                         break;
                 }
                 break;
+            case 10:
+                switch (variant_id) {
+                    case 0:
+                        this.animalCircle(x + w/2, y + h/2, w/8, -0.04, 5);
+                        break;
+                    case 1:
+                        this.animalCircle(x + w/2, y + h/2, w/8, 0.04, 5);
+                        break;
+                }
         }
     }
 

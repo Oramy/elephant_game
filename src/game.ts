@@ -10,6 +10,7 @@ import "phaser";
 import { MainScene } from "./scenes/mainScene";
 import { Menu } from "./scenes/menu";
 import {Preloader} from "./scenes/preloader";
+import {GameOverScene} from "./scenes/gameOverScene";
 
 // main game configuration
 
@@ -39,7 +40,7 @@ FBInstant.initializeAsync().then(function(){
     },
     type: Phaser.AUTO,
     parent: "game",
-    scene: [Preloader, Menu, MainScene],
+    scene: [Preloader, Menu, MainScene, GameOverScene],
     physics: {
       default: "matter",
       matter: {
