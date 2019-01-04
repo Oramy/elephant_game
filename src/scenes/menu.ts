@@ -120,7 +120,7 @@ export class Menu extends Phaser.Scene{
         }
     }
     play(pointer, gameObject){
-        if(gameObject == this.characterImage) {
+        if(this.playerData.get(this.character) == 'unlocked' && gameObject == this.characterImage) {
             this.startGame();
         }
     }createSave() {
@@ -165,7 +165,8 @@ export class Menu extends Phaser.Scene{
     }
     create ()
     {
-
+        // @ts-ignore
+        console.log(this.facebook.playerID);
         this.height = this.sys.canvas.height;
         this.width = this.sys.canvas.width;
         SC = this.height / 1920;

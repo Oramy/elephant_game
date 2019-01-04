@@ -125,8 +125,11 @@ export class MainScene extends Phaser.Scene {
 
                 this.highscores = leaderboard;
             }
-            else if(leaderboard.name == 'Amis')
+            else if(leaderboard.name == 'Amis.' + this.facebook.contextID){
+                console.log("friends!!")
                 this.friends = leaderboard;
+            }
+
 
 
 
@@ -135,7 +138,31 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         this.facebook.getLeaderboard('Highscores');
         // @ts-ignore
-        //this.facebook.getLeaderboard('Amis');
+        this.facebook.getPlayers();
+        // @ts-ignore
+        this.facebook.on('players', (function(event, data){
+            this.facebook.createContext(data.playerID);
+        }).bind(this));
+        // @ts-ignore
+        this.facebook.on('playersfail', function(){
+            console.log("sad");
+        });
+        // @ts-ignore
+        this.facebook.on('create', (function(event, data){
+            if(this.facebook.contextID != null){
+                // @ts-ignore
+                this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
+            }
+        }).bind(this));
+        // @ts-ignore
+        console.log(this.facebook.contextID);
+        // @ts-ignore
+        if(this.facebook.contextID != null){
+            // @ts-ignore
+            this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
+        }
+
+
     }
     createBackground(): void{
 
@@ -229,14 +256,19 @@ export class MainScene extends Phaser.Scene {
             bodyA.gameObject.setSensor(false);
         }
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
-            this.destroyObject(bodyA.gameObject);
+
             bodyA.label == 'dead';
             var shelter = bodyB.gameObject;
 
+            var multiplier = SCORE_MULTIPLIER;
+            if(bodyA.gameObject.gold){
+                multiplier = multiplier ** 5;
+                console.log(multiplier);
+            }
             if(shelter.score == 0)
-                shelter.score = BASE_SCORE * SCORE_MULTIPLIER;
+                shelter.score = BASE_SCORE * multiplier;
             else
-                shelter.score *= SCORE_MULTIPLIER;
+                shelter.score *= multiplier;
             if(this.tween === undefined || !this.tween.isPlaying()) {
                 this.tween = this.tweens.add({
                     targets: this.scoreText,
@@ -248,6 +280,7 @@ export class MainScene extends Phaser.Scene {
 
                 });
             }
+            this.destroyObject(bodyA.gameObject);
         }
     }
     create (): void {
@@ -317,7 +350,16 @@ export class MainScene extends Phaser.Scene {
         this.updateAchievements();
 
     }
+    computeMultiplier(): integer{
+        var s = 0;
+        this.followingAnimals.forEach((function(animal){
+            s += animal.gold ? 5 : 1;
+        }).bind(this));
+        var multiplier_log = Math.trunc(s / 5);
+        var multiplier = Math.trunc(Math.pow(2,multiplier_log));
 
+        return multiplier;
+    }
     updateUI(): void{
         this.scoreText.setText("Score: " + Math.round(this.computeScore()));
         this.metersText.setText(this.computeMeters() + 'm');
@@ -326,8 +368,7 @@ export class MainScene extends Phaser.Scene {
         +  "\n X2: " + (this.input.activePointer.x / this.width).toFixed(2)
         + "- Y2: " + (this.input.activePointer.y / this.height).toFixed(2));
 
-        var multiplier_log = Math.trunc(this.followingAnimals.length / 5);
-        var multiplier = Math.trunc(Math.pow(2,multiplier_log));
+        var multiplier = this.computeMultiplier();
         if(this.multiplier != multiplier) {
 
             this.multiplierText.setText("x" + multiplier);
@@ -531,11 +572,30 @@ export class MainScene extends Phaser.Scene {
 
                     this.facebook.on('savedata', this.scene.get('Menu').updateCharacter);
                 }
+
                 this.scene.start('Menu');
                 this.scene.get('Menu').lastScore = Math.trunc(this.computeScore());
 
             }.bind(this), this);
+
+           // @ts-ignore
+            this.facebook.on('updatefail', function(e){
+                console.log("update failed" + e.message);
+            });
             this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
+            if(this.friends != null){
+                // @ts-ignore
+
+                FBInstant.updateAsync({
+                    action: 'LEADERBOARD',
+                    // @ts-ignore
+                    name: 'Amis.' + this.facebook.contextID,
+                });
+                console.log('ouf');
+                this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
+
+            }
+
 
         }
 

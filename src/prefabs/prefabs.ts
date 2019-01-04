@@ -67,7 +67,8 @@ export class Prefabs{
         animal.setCollidesWith([scene.elephantCat, scene.obstacleCat]);
         animal.setSensor(true);
         scene.addInsideScreenObject(animal);
-
+        // @ts-ignore
+        animal.gold = gold;
         if(gold){
             animal.tint = 0xDAA520;
 

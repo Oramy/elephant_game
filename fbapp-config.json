@@ -1,0 +1,11 @@
+{
+  "instant_games": {
+    "orientation": "PORTRAIT",
+    "navigation_menu_version": "NAV_FLOATING",
+    "custom_update_templates": {
+      "play_turn": {
+        "example": "X just played. It's your turn !"
+      }
+    }
+  }
+}
