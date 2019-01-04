@@ -95,6 +95,10 @@ export class MainScene extends Phaser.Scene {
 
     private unlockList= [];
     private metersText: Phaser.GameObjects.BitmapText;
+
+    private leftWall: Sprite;
+    private rightWall: Sprite;
+
     constructor() {
         super({
             key: "MainScene",
@@ -102,7 +106,7 @@ export class MainScene extends Phaser.Scene {
                 default: 'matter',
                 matter: {
                     gravity: {y: 0},
-                    debug: false,
+                    debug: true,
                     enableSleeping: false
                 }
             }
@@ -215,6 +219,16 @@ export class MainScene extends Phaser.Scene {
         Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
 
     }
+    createSideWalls(): void{
+        this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
+        this.leftWall.setCollisionCategory(this.obstacleCat);
+        this.leftWall.setDisplaySize(this.width * 0.5, this.height);
+        this.leftWall.setVisible(false);
+        this.rightWall = this.matter.add.sprite(this.width * 1.9,this.height/2, 'round', 'elephant.png', { isStatic: true});
+        this.rightWall.setCollisionCategory(this.obstacleCat);
+        this.rightWall.setDisplaySize(this.width * 0.5, this.height);
+        this.rightWall.setVisible(false);
+    }
     createElephant(): void{
 
         this.elephant = this.matter.add.sprite(400*SC, 400*SC, 'round', this.character + '.png',
@@ -309,7 +323,7 @@ export class MainScene extends Phaser.Scene {
         this.createUI();
         this.createBackground();
         this.createElephant();
-
+        this.createSideWalls();
         this.prefabs = new Prefabs(this, this.width, this.height);
         //this.prefabs.addObstaclesAndAnimals(0, -1000, 8, 0);
 
@@ -485,7 +499,11 @@ export class MainScene extends Phaser.Scene {
         var ny = this.input.y + this.camera.scrollY +  this.cameraSpeed;
         var x = this.elephant.getCenter().x;
         var y = this.elephant.getCenter().y ;
-        this.elephant.setVelocity((nx-x)*MOVE_DELAY_COEFF,(ny-y)*MOVE_DELAY_COEFF);
+        var mx = (nx-x)*MOVE_DELAY_COEFF;
+        var my = (ny - y)*MOVE_DELAY_COEFF;
+        my = Phaser.Math.Clamp(my, -this.height/2*MOVE_DELAY_COEFF, this.height/2*MOVE_DELAY_COEFF);
+
+        this.elephant.setVelocity(mx, my);
 
         var move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0],
             this.input.y - this.lastPosition[1]);
@@ -504,6 +522,8 @@ export class MainScene extends Phaser.Scene {
         this.camera.scrollY += this.cameraSpeed;
         this.background.tilePositionY = this.camera.scrollY / SC;
 
+        this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2);
+        this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2);
     }
     private updateScrolling() : void {
         if(this.camera.scrollY < -this.spawnCount * this.height){
