@@ -614,6 +614,7 @@ export class Prefabs{
                         this.animalCircle(x + w/2, y + h/2, w/8, 0.04, 5);
                         break;
                 }
+                break;
             case 11: // Spikes trap right
                 switch (variant_id) {
                     case 0: // Trap
