@@ -119,6 +119,8 @@ export class GameOverScene extends Phaser.Scene{
      */
     spawnAnimals( x, y, x2, y2, count): void{
         var scale = 1;
+        if(count == 0)
+            return;
         if(count % 20 < 5){
             count = count - count % 20 + Phaser.Math.Between(5, 19);
         }
@@ -245,7 +247,14 @@ export class GameOverScene extends Phaser.Scene{
 
         }
         else{
-            list =  this.unlockList.slice(0, Math.min(this.unlockList.length, 3));
+            list =  this.unlockList.slice(0, Math.min(this.unlockList.length, 2));
+            if(list.length < 2){
+                list = list.concat(this.unlocked.filter((function(el){
+                    return el != this.character;
+                }).bind(this)).slice(0, Math.min(this.unlocked.length, 1-list.length)));
+
+
+            }
             list.push(this.character);
         }
         if(this.unlockList.length != 0) {

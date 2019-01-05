@@ -191,6 +191,7 @@ export class Menu extends Phaser.Scene{
 
 
 ;                if(this.playerData.values.coins >= this.prices[this.character]){
+
                     this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
                     this.playerData.values.coins -= this.prices[this.character];
                     this.playerData.values[this.character] = 'unlocked';
@@ -210,7 +211,7 @@ export class Menu extends Phaser.Scene{
        'dog':'locked',
        'duck':'locked',
        'elephant':'unlocked',
-       'frog':'unlocked',
+       'frog':'locked',
        'giraffe':'locked',
        'goat':'locked',
        'gorilla':'locked',
@@ -236,7 +237,7 @@ export class Menu extends Phaser.Scene{
         console.log('create save');
         //@ts-ignore
         this.facebook.saveData(data);
-
+        this.coinsComponent.smoothChangeScore(data['coins'], 1).play();
 
     }
     update(){
@@ -272,9 +273,7 @@ export class Menu extends Phaser.Scene{
                     this.highscores.on('getplayerscore', function (score, name)
                     {
                         var data = JSON.parse(score.data);
-                        this.facebook.on('getdata', (function () {
-                            this.updateCharacter(data.character);
-                        }).bind(this));
+                        this.updateCharacter(data.character);
                         this.createPlayerScoreLine();
 
                     }.bind(this), this);
@@ -407,6 +406,7 @@ export class Menu extends Phaser.Scene{
         this.facebook.on('savedata', (function (){
             this.updateCharacter();
             this.updatePlayerDataUI();
+
             // @ts-ignore
             this.facebook.getData(dataKeys);
 
@@ -414,18 +414,27 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         this.facebook.on('getdata', (function () {
             this.playerData = this.facebook.data;
+
+            var s = false;
             if((this.facebook.data.values.elephant === undefined
             || this.facebook.data.values.bear === 'locked' ) &&!this.saveCreated){
-                this.saveCreated = true;
+
+                s = true;
                 this.createSave();
 
             }
-            if(this.playerData.values.coins === undefined){
+            else if(this.playerData.values.coins === undefined && !this.saveCreated){
                 this.playerData.set('coins',  0);
-
-
             }
-            this.coinsComponent.smoothChangeScore(this.playerData.values.coins, 1).play();
+            if(!s && !this.saveCreated)
+            {
+                this.saveCreated = true;
+                this.coinsComponent.smoothChangeScore(this.playerData.values.coins, 1).play();
+            }
+            if(s)
+                this.saveCreated = true;
+
+
             //In order to update images and texts.
             this.updateCharacter();
             this.updatePlayerDataUI();

@@ -93,7 +93,7 @@ export class CoinsComponent{
             yoyo: false,
             ease: 'Cubic.easeIn',
             from: value,
-            to: bonusPart == 1 ? value: Phaser.Math.Between(1, Math.trunc(value * bonusPart)),
+            to: bonusPart == 1 || value == 0 ? value: Phaser.Math.Between(1, Math.trunc(value * bonusPart)),
             delay: 0,
             onComplete: onComplete2
 
