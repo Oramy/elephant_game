@@ -45,6 +45,7 @@ export class Preloader extends Phaser.Scene{
         this.load.atlasXML('square_nodetailsOutline', 'assets/atlas/square_nodetailsOutline.png', 'assets/atlas/square_nodetailsOutline.xml');
         this.load.atlasXML('icons', 'assets/atlas/sheet_black1x.png', 'assets/atlas/sheet_black1x.xml');
         this.load.atlasXML('topdownsprites', 'assets/atlas/allSprites_default.png', 'assets/atlas/allSprites_default.xml');
+        this.load.atlasXML('spritesheet_other', 'assets/atlas/spritesheet_other.png', 'assets/atlas/spritesheet_other.xml');
 
         this.load.image('fire1', 'assets/particles/fire1.png');
         this.load.image('yellow', 'assets/particles/yellow.png');

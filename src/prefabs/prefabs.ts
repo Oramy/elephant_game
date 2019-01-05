@@ -3,6 +3,7 @@ import Line = Phaser.Geom.Line;
 import Rectangle = Phaser.Geom.Rectangle;
 import GameObject = Phaser.GameObjects.GameObject;
 import FloatBetween = Phaser.Math.FloatBetween;
+import Vector2 = Phaser.Math.Vector2;
 
 var notused = [];
 var notused_offsets = [];
@@ -11,9 +12,10 @@ var notused_offsets = [];
  * @param x
  * @param y
  */
-const OBSTACLE_MAX_ID = 10;
-const VARIANTS_MAX_ID = [11, 2, 1, 0, 0, 0, 0, 1,1,6, 1];
-const SHELTER_MAX_ID = 0;
+export const OBSTACLE_MAX_ID = 17;
+export const EASY_OBSTACLE_MAX_ID = 10;
+export const VARIANTS_MAX_ID = [4, 1, 1, 1, 1, 0, 0, 1,1,6, 1, 1, 1, 4, 1, 1, 1, 1];
+export const SHELTER_MAX_ID = 1;
 
 var SC;
 export class Prefabs{
@@ -97,12 +99,17 @@ export class Prefabs{
             this.spawnAnimal(animalX, animalY);
         }
     }
-    objectCircle(x:number, y:number, radius:number,  angle:number, objects, aliveCondition){
+    objectCircle(x:number, y:number, radius:number,  angle:number, objects, aliveCondition, rotate = false){
         var scene = this.scene;
         var circle = new Phaser.Geom.Circle(x,y,radius);
         var updateCircle;
         updateCircle = (function(event){
             objects = objects.filter(aliveCondition);
+            if(rotate){
+                objects.forEach((function(object){
+                    object.rotation += angle;
+                }).bind(this));
+            }
             Phaser.Actions.RotateAroundDistance(objects,{x: x, y:y}, angle, radius);
 
             if(objects.length == 0){
@@ -112,6 +119,13 @@ export class Prefabs{
         }).bind(this);
         scene.events.on("update", updateCircle, this);
         Phaser.Actions.PlaceOnCircle(objects, circle);
+        if(rotate){
+            var center = new Vector2(x,y);
+            objects.forEach((function(object){
+                var pos = new Vector2(object.x, object.y);
+                object.rotation =  pos.subtract(center.clone()).angle();
+            }).bind(this));
+        }
         return objects;
     }
     animalCircle(x:number, y:number, radius:number,  angle:number, count:integer){
@@ -120,27 +134,36 @@ export class Prefabs{
         var animals = this.genAnimals(count);
         return this.objectCircle(x, y, radius, angle, animals, aliveCondition);
     }
-    barrierCircle(x:number, y:number, radius:number, angle:number, count:integer){
+    barrierCircle(x:number, y:number, radius:number, angle:number, count:integer,
+                  frame="fence.png", barrierAngle = 0, kill = false){
         var aliveCondition = function(barrier){
             return barrier.body != undefined};
-        var barriers = this.genBarriers(count);
-        return this.objectCircle(x, y, radius, angle, barriers, aliveCondition);
+
+        var barriers = this.genBarriers(count, frame, kill);
+        barriers = this.objectCircle(x, y, radius, angle, barriers,aliveCondition, true);
+        barriers.forEach((function(object){
+            object.rotation += barrierAngle;
+        }).bind(this));
+        return  barriers;
     }
-    addBarrier( x = 0, y = 0, scale = 1){
+    addBarrier( x = 0, y = 0, scale = 1, frame = 'fence.png', kill = false){
         var scene = this.scene;
-        var barrier = scene.matter.add.image(x,y, "topdownsprites", "treeBrown_small.png");
-        barrier.setScale(scale*3 * SC);
+        var barrier = scene.matter.add.image(x,y, "spritesheet_other", frame);
+        barrier.setScale(scale*2.2 * SC);
         barrier.setStatic(true);
 
+        if(kill){
+            barrier.body.label = 'disableControl';
+        }
         barrier.setCollisionCategory(scene.obstacleCat);
 
         scene.addInsideScreenObject(barrier);
         return barrier;
     }
-    genBarriers(count:number){
+    genBarriers(count:number, frame='fence.png', kill=false){
         var items = []
         for(var i = 0; i < count; i++){
-            items.push(this.addBarrier());
+            items.push(this.addBarrier(0, 0, 1, frame, kill));
         }
         return items;
     }
@@ -280,9 +303,9 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
                 left = this.genBarriers(2);
-                right = this.genBarriers(2);
+                left = this.genBarriers(2);
                 leftLine = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
-                rightLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
+                leftLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
 
 
                 Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -294,10 +317,97 @@ export class Prefabs{
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
                 break;
-            case 10:
+            case 10: // Block circle
                 var angle = 0.02;
                 angle *= variant_id % 2 == 0 ? 1 : -1;
-                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2);
+                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown');
+                break;
+            case 11: // Spikes trap right
+                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_TL.png');
+
+                var middle = this.genBarriers(4);
+                var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
+
+                var right = this.genBarriers(2, 'spikesHigh.png', true);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 3/4 - 64 * SC, y + h / 4);
+
+
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+                break;
+            case 12:// Spikes trap left
+                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_TR.png');
+
+                var middle = this.genBarriers(4);
+                var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
+
+                var left = this.genBarriers(2, 'spikesHigh.png', true);
+                var leftLine = new Line(x +  64 * SC, y + h / 4, x + w * 1/4 + 64 * SC, y + h / 4);
+
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+                break;
+            case 13:// Left and right 1/4 spikes.
+                var left = this.genBarriers(2, 'spikesHigh.png', true);
+                var right = this.genBarriers(2, 'spikesHigh.png', true);
+                var leftLine = new Line(x + 64 * SC, y + h / 2, x + 64 * SC + w / 4, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
+                break;
+            case 14:// Middle 1/2 Spikes
+                var middle = this.genBarriers(4, 'spikesHigh.png', true);
+                var middleLine = new Line(x + w / 4 + 64 * SC, y + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+
+                break;
+            case 15:// Middle 1/4 Spikes
+                var middle = this.genBarriers(2, 'spikesHigh.png', true);
+                var middleLine = new Line(x + w * 3 / 8 + 64 * SC, y + h / 2, x + w * 5 / 8 + 64 * SC, y + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+
+                break;
+            case 16: // Spiked-Block circle
+                var angle = 0.02;
+                angle *= variant_id % 2 == 0 ? 1 : -1;
+                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
+                var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 - 64*SC, angle, 2, 'spikesHigh.png', -Math.PI /2, true);
+                spikes.forEach(function(spike){
+                    spike.setOrigin(0.5, 1);
+                });
+                break;
+
+            case 17: // Full-Spiked-Block circle
+                var angle = 0.02;
+                var sign =variant_id % 2 == 0 ? 1 : -1;
+                angle *= sign;
+                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
+                var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 64*SC, angle, 2, 'spikesHigh.png', Math.PI /2, true);
+                spikes.forEach(function(spike){
+                    spike.setOrigin(0.5, 1);
+                });
+                var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 - 128*SC, angle, 2, 'spikesHigh.png', -Math.PI /2, true);
+                spikes.forEach(function(spike){
+                    spike.setOrigin(0.5, 0);
+                });
+                var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 15*SC, angle, 2, 'spikesHigh.png', 0, true);
+
+                Phaser.Actions.RotateAroundDistance(spikes,{x: x +w/2, y:y+h/2}, -20*SC*angle*sign,  w/3 + 15 * SC);
+
+                var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 15*SC, angle, 2, 'spikesHigh.png', Math.PI, true);
+
+                Phaser.Actions.RotateAroundDistance(spikes,{x: x +w/2, y:y+h/2}, 20*SC*angle*sign,  w/3 + 15 * SC);
+
                 break;
         }
     }
@@ -307,54 +417,30 @@ export class Prefabs{
         var w = this.width;
         var h = this.height;
         switch (obstacle_id) {
+            case 13:// Left and right 1/4 spikes.
             case 0: // Left and right 1/4 barrier.
                 switch (variant_id) {
-                    case 0: // 1 Front Left
-                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
-                        break;
-                    case 1:// 2 Front Left
+                    case 0:// 2 Front Left
                         this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
                         this.spawnAnimal( x+64*SC+128*SC, y+ h/2+ 128*SC);
                         break;
-                    case 2: // 1 Front Right
-                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
-                        break;
-                    case 3: // 2 Front Right
+                    case 1: // 2 Front Right
                         this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
                         this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2+ 128*SC);
                         break;
-                    case 4: // 2 Front Left-Right
-                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
-                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
-                        break;
-                    case 5: // 4 Front Left-Right
+                    case 2: // 4 Front Left-Right
                         this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC);
                         this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2+ 128*SC);
                         this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC);
                         this.spawnAnimal( x+64*SC+128*SC, y+ h/2+ 128*SC);
                         break;
-                    case 6: // 1 Behind Left
-                        this.spawnAnimal( x+64*SC, y+ h/2- 128*SC);
-                        break
-
-                    case 7: // 1 Behind Right
-                        this.spawnAnimal( x+w-64*SC, y+ h/2- 128*SC);
-                        break;
-                    case 8: // 2 Behind Left-Right
-                        this.spawnAnimal( x+64*SC, y+ h/2- 128*SC);
-                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2- 128*SC);
-                        break;
-                    case 9: // 2 Middle
-                        this.spawnAnimal( x + w/2 - 128*SC, y + h / 2);
-                        this.spawnAnimal( x + w/2 + 128*SC, y + h / 2);
-                        break;
-                    case 10: // 4 Middle
+                    case 3: // 4 Middle
                         this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 2);
                         this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 2);
                         this.spawnAnimal( x + w/2  - 64*SC, y + h / 2);
                         this.spawnAnimal( x + w/2  + 64*SC, y + h / 2);
                         break;
-                    case 11: // 8 Middle Jackpot
+                    case 4: // 8 Middle Jackpot
                         this.spawnAnimal( x + w/2 - 128*SC - 64*SC, y + h / 2);
                         this.spawnAnimal( x + w/2 + 128*SC + 64*SC, y + h / 2);
                         this.spawnAnimal( x + w/2  - 64*SC, y + h / 2);
@@ -375,17 +461,12 @@ export class Prefabs{
                         this.spawnAnimalRel( 0.30, 0.25, x, y);
                         this.spawnAnimalRel( 0.70, 0.50, x, y);
                         break;
-                    case 1: // Behind obstacles
-                        this.spawnAnimalRel( 0, 0.75, x + 64*SC, y-128*SC);
-                        this.spawnAnimalRel( 0, 0.25, x + 64*SC, y-128*SC);
-                        this.spawnAnimalRel( 1, 0.5, x - 64*SC, y-128*SC);
-                        break;
-                    case 2: // Sinusoidal jackpot
-                        for(var i = 0; i < 10; i++){
-                            var t = i / 9;
+                    case 1: // Sinusoidal jackpot
+                        for(var i = 0; i < 5; i++){
+                            var t = i / 4;
                             var u = 0.25 + (1 - Math.sin(t*Math.PI)) * 0.5;
                             var v = 0.25 + t * 0.5;
-                            this.spawnAnimalRel(u, v);
+                            this.spawnAnimalRel(u, v, x, y);
                         }
 
                         break;
@@ -394,28 +475,58 @@ export class Prefabs{
             case 2: // Left-right-left 1/2
                 switch (variant_id) {
                     case 0: //Circle mid
-                        this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 3);
+                        this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 4);
                         break;
                     case 1: //Circle front mid behind
-                        this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 3);
-                        this.animalCircle(x + 3 * w / 4, y + h / 4, w / 16, 0.05, 3);
-                        this.animalCircle(x + 3 * w / 4, y + 3 * h / 4, w / 16, 0.05, 3);
+                        this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 2);
+                        this.animalCircle(x + 3 * w / 4, y + h / 4, w / 16, 0.05, 2);
+                        this.animalCircle(x + 3 * w / 4, y + 3 * h / 4, w / 16, 0.05, 2);
                         break;
                 }
                 break;
             case 3: // Right-Left-Right 1/4
+                switch (variant_id) {
+                    case 0: // Mid
+                        this.spawnAnimalRel( 0.70, 0.75, x, y);
+                        this.spawnAnimalRel( 0.70, 0.25, x, y);
+                        this.spawnAnimalRel( 0.30, 0.50, x, y);
+                        break;
+                    case 1: // Sinusoidal jackpot
+                        for(var i = 0; i < 5; i++){
+                            var t = i / 4;
+                            var u = 0.25 + (1 - Math.sin(t*Math.PI)) * 0.5;
+                            var u = 1 - u;
+                            var v = 0.25 + t * 0.5;
+                            this.spawnAnimalRel(u, v, x, y);
+                        }
 
+                        break;
+                }
+                break;
+
+                break;
             case 4: // Right-Left-Right 1/2
-
+                switch (variant_id) {
+                    case 0: //Circle mid
+                        this.animalCircle(x + w * 3 / 4, y + h / 2, w / 16, 0.05, 4);
+                        break;
+                    case 1: //Circle front mid behind
+                        this.animalCircle(x + w * 3/ 4, y + h / 2, w / 16, 0.05, 2);
+                        this.animalCircle(x + w / 4, y + h / 4, w / 16, 0.05, 2);
+                        this.animalCircle(x + w / 4, y + 3 * h / 4, w / 16, 0.05, 2);
+                        break;
+                }
+                break;
             case 5: // Random
 
             case 6: // Nothing
                 this.spawnAnimals( x, y, x + w, y + h, ANIMALS_SPAWN);
                 break;
+            case 14: //Middle 1/2 Spikes
             case 7: // Middle 1/2
                 switch (variant_id) {
                     case 0: //Circle
-                        this.animalCircle( x + w/2,y+  h/2, w * 3/8, 0.02, 10);
+                        this.animalCircle( x + w/2,y+  h/2, w * 3/8, 0.03, 5);
                         break;
                     case 1: //Fill line
                         this.spawnAnimal( x+64*SC, y+ h/2);
@@ -425,10 +536,11 @@ export class Prefabs{
                         break;
                 }
                 break;
+            case 15: //Middle 1/2 Spikes
             case 8://Middle 1/4
                 switch (variant_id) {
                     case 0: // Circle jackpot
-                        this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.02, 10);
+                        this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.03, 5);
                         break;
                     case 1: // Fill line
                         this.spawnAnimal( x+64*SC, y+ h/2);
@@ -443,7 +555,7 @@ export class Prefabs{
             case 9://L&R, mid, L&R
                 switch (variant_id) {
                     case 0: //Circle jackpot
-                        this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.02, 10);
+                        this.animalCircle( x + w/2, y + h/2, w * 3/8, 0.03, 5);
                         break;
                     case 1: //Fill mid line
                         this.spawnAnimal( x+64*SC, y+ h/2);
@@ -491,7 +603,9 @@ export class Prefabs{
                         break;
                 }
                 break;
-            case 10:
+            case 16:
+            case 17:
+            case 10: // Barrier circle
                 switch (variant_id) {
                     case 0:
                         this.animalCircle(x + w/2, y + h/2, w/8, -0.04, 5);
@@ -500,6 +614,30 @@ export class Prefabs{
                         this.animalCircle(x + w/2, y + h/2, w/8, 0.04, 5);
                         break;
                 }
+            case 11: // Spikes trap right
+                switch (variant_id) {
+                    case 0: // Trap
+                        this.animalCircle(x + w * 0.8, y + h  * 0.6, w / 16, 0.05, 4);
+                        this.spawnAnimalRel(0.22, 0.3, x, y);
+                        break;
+                    case 1: //  Easy
+                        this.animalCircle(x + w * 0.22, y + h  * 0.3, w / 16, 0.05, 5);
+                        break;
+
+                }
+                break;
+            case 12: // Spikes trap left
+                switch (variant_id) {
+                    case 0: // Trap
+                        this.animalCircle(x + w * 0.2, y + h  * 0.6, w / 16, 0.05, 4);
+                        this.spawnAnimalRel(0.78, 0.3, x, y);
+                        break;
+                    case 1: //  Easy
+                        this.animalCircle(x + w * 0.78, y + h  * 0.3, w / 16, 0.05, 5);
+                        break;
+
+                }
+                break;
         }
     }
 
@@ -507,8 +645,12 @@ export class Prefabs{
         var w = this.width;
         var h = this.height;
         switch (id) {
-            case 0:
-                this.addObstaclesAndAnimals( x, y, 0);
+            case 0: // Normal shelter
+                this.addObstaclesAndAnimals( x, y, 0, 0);
+                this.spawnShelter( x + w / 2, y + h/2);
+                break;
+            case 1: //Spiked shelter
+                this.addObstaclesAndAnimals( x, y, 13, 0);
                 this.spawnShelter( x + w / 2, y + h/2);
                 break;
         }

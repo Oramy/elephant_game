@@ -15,6 +15,7 @@ import "../prefabs/prefabs.ts";
 import {Prefabs} from "../prefabs/prefabs";
 import ScaleModes = Phaser.ScaleModes;
 import Color = Phaser.Display.Color;
+import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs";
 
 function arrayRemove(arr, value) {
 
@@ -30,9 +31,9 @@ export const MOVE_DELAY_COEFF = 0.1;
 export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
 export const ANIMAL_BASE_SPEED = 280;
 export const ANIMAL_SPEED_XY_RATIO = 1/20;
-export const CAMERA_BASE_SPEED = -6; // -6;
+export const CAMERA_BASE_SPEED = -15; // -15;
 export const ANIMAL_ACC = 6;
-export const CAMERA_ACC = -0.2; // -0.2;
+export const CAMERA_ACC = -0; // -0;
 export const ANIMALS_SPAWN = 5;
 export const SCORE_MULTIPLIER = 1.148698355; // 2 ^ (1/5)
 export const BASE_SCORE = 10;
@@ -102,6 +103,8 @@ export class MainScene extends Phaser.Scene {
     private savedAnimals: number;
     private characterNames: string[];
     private characterFrames: string[];
+    private lava: any;
+    private disableControl: boolean;
 
     constructor() {
         super({
@@ -178,6 +181,10 @@ export class MainScene extends Phaser.Scene {
         this.background.setScale(SC);
         this.background.setScrollFactor(0);
 
+        this.lava = this.add.tileSprite(this.width/2, this.height - 32*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png');
+        this.lava.setScale(2*SC);
+        this.lava.setScrollFactor(0);
+        this.lava.setDepth(2);
         /**var particles = this.add.particles('fire1');
         // @ts-ignore
         particles.setDepth(2);
@@ -234,7 +241,7 @@ export class MainScene extends Phaser.Scene {
         this.rightWall.setVisible(false);
     }
     createElephant(): void{
-
+        this.disableControl = false;
         if(this.character === undefined){
             this.character = 'elephant';
         }
@@ -275,6 +282,9 @@ export class MainScene extends Phaser.Scene {
             this.followingAnimals.push(bodyA.gameObject);
             bodyA.gameObject.setCollidesWith(this.obstacleCat);
             bodyA.gameObject.setSensor(false);
+        }
+        if(bodyA.label == 'disableControl' && bodyB.label == 'elephant'){
+            this.killElephant();
         }
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
 
@@ -338,7 +348,7 @@ export class MainScene extends Phaser.Scene {
         this.createElephant();
         this.createSideWalls();
         this.prefabs = new Prefabs(this, this.width, this.height);
-        //this.prefabs.addObstaclesAndAnimals(0, 0, 10, 0);
+        //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1);
 
         var collisionCallback = (function (event) {
                 var pairs = event.pairs;
@@ -441,6 +451,7 @@ export class MainScene extends Phaser.Scene {
     }
     updateAnimals(delta): void {
         this.animalSpeed += delta * ANIMAL_ACC /1000;
+
         //Following the elephant logic.
         for (var i = 0; i < this.followingAnimals.length; i++) {
             var animal = this.followingAnimals[i];
@@ -508,32 +519,36 @@ export class MainScene extends Phaser.Scene {
         });
     }
     updateElephant(): void{
-        var nx = this.input.x + this.camera.scrollX;
-        var ny = this.input.y + this.camera.scrollY +  this.cameraSpeed;
-        var x = this.elephant.getCenter().x;
-        var y = this.elephant.getCenter().y ;
-        var mx = (nx-x)*MOVE_DELAY_COEFF;
-        var my = (ny - y)*MOVE_DELAY_COEFF;
-        my = Phaser.Math.Clamp(my, -this.height/2*MOVE_DELAY_COEFF, this.height/2*MOVE_DELAY_COEFF);
+        if(!this.disableControl) {
+            var nx = this.input.x + this.camera.scrollX;
+            var ny = this.input.y + this.camera.scrollY + this.cameraSpeed;
+            var x = this.elephant.getCenter().x;
+            var y = this.elephant.getCenter().y;
+            var mx = (nx - x) * MOVE_DELAY_COEFF;
+            var my = (ny - y) * MOVE_DELAY_COEFF;
+            my = Phaser.Math.Clamp(my, -this.height / 2 * MOVE_DELAY_COEFF, this.height / 2 * MOVE_DELAY_COEFF);
 
-        this.elephant.setVelocity(mx, my);
+            this.elephant.setVelocity(mx, my);
 
-        var move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0],
-            this.input.y - this.lastPosition[1]);
+            var move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0],
+                this.input.y - this.lastPosition[1]);
 
-        if(move.lengthSq() > DIRECTION_UPDATE_DIST_SQ){
+            if (move.lengthSq() > DIRECTION_UPDATE_DIST_SQ) {
 
-            this.lastPosition = [this.input.x, this.input.y];
-            this.elephantDirection = move;
+                this.lastPosition = [this.input.x, this.input.y];
+                this.elephantDirection = move;
+            }
+            this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4;
+            this.elephant.body.label = 'elephant';
         }
-        this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2/4;
-        this.elephant.body.label = 'elephant';
 
     }
     updateCamera(time, delta): void{
         this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
+
         this.camera.scrollY += this.cameraSpeed;
         this.background.tilePositionY = this.camera.scrollY / SC;
+        this.lava.tilePositionX += 3;
 
         this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2);
         this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2);
@@ -544,11 +559,26 @@ export class MainScene extends Phaser.Scene {
             var y = - (this.spawnCount + 1) * this.height;
 
             if(this.spawnCount % 8 == 1)
-                this.prefabs.addObstaclesWithShelter(x, y);
+            {
+                if(this.spawnCount < 50)
+                {
+                    this.prefabs.addObstaclesWithShelter(x, y, 0);
+                }
+                else
+                    this.prefabs.addObstaclesWithShelter(x, y);
+            }
+
             else if(this.spawnCount == 0)
-                this.prefabs.addObstaclesAndAnimals(x, y, this.spawnCount);
-            else
-                this.prefabs.addObstaclesAndAnimals(x, y);
+                this.prefabs.addObstaclesAndAnimals(x, y, 0);
+            else{
+                if(this.spawnCount < 50)
+                {
+
+                    this.prefabs.addObstaclesAndAnimals(x, y, Phaser.Math.Between(0,EASY_OBSTACLE_MAX_ID));
+                }
+                else
+                    this.prefabs.addObstaclesAndAnimals(x, y);
+            }
 
             this.spawnCount ++;
 
@@ -663,5 +693,10 @@ export class MainScene extends Phaser.Scene {
     }
     setPlayerData(playerData){
         this.playerData = playerData;
+    }
+
+    private killElephant() {
+        this.disableControl = true;
+        this.elephant.setTint(0x333333);
     }
 }
