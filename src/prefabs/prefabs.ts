@@ -134,6 +134,11 @@ export class Prefabs{
         var animals = this.genAnimals(count);
         return this.objectCircle(x, y, radius, angle, animals, aliveCondition);
     }
+    rotateArray(objects, angle){
+        objects.forEach((function(object){
+            object.rotation += angle;
+        }).bind(this));
+    }
     barrierCircle(x:number, y:number, radius:number, angle:number, count:integer,
                   frame="fence.png", barrierAngle = 0, kill = false){
         var aliveCondition = function(barrier){
@@ -141,9 +146,7 @@ export class Prefabs{
 
         var barriers = this.genBarriers(count, frame, kill);
         barriers = this.objectCircle(x, y, radius, angle, barriers,aliveCondition, true);
-        barriers.forEach((function(object){
-            object.rotation += barrierAngle;
-        }).bind(this));
+        this.rotateArray(barriers, barrierAngle);
         return  barriers;
     }
     addBarrier( x = 0, y = 0, scale = 1, frame = 'fence.png', kill = false){
@@ -303,9 +306,9 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
                 left = this.genBarriers(2);
-                left = this.genBarriers(2);
+                right = this.genBarriers(2);
                 leftLine = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
-                leftLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
+                rightLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
 
 
                 Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -328,11 +331,16 @@ export class Prefabs{
                 var middle = this.genBarriers(4);
                 var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
 
+                var right = this.genBarriers(4, 'blockBrown.png', true);
+                var rightLine = new Line(x + w - 64 * SC, y - 100*SC  + h / 4, x + w /2 - 64 * SC, y - 100*SC + h / 4);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
+
                 var right = this.genBarriers(2, 'spikesHigh.png', true);
                 var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 3/4 - 64 * SC, y + h / 4);
-
-
                 Phaser.Actions.PlaceOnLine(right, rightLine);
+                this.rotateArray(right, Math.PI);
+
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
                 break;
@@ -342,39 +350,74 @@ export class Prefabs{
                 var middle = this.genBarriers(4);
                 var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
 
+                var left = this.genBarriers(4, 'blockBrown.png');
+                var leftLine = new Line(x +  64 * SC, y - 100*SC + h / 4, x + w * 1/2 + 64 * SC, y - 100*SC + h / 4);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+
                 var left = this.genBarriers(2, 'spikesHigh.png', true);
                 var leftLine = new Line(x +  64 * SC, y + h / 4, x + w * 1/4 + 64 * SC, y + h / 4);
-
-
                 Phaser.Actions.PlaceOnLine(left, leftLine);
+                this.rotateArray(left, Math.PI);
+
+
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
                 break;
             case 13:// Left and right 1/4 spikes.
+                var left = this.genBarriers(2, 'blockBrown.png', );
+                var right = this.genBarriers(2, 'blockBrown.png',);
+                var leftLine = new Line(x + 64 * SC, y + h / 2 - 100 * SC, x + 64 * SC + w / 4, y + h / 2  - 100 * SC);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 2  - 100 * SC, x + w * 3 / 4 - 64 * SC, y + h / 2  - 100 * SC);
+
+
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
                 var left = this.genBarriers(2, 'spikesHigh.png', true);
                 var right = this.genBarriers(2, 'spikesHigh.png', true);
                 var leftLine = new Line(x + 64 * SC, y + h / 2, x + 64 * SC + w / 4, y + h / 2);
                 var rightLine = new Line(x + w - 64 * SC, y + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
 
 
+
                 Phaser.Actions.PlaceOnLine(left, leftLine);
                 Phaser.Actions.PlaceOnLine(right, rightLine);
+                this.rotateArray(left, Math.PI);
+                this.rotateArray(right, Math.PI);
+
 
                 break;
             case 14:// Middle 1/2 Spikes
+                var middle = this.genBarriers(4, 'blockBrown.png');
+                var middleLine = new Line(x + w / 4 + 64 * SC, y  - 100 * SC + h / 2, x + w * 3 / 4 + 64 * SC, y - 100 * SC + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+
                 var middle = this.genBarriers(4, 'spikesHigh.png', true);
                 var middleLine = new Line(x + w / 4 + 64 * SC, y + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2);
 
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
+                this.rotateArray(middle, Math.PI);
+
+
 
                 break;
             case 15:// Middle 1/4 Spikes
+                var middle = this.genBarriers(2, 'blockBrown.png');
+                var middleLine = new Line(x + w * 3 / 8 + 64 * SC, y - 100 * SC + h / 2, x + w * 5 / 8 + 64 * SC, y + h / 2 - 100 * SC);
+
+
+                Phaser.Actions.PlaceOnLine(middle, middleLine);
+
                 var middle = this.genBarriers(2, 'spikesHigh.png', true);
                 var middleLine = new Line(x + w * 3 / 8 + 64 * SC, y + h / 2, x + w * 5 / 8 + 64 * SC, y + h / 2);
 
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
+                this.rotateArray(middle, Math.PI);
 
                 break;
             case 16: // Spiked-Block circle
