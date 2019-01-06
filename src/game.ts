@@ -9,8 +9,9 @@
 import "phaser";
 import { MainScene } from "./scenes/mainScene";
 import { Menu } from "./scenes/menu";
-import {Preloader} from "./scenes/preloader";
-import {GameOverScene} from "./scenes/gameOverScene";
+import { Preloader } from "./scenes/preloader";
+import { GameOverScene } from "./scenes/gameOverScene";
+import { PauseScene } from "./scenes/pauseScene";
 
 // main game configuration
 
@@ -26,12 +27,7 @@ export class Game extends Phaser.Game {
 
 // @ts-ignore
 FBInstant.initializeAsync().then(function(){
-
-
-
-
-
-  var config: any = {
+var config: any = {
     width: 720,
     height: 1280,
     scale:{
@@ -40,7 +36,7 @@ FBInstant.initializeAsync().then(function(){
     },
     type: Phaser.AUTO,
     parent: "game",
-    scene: [Preloader, Menu, MainScene, GameOverScene],
+    scene: [Preloader, Menu, MainScene, GameOverScene, PauseScene],
     physics: {
       default: "matter",
       matter: {

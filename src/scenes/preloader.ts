@@ -2,6 +2,8 @@
 import { MainScene } from "./mainScene";
 import { Menu } from "./menu";
 import { GameOverScene } from "./gameOverScene";
+import { PauseScene } from "./pauseScene";
+
 export class Preloader extends Phaser.Scene{
     constructor ()
     {

@@ -11,6 +11,7 @@ import Sprite = Phaser.Physics.Matter.Sprite;
 import Composite = MatterJS.Composite;
 import combined = Phaser.Cameras.Sprite3D.combined;
 import { Menu } from "./menu";
+import { PauseScene } from "./pauseScene";
 import "../prefabs/prefabs.ts";
 import {Prefabs} from "../prefabs/prefabs";
 import ScaleModes = Phaser.ScaleModes;
@@ -184,7 +185,7 @@ export class MainScene extends Phaser.Scene {
         this.lava = this.add.tileSprite(this.width/2, this.height - 32*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png');
         this.lava.setScale(2*SC);
         this.lava.setScrollFactor(0);
-        this.lava.setDepth(2);
+		this.lava.setDepth(2);
         /**var particles = this.add.particles('fire1');
         // @ts-ignore
         particles.setDepth(2);
@@ -368,9 +369,12 @@ export class MainScene extends Phaser.Scene {
 
 
         this.cameraSpeed = CAMERA_BASE_SPEED;
-        this.animalSpeed = ANIMAL_BASE_SPEED;
+		this.animalSpeed = ANIMAL_BASE_SPEED;
 
-
+		this.input.on('pointerup', function () {
+			this.scene.pause();
+		    this.scene.launch('PauseScene');
+		}, this);
     }
     update(time, delta): void
     {
