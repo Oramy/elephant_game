@@ -374,7 +374,7 @@ export class Prefabs{
                 var middle = this.genBarriers(4);
                 var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
 
-                var right = this.genBarriers(4, 'blockBrown.png', true);
+                var right = this.genBarriers(4, 'blockBrown.png');
                 var rightLine = new Line(x + w - 64 * SC, y - 100*SC  + h / 4, x + w /2 - 64 * SC, y - 100*SC + h / 4);
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
