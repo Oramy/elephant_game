@@ -179,29 +179,13 @@ export class MainScene extends Phaser.Scene {
     createBackground(): void{
 
         this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0);
-        this.background.setScale(SC);
+        this.background.setScale(2*SC);
         this.background.setScrollFactor(0);
 
-        this.lava = this.add.tileSprite(this.width/2, this.height - 32*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png');
+        this.lava = this.add.tileSprite(this.width/2, this.height - 32*SC, this.width, 56*SC, 'spritesheet_other', 'fluidRed_top.png');
         this.lava.setScale(2*SC);
         this.lava.setScrollFactor(0);
 		this.lava.setDepth(2);
-        /**var particles = this.add.particles('fire1');
-        // @ts-ignore
-        particles.setDepth(2);
-        var emitter = particles.createEmitter({
-            x: {min:0, max:this.width},
-            y: this.height,
-            lifespan: 1000,
-            speedY: { min: -200*SC, max: -600*SC },
-            scale: {start: 4, end: 0},
-            quantity: 3,
-            blendMode: 'ADD',
-
-        });
-
-        emitter.setScrollFactor(0);
-        **/
     }
     computeMeters(): integer{
         return Math.trunc(-this.camera.scrollY / this.width * 20);
@@ -551,7 +535,7 @@ export class MainScene extends Phaser.Scene {
         this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
 
         this.camera.scrollY += this.cameraSpeed;
-        this.background.tilePositionY = this.camera.scrollY / SC;
+        this.background.tilePositionY = this.camera.scrollY / (SC * 2);
         this.lava.tilePositionX += 3;
 
         this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2);
