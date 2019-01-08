@@ -87,7 +87,6 @@ export class MainScene extends Phaser.Scene {
     private gameOverB : any;
     private height: number;
     private width: number;
-    private xyText: Phaser.GameObjects.BitmapText;
 
     private prefabs: Prefabs;
     private multiplierText: Phaser.GameObjects.BitmapText;
@@ -105,7 +104,15 @@ export class MainScene extends Phaser.Scene {
     private characterNames: string[];
     private characterFrames: string[];
     private lava: any;
+    private lavaMoveType: integer;
+    private lavaNextBeginTime: integer;
+    private lavaNextEndTime: integer;
     private disableControl: boolean;
+    private lavaBottom: Phaser.GameObjects.TileSprite;
+    private lastUpdateTime: number;
+    private pauseTime: number;
+    private justResumed: boolean;
+    private lastTime: number;
 
     constructor() {
         super({
@@ -115,7 +122,9 @@ export class MainScene extends Phaser.Scene {
                 matter: {
                     gravity: {y: 0},
                     debug: false,
-                    enableSleeping: false
+                    enableSleeping: false,
+                    autoUpdate: false
+
                 }
             }
         });
@@ -182,10 +191,20 @@ export class MainScene extends Phaser.Scene {
         this.background.setScale(2*SC);
         this.background.setScrollFactor(0);
 
-        this.lava = this.add.tileSprite(this.width/2, this.height - 32*SC, this.width, 56*SC, 'spritesheet_other', 'fluidRed_top.png');
+
+
+        this.lavaBottom = this.add.tileSprite(this.width/2, this.height, this.width, 128*SC, 'spritesheet_other', 'fluidRed.png');
+        this.lavaBottom.setScale(2*SC);
+        this.lavaBottom.setScrollFactor(0);
+        this.lavaBottom.setDepth(2);
+        this.lava = this.add.tileSprite(this.width/2, this.height - 64*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png');
         this.lava.setScale(2*SC);
         this.lava.setScrollFactor(0);
-		this.lava.setDepth(2);
+        this.lava.setDepth(2);
+
+        this.lavaNextBeginTime = 0;
+        this.lavaNextEndTime = 0;
+
     }
     computeMeters(): integer{
         return Math.trunc(-this.camera.scrollY / this.width * 20);
@@ -207,10 +226,6 @@ export class MainScene extends Phaser.Scene {
         this.multiplierText.setDepth(Infinity);
         this.multiplierText.setOrigin(-0.5, 0);
 
-        this.xyText = this.add.bitmapText(20*SC, this.height - 100*SC,'jungle', 'X: Y:', 50*SC).setOrigin(0, 0);
-        this.xyText.tint = 0xFFFFFF;
-        this.xyText.setScrollFactor(0);
-        this.xyText.setDepth(Infinity);
         var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
         Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
 
@@ -359,20 +374,48 @@ export class MainScene extends Phaser.Scene {
 			this.scene.pause();
 		    this.scene.launch('PauseScene');
 		}, this);
+        this.events.on('resume', (function () {
+            this.justResumed = true;
+            this.pauseTime = this.lastTime;
+        }).bind(this));
+
+        this.justResumed = false;
+        this.pauseTime = 0;
+        this.lastUpdateTime = 0;
     }
     update(time, delta): void
     {
-        this.updateCamera(time, delta);
 
-        if(this.elephant != null)
-            this.updateElephant();
+        if(this.lastUpdateTime == 0){
+            this.lastUpdateTime = time;
+        }
+        if(this.justResumed){
+            this.lastUpdateTime = this.lastUpdateTime - this.lastTime + time;
+            this.justResumed = false;
+        }
+        this.lastTime = time;
+
+        var i = 0;
+        while(i < 5 && time - this.lastUpdateTime > 1000/60){
+            this.matter.step(1000/60, 1);
+            this.lastUpdateTime += 1000/60;
+
+            this.updateCamera(time, delta);
+
+            if(this.elephant != null)
+                this.updateElephant();
+
+            this.updateScrolling();
+            this.updateAnimals(delta);
+            this.deleteOutsideScreen();
+            this.updateUI();
+            this.updateAchievements();
+            i += 1;
+        }
 
 
-        this.updateScrolling();
-        this.updateAnimals(delta);
-        this.deleteOutsideScreen();
-        this.updateUI();
-        this.updateAchievements();
+
+
 
     }
     computeMultiplier(): integer{
@@ -388,10 +431,6 @@ export class MainScene extends Phaser.Scene {
     updateUI(): void{
         this.scoreText.setText("Score: " + Math.round(this.computeScore()));
         this.metersText.setText(this.computeMeters() + 'm');
-        this.xyText.setText("X: " + Math.round(this.input.activePointer.x)
-            + " - Y: "+ Math.round(this.input.activePointer.y)
-        +  "\n X2: " + (this.input.activePointer.x / this.width).toFixed(2)
-        + "- Y2: " + (this.input.activePointer.y / this.height).toFixed(2));
 
         var multiplier = this.computeMultiplier();
         if(this.multiplier != multiplier) {
@@ -537,6 +576,42 @@ export class MainScene extends Phaser.Scene {
         this.camera.scrollY += this.cameraSpeed;
         this.background.tilePositionY = this.camera.scrollY / (SC * 2);
         this.lava.tilePositionX += 3;
+        this.lavaBottom.tilePositionX = this.lava.tilePositionX;
+
+
+
+        if(time > this.lavaNextEndTime){
+            this.lavaMoveType = Phaser.Math.Between(0, 1);
+
+            this.lavaNextBeginTime = time;
+            if(this.lavaMoveType == 0)
+                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(2000, 4000);
+            else
+                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(1000, 3000);
+
+
+            this.lava.y = Math.trunc(this.height - 64 * SC );
+            this.lavaBottom.y =  Math.trunc(this.height + 16 * SC);
+
+        }
+        else if(time > this.lavaNextBeginTime){
+            var duration = this.lavaNextEndTime - this.lavaNextBeginTime;
+            var t = (time - this.lavaNextBeginTime) / duration;
+
+            switch (this.lavaMoveType) {
+                case 0:
+                    this.lava.y = Math.trunc(this.height - 64 * SC - 10 * SC* (1 - Math.cos(Math.PI * 2 * t)));
+                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  10 * SC* ( 1 - Math.cos(Math.PI * 2 * t)));
+
+                    break;
+                case 1:
+                    this.lava.y = Math.trunc(this.height - 64 * SC - 50 * SC* (1 - Math.cos(Math.PI * 2 * t)));
+                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  50 * SC* ( 1 - Math.cos(Math.PI * 2 * t)));
+
+                    break;
+            }
+
+        }
 
         this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2);
         this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2);

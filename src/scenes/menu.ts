@@ -383,7 +383,6 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         this.load.image(this.facebook.playerID, this.facebook.playerPhotoURL);
         this.load.on('complete', this.addPlayerPhoto, this);
-        this.load.image('mask');
 
         this.input.on("gameobjectdown",  (this.next).bind(this));
         this.input.on("gameobjectdown",  (this.prev).bind(this));

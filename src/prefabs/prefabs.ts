@@ -12,9 +12,9 @@ var notused_offsets = [];
  * @param x
  * @param y
  */
-export const OBSTACLE_MAX_ID = 22;
+export const OBSTACLE_MAX_ID = 23;
 export const EASY_OBSTACLE_MAX_ID = 10;
-export const VARIANTS_MAX_ID = [4, 1, 1, 1, 1, 0, 0, 1,1,6, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 0, 0];
+export const VARIANTS_MAX_ID = [4, 1, 1, 1, 1, 0, 0, 1,1,6, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1];
 export const SHELTER_MAX_ID = 1;
 
 var SC;
@@ -511,33 +511,34 @@ export class Prefabs{
                 var middle = this.genBarriers(4, 'blockBrown.png');
                 var middleLine = new Line(x + w * 1 / 4 + 64 * SC, y - 100 * SC + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2 - 100 * SC);
 
-
+                var delay = variant_id == 0 ? 1 : 0;
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
-                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * t), -1, 1) * w * 1/4, t => 0);
+                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t+delay)), -1, 1) * w * 1/4, t => 0);
 
                 var middle = this.genBarriers(4, 'blockBrown.png');
                 var middleLine = new Line(x + w * 1 / 4 + 64 * SC, y - 520 * SC + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2 - 520 * SC);
 
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
-                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t - 0.3)), -1, 1) * w * 1/4, t => 0);
+                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t +delay - 0.3)), -1, 1) * w * 1/4, t => 0);
 
                 var middle = this.genBarriers(4, 'blockBrown.png');
                 var middleLine = new Line(x + w * 1 / 4 + 64 * SC, y + 320 * SC + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2 + 320 * SC);
 
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
-                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t + 0.3)), -1, 1) * w * 1/4, t => 0);
+                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t + delay + 0.3)), -1, 1) * w * 1/4, t => 0);
 
 
                 break;
             case 20: //Squared signal
                 var middle = this.genBarriers(4, 'blockBrown.png');
                 var middleLine = new Line(x + w * 1 / 4 + 64 * SC, y - 100 * SC + h / 2, x + w * 3 / 4 + 64 * SC, y + h / 2 - 100 * SC);
+                var delay = variant_id == 0 ? 1 : 0;
 
 
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
-                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * t), -1, 1) * w * 1/4, t => 0);
+                this.objectsMovement(middle, t => Phaser.Math.Clamp(5 * Math.sin(3 * (t + delay)), -1, 1) * w * 1/4, t => 0);
 
 
                 break;
@@ -673,6 +674,27 @@ export class Prefabs{
 
 
                 break;
+
+            case 23: // Supermarket block
+                var angle = 0.04;
+                angle *= variant_id % 2 == 0 ? 1 : -1;
+                this.barrierCircle(x + w/2, y + h/2, w/4 - 64*SC, angle, 2, 'blockBrown.png');
+
+
+                var angle = 0.04;
+                angle *= variant_id % 2 == 0 ? 1 : -1;
+                this.barrierCircle(x + w/2, y + h/2, w/4 - 204*SC, angle, 2, 'blockBrown.png');
+
+                var left = this.genBarriers(2);
+                var right = this.genBarriers(2);
+                var leftLine = new Line(x + 16 * SC, y + h / 2, x + 16 * SC + w / 4, y + h / 2);
+                var rightLine = new Line(x + w - 16 * SC, y + h / 2, x + w * 3 / 4 - 16 * SC, y + h / 2);
+
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+
+                break;
         }
     }
     addAnimals(x:number, y:number,
@@ -739,7 +761,7 @@ export class Prefabs{
             case 2: // Left-right-left 1/2
                 switch (variant_id) {
                     case 0: //Circle mid
-                        this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 4);
+                        this.animalCircle(x + w / 4, y + h / 2, w / 8, 0.05, 5);
                         break;
                     case 1: //Circle front mid behind
                         this.animalCircle(x + w / 4, y + h / 2, w / 16, 0.05, 2);
@@ -772,7 +794,7 @@ export class Prefabs{
             case 4: // Right-Left-Right 1/2
                 switch (variant_id) {
                     case 0: //Circle mid
-                        this.animalCircle(x + w * 3 / 4, y + h / 2, w / 16, 0.05, 4);
+                        this.animalCircle(x + w * 3 / 4, y + h / 2, w / 8, 0.05, 5);
                         break;
                     case 1: //Circle front mid behind
                         this.animalCircle(x + w * 3/ 4, y + h / 2, w / 16, 0.05, 2);
@@ -949,6 +971,23 @@ export class Prefabs{
                         this.spawnAnimalRel(0.5, 0.25, x, y);
                         break;
                 }
+                break;
+
+            case 23: // Supermarket block
+                switch(variant_id){
+                    case 0:
+                        this.spawnAnimalRel(0.3, 0.50, x, y);
+                        this.spawnAnimalRel(0.5, 0.40, x, y);
+                        this.spawnAnimalRel(0.5, 0.60, x, y);
+                        this.spawnAnimalRel(0.7, 0.50, x, y);
+                        break;
+                    case 1:
+                        var animals = this.animalCircle(x + w * 0.5, y + h  * 0.5, w / 4, -0.04, 4);
+
+                        Phaser.Actions.RotateAroundDistance(animals,{x: x + w * 0.5, y:y + h * 0.5}, Math.PI / 4, w/4);
+                        break;
+                }
+
                 break;
         }
     }

@@ -50,6 +50,7 @@ export class Preloader extends Phaser.Scene{
         this.load.image('yellow', 'assets/particles/yellow.png');
         this.load.image('blue', 'assets/particles/blue.png');
         this.load.image('animalCoins', 'assets/ui/animalCoins.png');
+
     }
 
     startGame ()
