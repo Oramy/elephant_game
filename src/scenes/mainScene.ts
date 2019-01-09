@@ -140,7 +140,7 @@ export class MainScene extends Phaser.Scene {
     loadLeaderboards(): void{
 
         // @ts-ignore
-        this.facebook.on('getleaderboard', (function (leaderboard)
+        this.facebook.once('getleaderboard', (function (leaderboard)
         {
             if(leaderboard.name == 'Highscores') {
 
@@ -161,22 +161,16 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         this.facebook.getPlayers();
         // @ts-ignore
-        this.facebook.on('players', (function(event, data){
+        this.facebook.once('players', (function(event, data){
             this.facebook.createContext(data.playerID);
         }).bind(this));
         // @ts-ignore
-        this.facebook.on('playersfail', function(){
-            console.log("sad");
-        });
-        // @ts-ignore
-        this.facebook.on('create', (function(event, data){
+        this.facebook.once('create', (function(event, data){
             if(this.facebook.contextID != null){
                 // @ts-ignore
                 this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
             }
         }).bind(this));
-        // @ts-ignore
-        console.log(this.facebook.contextID);
         // @ts-ignore
         if(this.facebook.contextID != null){
             // @ts-ignore
@@ -399,33 +393,34 @@ export class MainScene extends Phaser.Scene {
     update(time, delta): void
     {
 
-        if(this.lastUpdateTime == 0){
-            this.lastUpdateTime = time;
+        if(this.matter.world != null) {
+            if (this.lastUpdateTime == 0) {
+                this.lastUpdateTime = time;
+            }
+            if (this.justResumed) {
+                this.lastUpdateTime = this.lastUpdateTime - this.lastTime + time;
+                this.justResumed = false;
+            }
+            this.lastTime = time;
+
+            var i = 0;
+            while (i < 5 && time - this.lastUpdateTime > 1000 / 60) {
+                this.matter.step(1000 / 60, 1);
+                this.lastUpdateTime += 1000 / 60;
+
+                this.updateCamera(time, delta);
+
+                if (this.elephant != null)
+                    this.updateElephant();
+
+                this.updateScrolling();
+                this.updateAnimals(delta);
+                this.deleteOutsideScreen();
+                this.updateUI();
+                this.updateAchievements();
+                i += 1;
+            }
         }
-        if(this.justResumed){
-            this.lastUpdateTime = this.lastUpdateTime - this.lastTime + time;
-            this.justResumed = false;
-        }
-        this.lastTime = time;
-
-        var i = 0;
-        while(i < 5 && time - this.lastUpdateTime > 1000/60){
-            this.matter.step(1000/60, 1);
-            this.lastUpdateTime += 1000/60;
-
-            this.updateCamera(time, delta);
-
-            if(this.elephant != null)
-                this.updateElephant();
-
-            this.updateScrolling();
-            this.updateAnimals(delta);
-            this.deleteOutsideScreen();
-            this.updateUI();
-            this.updateAchievements();
-            i += 1;
-        }
-
 
 
 
