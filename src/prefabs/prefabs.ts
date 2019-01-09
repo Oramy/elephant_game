@@ -56,13 +56,13 @@ export class Prefabs{
             notused_offsets = ROUND_Y_OFFSETS;
         }
         var i = Phaser.Math.Between(0, notused.length - 1);
-        var key = gold ? 'roundOutline': 'round';
+        var key = 'roundQuarter';
 
         var frame = notused[i];
         var animal = scene.matter.add.image(x,y, key, frame, {
             shape: {
                 type: 'circle',
-                radius: 64
+                radius: 16
             },
             render: {sprite: {xOffset: 0, yOffset: notused_offsets[i]}},
             label: 'animal',

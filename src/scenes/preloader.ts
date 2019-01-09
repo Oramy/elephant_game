@@ -37,6 +37,8 @@ export class Preloader extends Phaser.Scene{
         this.load.image('sky', 'assets/background/background.png');
 
         this.load.atlasXML('round', 'assets/atlas/round.png', 'assets/atlas/round.xml');
+        this.load.atlas('roundQuarter', 'assets/atlas/roundQuarter.png', 'assets/atlas/roundQuarter.json');
+
         this.load.atlasXML('roundOutline', 'assets/atlas/roundOutline.png', 'assets/atlas/roundOutline.xml');
         this.load.atlasXML('square', 'assets/atlas/square.png', 'assets/atlas/square.xml');
         this.load.atlasXML('squareOutline', 'assets/atlas/square.png', 'assets/atlas/square.xml');

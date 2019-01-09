@@ -26,7 +26,7 @@ function arrayRemove(arr, value) {
 
 }
 export const ELEPHANT_SCALE = 2;
-export const ANIMAL_SCALE = 0.75;
+export const ANIMAL_SCALE = 3;
 //1 = NO DELAY
 export const MOVE_DELAY_COEFF = 0.1;
 export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
