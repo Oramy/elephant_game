@@ -370,10 +370,10 @@ export class MainScene extends Phaser.Scene {
         this.cameraSpeed = CAMERA_BASE_SPEED;
 		this.animalSpeed = ANIMAL_BASE_SPEED;
 
-		this.input.on('pointerup', function () {
+		/*this.input.on('pointerup', function () {
 			this.scene.pause();
 		    this.scene.launch('PauseScene');
-		}, this);
+		}, this);*/
 		this.events.on('pause', (function(){
 		    this.pauseTime = this.lastTime;
         }).bind(this));

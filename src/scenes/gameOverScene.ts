@@ -96,7 +96,7 @@ export class GameOverScene extends Phaser.Scene{
         notused_offsets = notused_offsets.filter(function (el, j) {
             return i!=j;
         });
-        animal.setScale(ANIMAL_SCALE * scale * SC);
+        animal.setScale(ANIMAL_SCALE * scale / 4 * SC);
         animal.body.allowRotation = false;
         // @ts-ignore
         animal.gold = gold;
