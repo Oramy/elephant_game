@@ -442,7 +442,8 @@ export class Menu extends Phaser.Scene{
 
         }).bind(this), this);
 
-
+        var logo = this.add.image(this.width * 0.83, this.height * 0.9, 'logo');
+        logo.setScale(1.5 * SC);
     }
     addScoreEntryPhoto(imageID, y): void{
         var pic = this.add.image(320*SC, y + 40*SC, imageID);

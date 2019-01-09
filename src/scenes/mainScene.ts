@@ -374,14 +374,27 @@ export class MainScene extends Phaser.Scene {
 			this.scene.pause();
 		    this.scene.launch('PauseScene');
 		}, this);
+		this.events.on('pause', (function(){
+		    this.pauseTime = this.lastTime;
+        }).bind(this));
         this.events.on('resume', (function () {
             this.justResumed = true;
-            this.pauseTime = this.lastTime;
         }).bind(this));
-
+        window.addEventListener('focus', this.onFocus.bind(this));
+        window.addEventListener('blur', this.onBlur.bind(this));
         this.justResumed = false;
         this.pauseTime = 0;
         this.lastUpdateTime = 0;
+    }
+    onBlur(): void
+    {
+        this.scene.pause('MainScene');
+        this.pauseTime = this.lastTime;
+    }
+    onFocus(): void
+    {
+        this.scene.resume('MainScene');
+        this.justResumed = true;
     }
     update(time, delta): void
     {

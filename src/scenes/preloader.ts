@@ -51,6 +51,8 @@ export class Preloader extends Phaser.Scene{
         this.load.image('blue', 'assets/particles/blue.png');
         this.load.image('animalCoins', 'assets/ui/animalCoins.png');
 
+        this.load.image('logo', 'assets/ui/fake_logo_final_v4.png');
+
     }
 
     startGame ()
