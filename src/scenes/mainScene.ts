@@ -17,6 +17,7 @@ import {Prefabs} from "../prefabs/prefabs";
 import ScaleModes = Phaser.ScaleModes;
 import Color = Phaser.Display.Color;
 import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs";
+import Tween = Phaser.Tweens.Tween;
 
 function arrayRemove(arr, value) {
 
@@ -33,8 +34,9 @@ export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
 export const ANIMAL_BASE_SPEED = 280;
 export const ANIMAL_SPEED_XY_RATIO = 1/20;
 export const CAMERA_BASE_SPEED = -15; // -15;
+export const CAMERA_BEGIN_SPEED = -5;
 export const ANIMAL_ACC = 6;
-export const CAMERA_ACC = -0; // -0;
+export const CAMERA_ACC = -2; // -0;
 export const ANIMALS_SPAWN = 5;
 export const SCORE_MULTIPLIER = 1.148698355; // 2 ^ (1/5)
 export const BASE_SCORE = 10;
@@ -113,6 +115,12 @@ export class MainScene extends Phaser.Scene {
     private pauseTime: number;
     private justResumed: boolean;
     private lastTime: number;
+    private started: boolean;
+    private touchToPlay: Phaser.GameObjects.BitmapText[];
+    private touchToPlayTweens: Tween[];
+    
+    
+    
 
     constructor() {
         super({
@@ -223,6 +231,78 @@ export class MainScene extends Phaser.Scene {
         var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
         Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
 
+        this.touchToPlay = [];
+        var drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle',
+            'Drag your character to move it.', 60*SC).setOrigin(0.5, 0.5);
+        drag.tint = 0xFFFFFF;
+        drag.setScale(1);
+        drag.setScrollFactor(0);
+        drag.setDepth(Infinity);
+
+        var escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle',
+            'Escape the lava!', 100*SC).setOrigin(0.5, 0.5);
+        escape.tint = 0xFFFFFF;
+        escape.setScrollFactor(0);
+        escape.setDepth(Infinity);
+        escape.setAlpha(0);
+        var touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png');
+        touch.setDepth(Infinity);
+        touch.setScale(4 * SC);
+        touch.setScrollFactor(0);
+        this.touchToPlay.push(drag);
+        this.touchToPlay.push(escape);
+        this.touchToPlayTweens = [];
+        this.touchToPlayTweens.push(this.tweens.add({
+            targets: touch,
+            x: this.width * 0.65,
+            y: this.height * 0.53,
+            ease: 'Quad.easeInOut',
+            duration: 600,
+            yoyo: true,
+            repeat: Infinity,
+            hold: 600}));
+        this.touchToPlayTweens.push(this.tweens.add({
+            targets: escape,
+            alpha : 1,
+            ease: 'Quad.easeIn',
+            duration: 180,
+            yoyo: true,
+            repeat: Infinity,
+            hold: 240}));
+        this.touchToPlayTweens.push(this.tweens.add({
+            targets: drag,
+            scaleX: 0.98,
+            scaleY: 0.98,
+            ease: 'Sine.easeInOut',
+            duration: 600,
+            yoyo: true,
+            repeat: Infinity,
+            hold: 0}));
+        this.input.once('pointerdown', function(){
+            this.touchToPlayTweens.forEach(function(tween){
+                tween.stop();
+
+            });
+            this.tweens.add({
+                targets: touch,
+                x: this.width *  1.2,
+                y: this.height * 0.2,
+                ease: 'Quad.easeOut',
+                duration: 800});
+            this.tweens.add({
+                targets: escape,
+                alpha : 0,
+                ease: 'Quad.easeOut',
+                duration: 800});
+           this.tweens.add({
+                targets: drag,
+                scaleX: 0,
+                scaleY: 0,
+                ease: 'Quad.easeOut',
+                duration: 800});
+            this.touchToPlayTweens = [];
+
+        }, this);
     }
     createSideWalls(): void{
         this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
@@ -239,7 +319,7 @@ export class MainScene extends Phaser.Scene {
         if(this.character === undefined){
             this.character = 'elephant';
         }
-        this.elephant = this.matter.add.sprite(400*SC, 400*SC, 'round', this.character + '.png',
+        this.elephant = this.matter.add.sprite(this.width/2, this.height * 0.6, 'round', this.character + '.png',
             {
                 shape:{
                     type:'circle',
@@ -289,7 +369,6 @@ export class MainScene extends Phaser.Scene {
             var multiplier = SCORE_MULTIPLIER;
             if(bodyA.gameObject.gold){
                 multiplier = multiplier ** 5;
-                console.log(multiplier);
             }
             if(shelter.score == 0)
                 shelter.score = BASE_SCORE * multiplier;
@@ -310,6 +389,9 @@ export class MainScene extends Phaser.Scene {
         }
     }
     create (): void {
+
+        this.started = false;
+
         var atlasTexture = this.textures.get('round');
         this.characterFrames = atlasTexture.getFrameNames();
         this.characterNames = this.characterFrames.map(function(frame){
@@ -361,24 +443,32 @@ export class MainScene extends Phaser.Scene {
         this.matter.world.on('collisionstart', collisionCallback);
 
 
-        this.cameraSpeed = CAMERA_BASE_SPEED;
+        this.cameraSpeed = CAMERA_BEGIN_SPEED;
 		this.animalSpeed = ANIMAL_BASE_SPEED;
 
-		/*this.input.on('pointerup', function () {
-			this.scene.pause();
-		    this.scene.launch('PauseScene');
-		}, this);*/
-		this.events.on('pause', (function(){
+		this.input.on('pointerup', function () {
+		    if(this.started) {
+                this.scene.pause();
+                this.scene.launch('PauseScene');
+            }
+		}, this);
+		this.events.on('pause', function(){
 		    this.pauseTime = this.lastTime;
-        }).bind(this));
-        this.events.on('resume', (function () {
+        }, this);
+        this.events.on('resume', function () {
             this.justResumed = true;
-        }).bind(this));
+        }, this);
         window.addEventListener('focus', this.onFocus.bind(this));
         window.addEventListener('blur', this.onBlur.bind(this));
         this.justResumed = false;
         this.pauseTime = 0;
         this.lastUpdateTime = 0;
+
+        this.input.once('pointerdown', function(){
+            this.started = true;
+        }, this);
+
+
     }
     onBlur(): void
     {
@@ -554,7 +644,7 @@ export class MainScene extends Phaser.Scene {
         });
     }
     updateElephant(): void{
-        if(!this.disableControl) {
+        if(!this.disableControl && this.started) {
             var nx = this.input.x + this.camera.scrollX;
             var ny = this.input.y + this.camera.scrollY + this.cameraSpeed;
             var x = this.elephant.getCenter().x;
@@ -579,9 +669,22 @@ export class MainScene extends Phaser.Scene {
 
     }
     updateCamera(time, delta): void{
-        this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
+        
 
-        this.camera.scrollY += this.cameraSpeed;
+
+
+
+        if(this.started) {
+            if(this.cameraSpeed  > CAMERA_BASE_SPEED)
+            {
+                this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
+                if(this.cameraSpeed  < CAMERA_BASE_SPEED)
+                {
+                    this.cameraSpeed = CAMERA_BASE_SPEED;
+                }
+            }
+            this.camera.scrollY += this.cameraSpeed;
+        }
         this.background.tilePositionY = this.camera.scrollY / (SC * 2);
         this.lava.tilePositionX += 3;
         this.lavaBottom.tilePositionX = this.lava.tilePositionX;

@@ -36,15 +36,21 @@ export class Menu extends Phaser.Scene{
     private unlocked : BitmapText;
 
     private indices = {'elephant':'', 'frog':'Score over 5000 to unlock this animal.',
-    'gorilla': 'Have more than 50 animals following you \n' +
-        '                              to unlock this animal.',
-    'giraffe': 'Score over 20000 to unlock this animal.',
-    'snake' : 'Escape the fire on 5000m to unlock this animal.'};
+        'gorilla': 'Have more than 50 animals following you \n' +
+            '                              to unlock this animal.',
+        'giraffe': 'Score over 20000 to unlock this animal.',
+        'snake' : 'Escape the fire on 5000m to unlock this animal.'};
     private characterNames: string[];
     private coinsComponent: CoinsComponent;
     private prices = {'bear': 1000, 'crocodile' : 5000};
 
     private saveCreated: boolean;
+    private nextZone: Phaser.GameObjects.Zone;
+    private prevZone: Phaser.GameObjects.Zone;
+    private playZone: Phaser.GameObjects.Zone;
+    private moveTween: Phaser.Tweens.Tween;
+    private nextImage: Phaser.GameObjects.Image;
+    private prevImage:  Phaser.GameObjects.Image;
     constructor ()
     {
         super('Menu');
@@ -147,91 +153,127 @@ export class Menu extends Phaser.Scene{
 
     }
     nextUnlockableIndex(ind){
-       ind = (ind + 1) % this.characterNames.length;
+        ind = (ind + 1) % this.characterNames.length;
         while(this.indices[this.characterNames[ind]] === undefined && this.prices[this.characterNames[ind]] === undefined){
             ind = (ind + 1) % this.characterNames.length;
         }
         return ind;
     }
     prevUnlockableIndex(ind){
-       ind =  (ind + this.characterNames.length - 1) % this.characterNames.length;
+        ind =  (ind + this.characterNames.length - 1) % this.characterNames.length;
 
         while(this.indices[this.characterNames[ind]] === undefined  && this.prices[this.characterNames[ind]] === undefined){
             ind = (ind + this.characterNames.length - 1) % this.characterNames.length;
         }
         return ind;
     }
+    addMoveTween(onYoyo){
+        if(this.moveTween == null) {
+            var done = false;
+            this.moveTween = this.tweens.add({
+                targets: [this.nextCharacterImage, this.nextCharacterSImage,
+                    this.prevCharacterImage, this.prevCharacterSImage, this.characterImage, this.characterSImage,
+                    this.playImage, this.nextImage, this.prevImage],
+                scaleX: 0,
+                scaleY: 0,
+                ease: 'Quad.easeInOut',
+                duration: 200,
+                yoyo: true,
+                repeat: 0,
+                delay: 0,
+                onYoyo: (function () {
+                    if(!done){
+                        done = true;
+                        onYoyo();
+                    }
+                }).bind(this),
+                onComplete: (function(){
+                    this.moveTween = null;
+                }).bind(this)
+            });
+        }
+    }
     next(pointer, gameObject){
         if(gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
-            var ind = this.characterNames.findIndex((function (el) {
-                return el == this.character
-            }).bind(this));
-            ind = this.nextUnlockableIndex(ind);
+            this.addMoveTween((
+                function(){
+                    var ind = this.characterNames.findIndex((function (el) {
+                            return el == this.character
+                        }).bind(this));
+                    ind = this.nextUnlockableIndex(ind);
+                    this.updateCharacterImages(ind);
+                }).bind(this));
 
-            this.updateCharacterImages(ind);
 
         }
     }
     prev(pointer, gameObject){
         if(gameObject == this.prevCharacterImage  || gameObject == this.prevCharacterSImage) {
-            var ind = this.characterNames.findIndex((function (el) {
-                return el == this.character
-            }).bind(this));
-            ind = this.prevUnlockableIndex(ind);
-            this.updateCharacterImages(ind);
+
+            this.addMoveTween((
+                function(){
+                    var ind = this.characterNames.findIndex((function (el) {
+                        return el == this.character
+                    }).bind(this));
+                    ind = this.prevUnlockableIndex(ind);
+                    this.updateCharacterImages(ind);
+                }).bind(this));
         }
     }
     play(pointer, gameObject){
         if(this.characterImage === gameObject){
-            var characterStatus = this.playerData.get(this.character);
-            if(characterStatus == 'unlocked' ) {
-                this.startGame();
-            }
-            else if(characterStatus == 'buyable'){
+            this.addMoveTween((
+                function(){
+                    var characterStatus = this.playerData.get(this.character);
+                    if(characterStatus == 'unlocked' ) {
+                        this.startGame();
+                    }
+                    else if(characterStatus == 'buyable'){
 
+                        if(this.playerData.values.coins >= this.prices[this.character]){
 
-;                if(this.playerData.values.coins >= this.prices[this.character]){
+                            this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
+                            this.playerData.values.coins -= this.prices[this.character];
+                            this.playerData.values[this.character] = 'unlocked';
+                        }
+                        this.updateCharacter();
+                    }
+                }).bind(this));
 
-                    this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
-                    this.playerData.values.coins -= this.prices[this.character];
-                    this.playerData.values[this.character] = 'unlocked';
-                }
-                this.updateCharacter();
-            }
         }
     }
     createSave() {
         var data = {
-           'bear':'buyable',
-       'buffalo':'locked',
-       'chick':'locked',
-       'chicken':'locked',
-       'cow':'locked',
-       'crocodile':'buyable',
-       'dog':'locked',
-       'duck':'locked',
-       'elephant':'unlocked',
-       'frog':'locked',
-       'giraffe':'locked',
-       'goat':'locked',
-       'gorilla':'locked',
-       'hippo':'locked',
-       'horse':'locked',
-       'monkey':'locked',
-       'moose':'locked',
-       'narwhal':'locked',
-       'owl':'locked',
-       'panda':'locked',
-       'parrot':'locked',
-       'penguin':'locked',
-       'pig':'locked',
-       'rabbit':'locked',
-       'rhino':'locked',
-       'sloth':'locked',
-       'snake':'locked',
-       'walrus':'locked',
-       'whale':'locked',
-       'zebra':'locked',
+            'bear':'buyable',
+            'buffalo':'locked',
+            'chick':'locked',
+            'chicken':'locked',
+            'cow':'locked',
+            'crocodile':'buyable',
+            'dog':'locked',
+            'duck':'locked',
+            'elephant':'unlocked',
+            'frog':'locked',
+            'giraffe':'locked',
+            'goat':'locked',
+            'gorilla':'locked',
+            'hippo':'locked',
+            'horse':'locked',
+            'monkey':'locked',
+            'moose':'locked',
+            'narwhal':'locked',
+            'owl':'locked',
+            'panda':'locked',
+            'parrot':'locked',
+            'penguin':'locked',
+            'pig':'locked',
+            'rabbit':'locked',
+            'rhino':'locked',
+            'sloth':'locked',
+            'snake':'locked',
+            'walrus':'locked',
+            'whale':'locked',
+            'zebra':'locked',
             'coins':0
         }
         console.log('create save');
@@ -245,6 +287,7 @@ export class Menu extends Phaser.Scene{
     }
     create ()
     {
+        this.moveTween = null;
         this.saveCreated = false;
         // @ts-ignore
         console.log(this.facebook.playerID);
@@ -258,7 +301,7 @@ export class Menu extends Phaser.Scene{
             return frame.slice(0, frame.length - 4);
         });
         this.character = 'elephant';
-        
+
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard)
         {
@@ -301,10 +344,10 @@ export class Menu extends Phaser.Scene{
 
         this.playImage = this.add.image(0, 0, 'icons', 'forward.png');
         this.playImage.setScale(3 * SC);
-        var secondQuarterZone = this.add.zone(this.width / 2,  270 * SC + 2 * this.height / 8, this.width, this.height*3 / 8);
-        Phaser.Display.Align.In.Center(this.characterImage, secondQuarterZone);
-        Phaser.Display.Align.In.Center(this.characterSImage, secondQuarterZone);
-        Phaser.Display.Align.In.Center(this.playImage, secondQuarterZone);
+        this.playZone = this.add.zone(this.width / 2,  270 * SC + 2 * this.height / 8, this.width, this.height*3 / 8);
+        Phaser.Display.Align.In.Center(this.characterImage, this.playZone);
+        Phaser.Display.Align.In.Center(this.characterSImage, this.playZone);
+        Phaser.Display.Align.In.Center(this.playImage, this.playZone);
 
         this.nextCharacterImage = this.add.image(0, 0, 'squareOutline', 'frog.png');
         this.nextCharacterImage.setScale(1.8 * SC);
@@ -312,13 +355,14 @@ export class Menu extends Phaser.Scene{
         this.nextCharacterSImage = this.add.image(0, 0, 'squareSilhouette', 'frog.png');
         this.nextCharacterSImage.setScale(1.8 * SC);
 
-        var next = this.add.image(0, 0, 'icons', 'arrowRight.png');
-        next.setScale(3 * SC);
+        this.nextImage = this.add.image(0, 0, 'icons', 'arrowRight.png');
+        this.nextImage.setScale(3 * SC);
 
-        var zone = this.add.zone(this.width / 2 + (64 + 128) * 1.8 *SC,  270 *SC  + 2 * this.height / 8, this.width, this.height*3 / 8);
-        Phaser.Display.Align.In.Center(next, zone);
-        Phaser.Display.Align.In.Center(this.nextCharacterImage, zone);
-        Phaser.Display.Align.In.Center(this.nextCharacterSImage, zone);
+        this.nextZone = this.add.zone(this.width / 2 + (64 + 128) * 1.8 *SC,  270 *SC  + 2 * this.height / 8, this.width, this.height*3 / 8);
+
+        Phaser.Display.Align.In.Center(this.nextImage, this.nextZone);
+        Phaser.Display.Align.In.Center(this.nextCharacterImage, this.nextZone);
+        Phaser.Display.Align.In.Center(this.nextCharacterSImage, this.nextZone);
 
         this.prevCharacterImage = this.add.image(0, 0, 'squareOutline', 'duck.png');
         this.prevCharacterImage.setScale(1.8 * SC);
@@ -326,16 +370,16 @@ export class Menu extends Phaser.Scene{
         this.prevCharacterSImage = this.add.image(0, 0, 'squareSilhouette', 'duck.png');
         this.prevCharacterSImage.setScale(1.8 * SC);
 
-        var prev = this.add.image(0, 0, 'icons', 'arrowLeft.png');
-        prev.setScale(3 * SC);
+        this.prevImage = this.add.image(0, 0, 'icons', 'arrowLeft.png');
+        this.prevImage.setScale(3 * SC);
 
-        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,  270 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
-        Phaser.Display.Align.In.Center(prev, zone);
-        Phaser.Display.Align.In.Center(this.prevCharacterImage, zone);
-        Phaser.Display.Align.In.Center(this.prevCharacterSImage, zone);
+        this.prevZone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,  270 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
+        Phaser.Display.Align.In.Center(this.prevImage, this.prevZone);
+        Phaser.Display.Align.In.Center(this.prevCharacterImage, this.prevZone);
+        Phaser.Display.Align.In.Center(this.prevCharacterSImage, this.prevZone);
 
-        next.setAlpha(0.8);
-        prev.setAlpha(0.8);
+        this.nextImage.setAlpha(0.8);
+        this.prevImage.setAlpha(0.8);
         this.playImage.setAlpha(0.8);
 
         this.nextCharacterImage.setInteractive();
@@ -416,7 +460,7 @@ export class Menu extends Phaser.Scene{
 
             var s = false;
             if((this.facebook.data.values.elephant === undefined
-            || this.facebook.data.values.bear === 'locked' ) &&!this.saveCreated){
+                || this.facebook.data.values.bear === 'locked' ) &&!this.saveCreated){
 
                 s = true;
                 this.createSave();
@@ -444,25 +488,102 @@ export class Menu extends Phaser.Scene{
 
         var logo = this.add.image(this.width * 0.83, this.height * 0.9, 'logo');
         logo.setScale(1.5 * SC);
-    }
-    addScoreEntryPhoto(imageID, y): void{
-        var pic = this.add.image(320*SC, y + 40*SC, imageID);
-        pic.setScale(0.3*SC);
+
+        logo.setInteractive();
+        this.input.on('gameobjectdown', function(pointer, gameObject){
+            if(gameObject === logo){
+                this.scene.pause('Menu');
+                this.scene.launch('CreditScene');
+            }
+        }, this);
+        this.tweens.add({
+            targets: logo,
+            scaleX: 1.6 * SC,
+            scaleY: 1.6 * SC,
+            ease: 'Sine.easeInOut',
+            duration: 2000,
+            yoyo: true,
+            repeat: Infinity,
+            delay: 2000
+        });
+        this.tweens.add({
+            targets: [this.characterImage],
+            scaleX: 1.8 * 1.03 * SC,
+            scaleY: 1.8 * 1.03 * SC,
+            ease: 'Quint.easeIn',
+            duration: 300,
+            yoyo: true,
+            repeat: Infinity,
+            delay: 200
+        });
+        this.tweens.add({
+            targets: [this.playImage],
+            scaleX: 3 * 1.03 * SC,
+            scaleY: 3 * 1.03 * SC,
+            ease: 'Quint.easeIn',
+            duration: 300,
+            yoyo: true,
+            repeat: Infinity,
+            delay: 200
+        });
     }
     addScoreEntry(entry,  y) : boolean
     {
-        this.load.image(entry.playerID, entry.playerPhotoURL);
-        this.load.on('complete', (function() {
-            this.addScoreEntryPhoto(entry.playerID, y);
-
-        }).bind(this));
+        var pic = this.add.image(320*SC - 1000 * SC, y + 40*SC, entry.playerID);
+        pic.setScale(0.3*SC);
         var data = JSON.parse(entry.data);
-        var character = this.add.image(215*SC, y + 40*SC, "square_nodetailsOutline", data.character + ".png");
+        var character = this.add.image(215*SC - 1000 * SC, y + 40*SC, "square_nodetailsOutline", data.character + ".png");
         character.setScale(0.75 *SC);
-        var rankText = this.add.bitmapText(200*SC, y + 13*SC, "jungle",entry.rank);
-        var nameText = this.add.bitmapText(400*SC, y , "jungle", entry.playerName);
-        var scoreText = this.add.bitmapText(400*SC, y+ 50*SC, "jungle", "Score: " + entry.scoreFormatted);
+        var rankText = this.add.bitmapText(200*SC - 1000 * SC, y + 13*SC, "jungle",entry.rank);
+        var nameText = this.add.bitmapText(400*SC - 1000 * SC, y , "jungle", entry.playerName);
+        var scoreText = this.add.bitmapText(400*SC - 1000 * SC, y+ 50*SC, "jungle", "Score: " + entry.scoreFormatted);
 
+
+        this.tweens.add({
+            targets: character,
+            x:215*SC,
+            ease: 'Quint.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
+        this.tweens.add({
+            targets: rankText,
+            x:200*SC,
+            ease: 'Quint.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
+        this.tweens.add({
+            targets: nameText,
+            x:400*SC,
+            ease: 'Quint.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
+        this.tweens.add({
+            targets: scoreText,
+            x:400*SC,
+            ease: 'Quint.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
+        this.tweens.add({
+            targets: pic,
+            x:320*SC,
+            ease: 'Quint.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
         rankText.tint = 0x11604f;
 
 
@@ -482,22 +603,29 @@ export class Menu extends Phaser.Scene{
             var entry = this.highscores.playerScore;
             // @ts-ignore
             this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1)*100*SC + 25*SC);
-            this.addScoreEntryPhoto(entry.playerID, baseY + (LEADERBOARD_DRAW + 1)*100*SC + 25*SC);
-        }
+         }
     }
     createHighscoreTab(scores): void{
-        this.scores = scores;
-        this.scores = this.scores.concat(scores);
-
-        var baseY = this.height / 2 + 100*SC;
-
-        this.inLeaderboard = false;
-        for(var i = 0; i < scores.length; i++){
+        for(var i = 0; i < scores.length; i++) {
             var entry = scores[i];
 
-            if(this.addScoreEntry(entry, baseY + i * 100*SC))
-                this.inLeaderboard = true;
+            this.load.image(entry.playerID, entry.playerPhotoURL);
         }
+        this.load.once("complete", (function()
+        {
+            this.scores = scores;
+
+            var baseY = this.height / 2 + 100*SC;
+
+            this.inLeaderboard = false;
+            for(var i = 0; i < scores.length; i++){
+                var entry = scores[i];
+
+                if(this.addScoreEntry(entry, baseY + i * 100*SC))
+                    this.inLeaderboard = true;
+            }
+        }).bind(this));
+
 
 
 
@@ -509,8 +637,19 @@ export class Menu extends Phaser.Scene{
         var profile = this.add.image(0, 0, this.facebook.playerID);
 
         var secondQuarterZone = this.add.zone(this.width / 2,  2 * this.height / 8, this.width, this.height*3 / 8);
-        profile.setScale(0.75 * SC);
+        profile.setScale(0);
+        this.tweens.add({
+            targets: profile,
+            scaleX: 0.75 * SC,
+            scaleY: 0.75 * SC,
+            ease: 'Quad.easeIn',
+            duration: 1000,
+            yoyo: false,
+            repeat: 0,
+            delay: 0
+        });
         Phaser.Display.Align.In.Center(profile, secondQuarterZone);
+
     }
     startGame ()
     {

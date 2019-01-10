@@ -11,6 +11,7 @@ import { MainScene } from "./scenes/mainScene";
 import { Menu } from "./scenes/menu";
 import { Preloader } from "./scenes/preloader";
 import { GameOverScene } from "./scenes/gameOverScene";
+import { CreditScene } from "./scenes/creditScene";
 import { PauseScene } from "./scenes/pauseScene";
 
 // main game configuration
@@ -36,7 +37,7 @@ var config: any = {
     },
     type: Phaser.AUTO,
     parent: "game",
-    scene: [Preloader, Menu, MainScene, GameOverScene, PauseScene],
+    scene: [Preloader, Menu, MainScene, GameOverScene, PauseScene, CreditScene],
     physics: {
       default: "matter",
       matter: {
