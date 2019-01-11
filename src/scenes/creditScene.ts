@@ -13,7 +13,7 @@ export class CreditScene extends Phaser.Scene{
     private text="Game Design, Level Design, Programmation:\n" +
 		"Amaury Absolu Butaux\n" +
 		"\n" +
-		"Assistance Programmation:\n" +
+		"Stagiaire Programmation:\n" +
 		"Johyn Enigm'Absolu Papin\n" +
 		"\n" +
 		"Assistance Game Design:\n" +

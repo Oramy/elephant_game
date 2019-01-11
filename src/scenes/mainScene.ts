@@ -101,23 +101,30 @@ export class MainScene extends Phaser.Scene {
 
     private leftWall: Sprite;
     private rightWall: Sprite;
+
     private playerData: any;
     private savedAnimals: number;
+    private deadInLava: number;
+
     private characterNames: string[];
     private characterFrames: string[];
+
     private lava: any;
     private lavaMoveType: integer;
     private lavaNextBeginTime: integer;
     private lavaNextEndTime: integer;
-    private disableControl: boolean;
     private lavaBottom: Phaser.GameObjects.TileSprite;
+
+    private disableControl: boolean;
     private lastUpdateTime: number;
     private pauseTime: number;
     private justResumed: boolean;
     private lastTime: number;
     private started: boolean;
+
     private touchToPlay: Phaser.GameObjects.BitmapText[];
     private touchToPlayTweens: Tween[];
+    private maxFollowingAnimals: number;
     
     
     
@@ -185,7 +192,7 @@ export class MainScene extends Phaser.Scene {
             this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
         }
 
-
+        this.maxFollowingAnimals = 0;
     }
     createBackground(): void{
 
@@ -362,8 +369,17 @@ export class MainScene extends Phaser.Scene {
         }
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
 
-            bodyA.label == 'dead';
             this.savedAnimals += 1;
+
+            var animal = bodyA.gameObject.frame.name;
+            animal = animal.slice(0, animal.length - 4);
+
+            this.playerData.values[animal + "Count"] += 1;
+
+            if(bodyA.gameObject.gold){
+                this.playerData.values.goldSaved += 1;
+            }
+
             var shelter = bodyB.gameObject;
 
             var multiplier = SCORE_MULTIPLIER;
@@ -397,7 +413,10 @@ export class MainScene extends Phaser.Scene {
         this.characterNames = this.characterFrames.map(function(frame){
             return frame.slice(0, frame.length - 4);
         });
+
         this.savedAnimals = 0;
+        this.deadInLava = 0;
+
         SC = this.sys.canvas.height / 1920;
         this.gameOverB = false;
         //Initializing categories.
@@ -446,12 +465,12 @@ export class MainScene extends Phaser.Scene {
         this.cameraSpeed = CAMERA_BEGIN_SPEED;
 		this.animalSpeed = ANIMAL_BASE_SPEED;
 
-		this.input.on('pointerup', function () {
+		/*this.input.on('pointerup', function () {
 		    if(this.started) {
                 this.scene.pause();
                 this.scene.launch('PauseScene');
             }
-		}, this);
+		}, this);*/
 		this.events.on('pause', function(){
 		    this.pauseTime = this.lastTime;
         }, this);
@@ -494,7 +513,7 @@ export class MainScene extends Phaser.Scene {
             this.lastTime = time;
 
             var i = 0;
-            while (i < 5 && time - this.lastUpdateTime > 1000 / 60) {
+            while (i < 3 && time - this.lastUpdateTime > 1000 / 60) {
                 this.matter.step(1000 / 60, 1);
                 this.lastUpdateTime += 1000 / 60;
 
@@ -566,11 +585,9 @@ export class MainScene extends Phaser.Scene {
 
     }
     updateAchievements(): void{
-        if(this.followingAnimals.length >= 50){
-            this.unlock('gorilla');
-        }
-        if(this.computeMeters() >= 5000){
-            this.unlock('snake');
+        if(this.followingAnimals.length >= this.maxFollowingAnimals){
+            this.maxFollowingAnimals = this.followingAnimals.length;
+
         }
 
     }
@@ -621,6 +638,10 @@ export class MainScene extends Phaser.Scene {
             var gameObject = this.insideScreenObjects[i];
 
             if(!this.inScreen(gameObject)){
+                if(gameObject.body.label == 'animal' || gameObject.body.label == 'followingAnimal'){
+                    this.deadInLava += 1;
+                }
+
                 gameObject.destroy();
                 toDestroy.push(gameObject);
                 // @ts-ignore
@@ -628,6 +649,8 @@ export class MainScene extends Phaser.Scene {
                     // @ts-ignore
                     this.acquiredScore += gameObject.score;
                 }
+
+
             }
 
 
@@ -784,6 +807,36 @@ export class MainScene extends Phaser.Scene {
     gameOver(): void{
         if(!this.gameOverB) {
             this.gameOverB = true;
+            if(this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals)
+                this.playerData.values.maxFollowingAnimals = this.maxFollowingAnimals;
+
+
+            var data = {
+                character: this.character
+            }
+            var menu = this.scene.get("menu");
+
+            var oldAnimalCount = this.playerData.values.coins;
+
+            this.playerData.values.coins += this.savedAnimals;
+            this.playerData.values.gameCount += 1;
+            this.playerData.values.deadInLava += this.deadInLava;
+            this.playerData.values.lastScore = this.computeScore();
+
+            var lastDist = this.computeMeters();
+            this.playerData.values.lastDistance = lastDist;
+            if(this.playerData.values.bestDistance < lastDist){
+                this.playerData.values.bestDistance = lastDist;
+            }
+
+            var score = Math.trunc(this.computeScore());
+            this.playerData.lastScore = score;
+
+            if(this.playerData.values.bestScore < score){
+                this.playerData.values.bestScore = score;
+            }
+
+            this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals;
 
             if (this.computeScore() >= 5000) {
                 this.unlock('frog');
@@ -791,14 +844,22 @@ export class MainScene extends Phaser.Scene {
             if (this.computeScore() >= 20000) {
                 this.unlock('giraffe');
             }
-            var data = {
-                character: this.character
+            if(this.maxFollowingAnimals >= 40){
+                this.unlock('gorilla');
             }
-            var menu = this.scene.get("menu");
 
-            var oldAnimalCount = this.playerData.values.coins;
-            this.playerData.values.coins += this.savedAnimals;
-
+            if(this.playerData.values.mooseCount >= 500){
+                this.unlock('moose');
+            }
+            if(this.playerData.values.goldSaved >= 2000){
+                this.unlock('narwhal');
+            }
+            if(this.computeMeters() >= 5000){
+                this.unlock('snake');
+            }
+            if(this.savedAnimals >= 500){
+                this.unlock('hippo');
+            }
             this.scene.pause("MainScene");
 
             // @ts-ignore

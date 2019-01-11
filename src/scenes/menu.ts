@@ -1,18 +1,18 @@
-
-import { MainScene } from "./mainScene";
+import {MainScene} from "./mainScene";
+import {CoinsComponent} from "../ui/coinsComponent";
 import Image = Phaser.GameObjects.Image;
 import BitmapText = Phaser.GameObjects.BitmapText;
-import {CoinsComponent} from "../ui/coinsComponent";
 
 const LEADERBOARD_DRAW = 3;
 var SC;
-export const SQUARE_Y_OFFSETS = [0, -0.015,0, 0.05, 0, 0, 0.1, 0,0.06, 0.02, 0.1, 0, 0, 0, 0.05,
-    0, 0.1, 0, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.05, -0.03, 0.02, 0.05];
+export const SQUARE_Y_OFFSETS = {'bear':0, 'buffalo':-0.015, 'chick':0, 'chicken' : 0.05, 'cow':0, 'crocodile':0, 'dog':0.1, 'duck':0, 'elephant':0.06, 'frog':0.02, 'giraffe':0.1, 'goat':0, 'gorilla':0, 'hippo':0, 'horse':0.05,
+   'monkey': 0, 'moose':0.1, 'narwhal':0, 'owl':0, 'panda':0, 'parrot':0, 'penguin':0, 'pig':0, 'rabbit':0.14, 'rhino':0, 'sloth':0, 'snake':-0.05, 'walrus':-0.03, 'whale':0.02, 'zebra':0.05};
 
-export class Menu extends Phaser.Scene{
+export class Menu extends Phaser.Scene {
     private highscores: any;
-    private friends : any;
+    private friends: any;
     private scores: any;
+
 
     private loadedPhotos: any;
     private inLeaderboard: boolean;
@@ -33,16 +33,22 @@ export class Menu extends Phaser.Scene{
     private touchToStart: BitmapText;
     private playerData: any;
     private playImage: Phaser.GameObjects.Image;
-    private unlocked : BitmapText;
+    private unlocked: BitmapText;
 
-    private indices = {'elephant':'', 'frog':'Score over 5000 to unlock this animal.',
-        'gorilla': 'Have more than 50 animals following you \n' +
+    private indices = {
+        'elephant': '', 'frog': 'Score over 5000 to unlock this animal.',
+        'gorilla': 'Have more than 40 animals following you \n' +
             '                              to unlock this animal.',
         'giraffe': 'Score over 20000 to unlock this animal.',
-        'snake' : 'Escape the fire on 5000m to unlock this animal.'};
+        'snake': 'Escape the fire on 5000m to unlock this animal.',
+        'moose': 'Save 500 of this type to unlock this animal.',
+        'narwhal':  'Save 2000 gold animals to unlock this animal.',
+        'parrot': 'Let 1000 animals die in lava to unlock this animal.',
+        'hippo': 'Save 500 in one run to unlock this animal.'
+    };
     private characterNames: string[];
     private coinsComponent: CoinsComponent;
-    private prices = {'bear': 1000, 'crocodile' : 5000};
+    private prices = {'bear': 1000, 'crocodile': 5000, 'monkey': 2500, 'whale': 10000, 'panda': 5000};
 
     private saveCreated: boolean;
     private nextZone: Phaser.GameObjects.Zone;
@@ -50,15 +56,14 @@ export class Menu extends Phaser.Scene{
     private playZone: Phaser.GameObjects.Zone;
     private moveTween: Phaser.Tweens.Tween;
     private nextImage: Phaser.GameObjects.Image;
-    private prevImage:  Phaser.GameObjects.Image;
-    constructor ()
-    {
+    private prevImage: Phaser.GameObjects.Image;
+
+    constructor() {
         super('Menu');
     }
 
 
-
-    updateCharacter(character=this.character){
+    updateCharacter(character = this.character) {
         this.character = character;
         this.characterImage.setFrame(character + ".png");
         this.characterSImage.setFrame(character + ".png");
@@ -67,108 +72,120 @@ export class Menu extends Phaser.Scene{
         }).bind(this));
         this.updateCharacterImages(ind);
     }
-    updatePlayerDataUI(){
+
+    updatePlayerDataUI() {
+        this.indices['narwhal'] = 'Save 2000 gold animals to unlock this animal.' +
+            '\n                                                  ('+ this.playerData.values.goldSaved + "/2000)";
+        this.indices['moose'] = 'Save 500 of this type to unlock this animal.' +
+            '\n                                                  ('+ this.playerData.values.mooseCount + "/500)";
+        this.indices['parrot'] = 'Let 1000 die in lava to unlock this animal.' +
+            '\n                                                  ('+ this.playerData.values.deadInLava + "/1000)";
+        this.indices['snake'] = 'Escape the fire on 5000m to unlock this animal.' +
+            '\n                                                  ('+ this.playerData.values.bestDistance + "/5000)";
+
+        this.indices['gorilla'] = 'Have more than 40 animals following you \n' +
+            '                              to unlock this animal. (' + this.playerData.values.maxFollowingAnimals + "/40)";
+        this.indices['giraffe'] = 'Score over 20000 to unlock this animal.\n' +
+            '                                                    (' + this.playerData.values.bestScore + "/20000)";
+        this.indices['frog'] = 'Score over 5000 to unlock this animal.\n' +
+            '                                                    (' + this.playerData.values.bestScore + "/5000)";
+        this.indices['hippo'] = 'Save 500 in one run to unlock this animal.\n' +
+            '                                                    (' + this.playerData.values.maxAnimalsSavedOneRun + "/500)";
+
         var characterStatus = this.playerData.get(this.character);
-        if(characterStatus == 'unlocked'){
+        if (characterStatus == 'unlocked') {
             this.playImage.setFrame('forward.png');
             // @ts-ignore
             this.touchToStart.setText("Welcome " + this.facebook.playerName + "! Touch your " + this.character + " to start.");
 
-        }
-        else if(characterStatus == 'locked')
-        {
+        } else if (characterStatus == 'locked') {
             this.playImage.setFrame('locked.png');
             // @ts-ignore
             var touchText = "This animal is locked...\n";
-            if(this.indices[this.character] !== undefined)
+            if (this.indices[this.character] !== undefined)
                 touchText += this.indices[this.character];
             this.touchToStart.setText(touchText);
 
-        }
-        else if(characterStatus == 'buyable'){
+        } else if (characterStatus == 'buyable') {
 
 
             this.playImage.setFrame('basket.png');
             this.touchToStart.setText("Pay " + this.prices[this.character] + " animals to unlock this character.");
         }
         var unlockedCount = 0;
-        for(var i = 0; i < this.characterNames.length; i++){
-            if(this.playerData.get(this.characterNames[i]) === 'unlocked')
-            {
-                unlockedCount +=1;
+        for (var i = 0; i < this.characterNames.length; i++) {
+            if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
+                unlockedCount += 1;
             }
         }
-        this.unlocked.setText(unlockedCount+ '/'+ (Object.keys(this.indices).length + Object.keys(this.prices).length));
-
+        this.unlocked.setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length));
 
 
     }
-    updateCharacterImages(ind){
+
+    updateCharacterImages(ind) {
         var next = this.nextUnlockableIndex(ind);
         var prev = this.prevUnlockableIndex(ind);
         this.character = this.characterFrames[ind];
         this.character = this.character.slice(0, this.character.length - 4);
 
         this.characterImage.setFrame(this.characterFrames[ind]);
-        this.characterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[ind]);
+        this.characterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[ind]]);
         this.characterSImage.setFrame(this.characterFrames[ind]);
-        this.characterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[ind]);
+        this.characterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[ind]]);
         this.prevCharacterImage.setFrame(this.characterFrames[prev]);
-        this.prevCharacterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[prev]);
+        this.prevCharacterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[prev]]);
         this.nextCharacterImage.setFrame(this.characterFrames[next]);
-        this.nextCharacterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[next]);
+        this.nextCharacterImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[next]]);
         this.prevCharacterSImage.setFrame(this.characterFrames[prev]);
-        this.prevCharacterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[prev]);
+        this.prevCharacterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[prev]]);
         this.nextCharacterSImage.setFrame(this.characterFrames[next]);
-        this.nextCharacterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[next]);
+        this.nextCharacterSImage.setOrigin(0.5, 0.5 + SQUARE_Y_OFFSETS[this.characterNames[next]]);
 
-        if(this.playerData.get(this.characterNames[ind]) == 'locked'){
+        if (this.playerData.get(this.characterNames[ind]) == 'locked') {
             this.characterSImage.setVisible(true);
             this.characterImage.setVisible(false);
-        }
-        else
-        {
+        } else {
             this.characterImage.setVisible(true);
             this.characterSImage.setVisible(false);
         }
-        if(this.playerData.get(this.characterNames[prev]) == 'locked'){
+        if (this.playerData.get(this.characterNames[prev]) == 'locked') {
             this.prevCharacterSImage.setVisible(true);
             this.prevCharacterImage.setVisible(false);
-        }
-        else
-        {
+        } else {
             this.prevCharacterImage.setVisible(true);
             this.prevCharacterSImage.setVisible(false);
         }
-        if(this.playerData.get(this.characterNames[next]) == 'locked'){
+        if (this.playerData.get(this.characterNames[next]) == 'locked') {
             this.nextCharacterSImage.setVisible(true);
             this.nextCharacterImage.setVisible(false);
-        }
-        else
-        {
+        } else {
             this.nextCharacterImage.setVisible(true);
             this.nextCharacterSImage.setVisible(false);
         }
         this.updatePlayerDataUI();
 
     }
-    nextUnlockableIndex(ind){
+
+    nextUnlockableIndex(ind) {
         ind = (ind + 1) % this.characterNames.length;
-        while(this.indices[this.characterNames[ind]] === undefined && this.prices[this.characterNames[ind]] === undefined){
+        while (this.indices[this.characterNames[ind]] === undefined && this.prices[this.characterNames[ind]] === undefined) {
             ind = (ind + 1) % this.characterNames.length;
         }
         return ind;
     }
-    prevUnlockableIndex(ind){
-        ind =  (ind + this.characterNames.length - 1) % this.characterNames.length;
 
-        while(this.indices[this.characterNames[ind]] === undefined  && this.prices[this.characterNames[ind]] === undefined){
+    prevUnlockableIndex(ind) {
+        ind = (ind + this.characterNames.length - 1) % this.characterNames.length;
+
+        while (this.indices[this.characterNames[ind]] === undefined && this.prices[this.characterNames[ind]] === undefined) {
             ind = (ind + this.characterNames.length - 1) % this.characterNames.length;
         }
         return ind;
     }
-    addMoveTween(onYoyo){
-        if(this.moveTween == null) {
+
+    addMoveTween(onYoyo) {
+        if (this.moveTween == null) {
             var done = false;
             this.moveTween = this.tweens.add({
                 targets: [this.nextCharacterImage, this.nextCharacterSImage,
@@ -182,24 +199,30 @@ export class Menu extends Phaser.Scene{
                 repeat: 0,
                 delay: 0,
                 onYoyo: (function () {
-                    if(!done){
+                    if (!done) {
                         done = true;
                         onYoyo();
                     }
                 }).bind(this),
-                onComplete: (function(){
+                onComplete: (function () {
                     this.moveTween = null;
+                    this.nextCharacterImage.setScale(1.8 * SC);
+                    this.nextCharacterSImage.setScale(1.8 * SC);
+                    this.characterSImage.setScale(1.8 * SC);
+                    this.prevCharacterImage.setScale(1.8 * SC);
+                    this.prevCharacterSImage.setScale(1.8 * SC);
                 }).bind(this)
             });
         }
     }
-    next(pointer, gameObject){
-        if(gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
+
+    next(pointer, gameObject) {
+        if (gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
             this.addMoveTween((
-                function(){
+                function () {
                     var ind = this.characterNames.findIndex((function (el) {
-                            return el == this.character
-                        }).bind(this));
+                        return el == this.character
+                    }).bind(this));
                     ind = this.nextUnlockableIndex(ind);
                     this.updateCharacterImages(ind);
                 }).bind(this));
@@ -207,11 +230,12 @@ export class Menu extends Phaser.Scene{
 
         }
     }
-    prev(pointer, gameObject){
-        if(gameObject == this.prevCharacterImage  || gameObject == this.prevCharacterSImage) {
+
+    prev(pointer, gameObject) {
+        if (gameObject == this.prevCharacterImage || gameObject == this.prevCharacterSImage) {
 
             this.addMoveTween((
-                function(){
+                function () {
                     var ind = this.characterNames.findIndex((function (el) {
                         return el == this.character
                     }).bind(this));
@@ -220,17 +244,17 @@ export class Menu extends Phaser.Scene{
                 }).bind(this));
         }
     }
-    play(pointer, gameObject){
-        if(this.characterImage === gameObject){
-            this.addMoveTween((
-                function(){
-                    var characterStatus = this.playerData.get(this.character);
-                    if(characterStatus == 'unlocked' ) {
-                        this.startGame();
-                    }
-                    else if(characterStatus == 'buyable'){
 
-                        if(this.playerData.values.coins >= this.prices[this.character]){
+    play(pointer, gameObject) {
+        if (this.characterImage === gameObject) {
+            this.addMoveTween((
+                function () {
+                    var characterStatus = this.playerData.get(this.character);
+                    if (characterStatus == 'unlocked') {
+                        this.startGame();
+                    } else if (characterStatus == 'buyable') {
+
+                        if (this.playerData.values.coins >= this.prices[this.character]) {
 
                             this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
                             this.playerData.values.coins -= this.prices[this.character];
@@ -242,51 +266,66 @@ export class Menu extends Phaser.Scene{
 
         }
     }
+
     createSave() {
         var data = {
-            'bear':'buyable',
-            'buffalo':'locked',
-            'chick':'locked',
-            'chicken':'locked',
-            'cow':'locked',
-            'crocodile':'buyable',
-            'dog':'locked',
-            'duck':'locked',
-            'elephant':'unlocked',
-            'frog':'locked',
-            'giraffe':'locked',
-            'goat':'locked',
-            'gorilla':'locked',
-            'hippo':'locked',
-            'horse':'locked',
-            'monkey':'locked',
-            'moose':'locked',
-            'narwhal':'locked',
-            'owl':'locked',
-            'panda':'locked',
-            'parrot':'locked',
-            'penguin':'locked',
-            'pig':'locked',
-            'rabbit':'locked',
-            'rhino':'locked',
-            'sloth':'locked',
-            'snake':'locked',
-            'walrus':'locked',
-            'whale':'locked',
-            'zebra':'locked',
-            'coins':0
-        }
-        console.log('create save');
+            'bear': 'buyable',
+            'buffalo': 'locked',
+            'chick': 'locked',
+            'chicken': 'locked',
+            'cow': 'locked',
+            'crocodile': 'buyable',
+            'dog': 'locked',
+            'duck': 'locked',
+            'elephant': 'unlocked',
+            'frog': 'locked',
+            'giraffe': 'locked',
+            'goat': 'locked',
+            'gorilla': 'locked',
+            'hippo': 'locked',
+            'horse': 'locked',
+            'monkey': 'buyable',
+            'moose': 'locked',
+            'narwhal': 'locked',
+            'owl': 'locked',
+            'panda': 'buyable',
+            'parrot': 'locked',
+            'penguin': 'locked',
+            'pig': 'locked',
+            'rabbit': 'locked',
+            'rhino': 'locked',
+            'sloth': 'locked',
+            'snake': 'locked',
+            'walrus': 'locked',
+            'whale': 'buyable',
+            'zebra': 'locked',
+            'coins': 0,
+            'deadInLava': 0,
+            'gameCount': 0,
+            'lastDistance': 0,
+            'bestDistance': 0,
+            'lastScore': 0,
+            'bestScore': 0,
+            'goldSaved': 0,
+            'maxAnimalsSavedOneRun': 0,
+            'maxFollowingAnimals': 0
+
+        };
+
+
+        this.characterNames.forEach(character => data[character + "Count"] = 0 );
+
         //@ts-ignore
         this.facebook.saveData(data);
         this.coinsComponent.smoothChangeScore(data['coins'], 1).play();
 
     }
-    update(){
+
+    update() {
         this.coinsComponent.update();
     }
-    create ()
-    {
+
+    create() {
         this.moveTween = null;
         this.saveCreated = false;
         // @ts-ignore
@@ -297,24 +336,26 @@ export class Menu extends Phaser.Scene{
         this.camera = this.cameras.main;
         var atlasTexture = this.textures.get('round');
         this.characterFrames = atlasTexture.getFrameNames();
-        this.characterNames = this.characterFrames.map(function(frame){
+        this.characterFrames = ['buffalo.png', 'chick.png', 'chicken.png', 'cow.png', 'dog.png', 'duck.png', 'elephant.png',
+            'frog.png', 'giraffe.png', 'goat.png', 'hippo.png', 'horse.png', 'moose.png', 'narwhal.png', 'owl.png',
+            'parrot.png', 'penguin.png', 'pig.png', 'rabbit.png', 'rhino.png', 'sloth.png', 'snake.png', 'gorilla.png', 'walrus.png', 'zebra.png',
+            'whale.png', 'panda.png', 'crocodile.png', 'monkey.png', 'bear.png']
+        this.characterNames = this.characterFrames.map(function (frame) {
             return frame.slice(0, frame.length - 4);
         });
         this.character = 'elephant';
 
         // @ts-ignore
-        this.facebook.once('getleaderboard', (function (leaderboard)
-        {
+        this.facebook.once('getleaderboard', (function (leaderboard) {
 
-            if(leaderboard.name == 'Highscores') {
+            if (leaderboard.name == 'Highscores') {
 
                 this.highscores = leaderboard;
-                leaderboard.on('getscores', (function(scores){
+                leaderboard.on('getscores', (function (scores) {
                     this.createHighscoreTab(scores);
 
                     // @ts-ignore
-                    this.highscores.on('getplayerscore', function (score, name)
-                    {
+                    this.highscores.on('getplayerscore', function (score, name) {
                         var data = JSON.parse(score.data);
                         this.updateCharacter(data.character);
                         this.createPlayerScoreLine();
@@ -325,26 +366,26 @@ export class Menu extends Phaser.Scene{
                 }).bind(this));
                 this.highscores.getScores(LEADERBOARD_DRAW, 0);
 
-            }
-            else if(leaderboard.name == 'Amis')
+            } else if (leaderboard.name == 'Amis')
                 this.friends = leaderboard;
-
 
 
         }).bind(this), this);
 
+        var background = this.add.image(this.width / 2, this.height / 2, 'menuBackground');
+        background.setScale(SC);
         this.coinsComponent = new CoinsComponent(this, 0);
         this.coinsComponent.create(SC);
 
         this.characterImage = this.add.image(0, 0, 'squareOutline', 'elephant.png');
-        this.characterImage.setScale(1.8*SC);
+        this.characterImage.setScale(1.8 * SC);
 
         this.characterSImage = this.add.image(0, 0, 'squareSilhouette', 'elephant.png');
-        this.characterSImage.setScale(1.8*SC);
+        this.characterSImage.setScale(1.8 * SC);
 
         this.playImage = this.add.image(0, 0, 'icons', 'forward.png');
         this.playImage.setScale(3 * SC);
-        this.playZone = this.add.zone(this.width / 2,  270 * SC + 2 * this.height / 8, this.width, this.height*3 / 8);
+        this.playZone = this.add.zone(this.width / 2, 270 * SC + 2 * this.height / 8, this.width, this.height * 3 / 8);
         Phaser.Display.Align.In.Center(this.characterImage, this.playZone);
         Phaser.Display.Align.In.Center(this.characterSImage, this.playZone);
         Phaser.Display.Align.In.Center(this.playImage, this.playZone);
@@ -358,7 +399,7 @@ export class Menu extends Phaser.Scene{
         this.nextImage = this.add.image(0, 0, 'icons', 'arrowRight.png');
         this.nextImage.setScale(3 * SC);
 
-        this.nextZone = this.add.zone(this.width / 2 + (64 + 128) * 1.8 *SC,  270 *SC  + 2 * this.height / 8, this.width, this.height*3 / 8);
+        this.nextZone = this.add.zone(this.width / 2 + (64 + 128) * 1.8 * SC, 270 * SC + 2 * this.height / 8, this.width, this.height * 3 / 8);
 
         Phaser.Display.Align.In.Center(this.nextImage, this.nextZone);
         Phaser.Display.Align.In.Center(this.nextCharacterImage, this.nextZone);
@@ -373,7 +414,7 @@ export class Menu extends Phaser.Scene{
         this.prevImage = this.add.image(0, 0, 'icons', 'arrowLeft.png');
         this.prevImage.setScale(3 * SC);
 
-        this.prevZone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,  270 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
+        this.prevZone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC, 270 * SC + 2 * this.height / 8, this.width, this.height * 3 / 8);
         Phaser.Display.Align.In.Center(this.prevImage, this.prevZone);
         Phaser.Display.Align.In.Center(this.prevCharacterImage, this.prevZone);
         Phaser.Display.Align.In.Center(this.prevCharacterSImage, this.prevZone);
@@ -389,23 +430,23 @@ export class Menu extends Phaser.Scene{
         this.nextCharacterSImage.setInteractive();
         this.prevCharacterSImage.setInteractive();
 
-        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC,    -50 *SC + 2 * this.height / 8, this.width, this.height*3 / 8);
-        var unlockedImage = this.add.image(0, 0 ,'icons', 'unlocked.png');
-        unlockedImage.setScale(2 *SC);
+        var zone = this.add.zone(this.width / 2 - (64 + 128) * 1.8 * SC, -50 * SC + 2 * this.height / 8, this.width, this.height * 3 / 8);
+        var unlockedImage = this.add.image(0, 0, 'icons', 'unlocked.png');
+        unlockedImage.setScale(2 * SC);
         unlockedImage.setAlpha(0.5);
 
-        this.unlocked = this.add.bitmapText(0, 0, 'jungle','');
-        this.unlocked.setFontSize(70*SC);
+        this.unlocked = this.add.bitmapText(0, 0, 'jungle', '');
+        this.unlocked.setFontSize(70 * SC);
         this.unlocked.tint = 0xCCCCCC;
 
 
         Phaser.Display.Align.In.Center(this.unlocked, zone);
         Phaser.Display.Align.In.Center(unlockedImage, this.unlocked);
 
-        this.nextCharacterImage.setAlpha(1, 0, 1, 0);
-        this.prevCharacterImage.setAlpha(0, 1, 0, 1);
-        this.nextCharacterSImage.setAlpha(1, 0, 1, 0);
-        this.prevCharacterSImage.setAlpha(0, 1, 0, 1);
+        this.nextCharacterImage.setAlpha(1, 0.5, 1, 0.5);
+        this.prevCharacterImage.setAlpha(0.5, 1, 0.5, 1);
+        this.nextCharacterSImage.setAlpha(1, 0.5, 1, 0.5);
+        this.prevCharacterSImage.setAlpha(0.5, 1, 0.5, 1);
 
         this.camera.setBackgroundColor('#5a756f');
         // @ts-ignore
@@ -413,10 +454,10 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         //this.facebook.getLeaderboard('Amis.'+FBInstant.context.getID());
         // @ts-ignore
-        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "Welcome " + this.facebook.playerName + "! Touch anywhere to start." , 40*SC);
-        var title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120*SC);
+        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "Welcome " + this.facebook.playerName + "! Touch anywhere to start.", 40 * SC);
+        var title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120 * SC);
         var screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
-        var topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2);
+        var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
         Phaser.Display.Align.In.Center(title, topZone);
 
@@ -428,25 +469,35 @@ export class Menu extends Phaser.Scene{
         this.load.image(this.facebook.playerID, this.facebook.playerPhotoURL);
         this.load.on('complete', this.addPlayerPhoto, this);
 
-        this.input.on("gameobjectdown",  (this.next).bind(this));
-        this.input.on("gameobjectdown",  (this.prev).bind(this));
-        this.input.on("gameobjectdown",  (this.play).bind(this));
-        if(this.lastScore !== undefined){
+        this.input.on("gameobjectdown", (this.next).bind(this));
+        this.input.on("gameobjectdown", (this.prev).bind(this));
+        this.input.on("gameobjectdown", (this.play).bind(this));
+        if (this.lastScore !== undefined) {
             var text = this.add.bitmapText(0, 0, 'jungle', 'Last score: ' + this.lastScore);
-            text.setFontSize(70*SC);
-            var topZone = this.add.zone(this.width /2 , this.height /20, this.width, this.height / 10);
+            text.setFontSize(70 * SC);
+            var topZone = this.add.zone(this.width / 2, this.height / 18, this.width, this.height / 10);
             Phaser.Display.Align.In.Center(text, topZone);
         }
 
 
-
-
         var dataKeys = this.characterNames.slice();
+
         dataKeys.push('coins');
+        dataKeys.push('deadInLava');
+        dataKeys.push('gameCount');
+        dataKeys.push('lastDistance');
+        dataKeys.push('bestDistance');
+        dataKeys.push('lastScore');
+        dataKeys.push('bestScore');
+        dataKeys.push('goldSaved');
+        dataKeys.push('maxAnimalsSavedOneRun');
+        dataKeys.push('maxFollowingAnimals');
+
+        this.characterNames.forEach(character => dataKeys.push(character + "Count"));
         // @ts-ignore
         this.facebook.getData(dataKeys);
         //@ts-ignore
-        this.facebook.on('savedata', (function (){
+        this.facebook.on('savedata', (function () {
             this.updateCharacter();
             this.updatePlayerDataUI();
 
@@ -457,24 +508,22 @@ export class Menu extends Phaser.Scene{
         // @ts-ignore
         this.facebook.on('getdata', (function () {
             this.playerData = this.facebook.data;
-
             var s = false;
-            if((this.facebook.data.values.elephant === undefined
-                || this.facebook.data.values.bear === 'locked' ) &&!this.saveCreated){
+            if ((this.facebook.data.values.elephant === undefined
+                || this.facebook.data.values.bear === 'locked'
+                || this.facebook.data.values.panda === 'locked') && !this.saveCreated) {
 
                 s = true;
                 this.createSave();
 
+            } else if (this.playerData.values.coins === undefined && !this.saveCreated) {
+                this.playerData.set('coins', 0);
             }
-            else if(this.playerData.values.coins === undefined && !this.saveCreated){
-                this.playerData.set('coins',  0);
-            }
-            if(!s && !this.saveCreated)
-            {
+            if (!s && !this.saveCreated) {
                 this.saveCreated = true;
                 this.coinsComponent.smoothChangeScore(this.playerData.values.coins, 1).play();
             }
-            if(s)
+            if (s)
                 this.saveCreated = true;
 
 
@@ -490,8 +539,8 @@ export class Menu extends Phaser.Scene{
         logo.setScale(1.5 * SC);
 
         logo.setInteractive();
-        this.input.on('gameobjectdown', function(pointer, gameObject){
-            if(gameObject === logo){
+        this.input.on('gameobjectdown', function (pointer, gameObject) {
+            if (gameObject === logo) {
                 this.scene.pause('Menu');
                 this.scene.launch('CreditScene');
             }
@@ -527,21 +576,21 @@ export class Menu extends Phaser.Scene{
             delay: 200
         });
     }
-    addScoreEntry(entry,  y) : boolean
-    {
-        var pic = this.add.image(320*SC - 1000 * SC, y + 40*SC, entry.playerID);
-        pic.setScale(0.3*SC);
+
+    addScoreEntry(entry, y): boolean {
+        var pic = this.add.image(320 * SC - 1000 * SC, y + 40 * SC, entry.playerID);
+        pic.setScale(0.3 * SC);
         var data = JSON.parse(entry.data);
-        var character = this.add.image(215*SC - 1000 * SC, y + 40*SC, "square_nodetailsOutline", data.character + ".png");
-        character.setScale(0.75 *SC);
-        var rankText = this.add.bitmapText(200*SC - 1000 * SC, y + 13*SC, "jungle",entry.rank);
-        var nameText = this.add.bitmapText(400*SC - 1000 * SC, y , "jungle", entry.playerName);
-        var scoreText = this.add.bitmapText(400*SC - 1000 * SC, y+ 50*SC, "jungle", "Score: " + entry.scoreFormatted);
+        var character = this.add.image(215 * SC - 1000 * SC, y + 40 * SC, "square_nodetailsOutline", data.character + ".png");
+        character.setScale(0.75 * SC);
+        var rankText = this.add.bitmapText(200 * SC - 1000 * SC, y + 13 * SC, "jungle", entry.rank);
+        var nameText = this.add.bitmapText(400 * SC - 1000 * SC, y, "jungle", entry.playerName);
+        var scoreText = this.add.bitmapText(400 * SC - 1000 * SC, y + 50 * SC, "jungle", "Score: " + entry.scoreFormatted);
 
 
         this.tweens.add({
             targets: character,
-            x:215*SC,
+            x: 215 * SC,
             ease: 'Quint.easeIn',
             duration: 1000,
             yoyo: false,
@@ -550,7 +599,7 @@ export class Menu extends Phaser.Scene{
         });
         this.tweens.add({
             targets: rankText,
-            x:200*SC,
+            x: 200 * SC,
             ease: 'Quint.easeIn',
             duration: 1000,
             yoyo: false,
@@ -559,7 +608,7 @@ export class Menu extends Phaser.Scene{
         });
         this.tweens.add({
             targets: nameText,
-            x:400*SC,
+            x: 400 * SC,
             ease: 'Quint.easeIn',
             duration: 1000,
             yoyo: false,
@@ -568,7 +617,7 @@ export class Menu extends Phaser.Scene{
         });
         this.tweens.add({
             targets: scoreText,
-            x:400*SC,
+            x: 400 * SC,
             ease: 'Quint.easeIn',
             duration: 1000,
             yoyo: false,
@@ -577,7 +626,7 @@ export class Menu extends Phaser.Scene{
         });
         this.tweens.add({
             targets: pic,
-            x:320*SC,
+            x: 320 * SC,
             ease: 'Quint.easeIn',
             duration: 1000,
             yoyo: false,
@@ -587,56 +636,55 @@ export class Menu extends Phaser.Scene{
         rankText.tint = 0x11604f;
 
 
-        rankText.setFontSize(50*SC);
-        nameText.setFontSize(50*SC);
-        scoreText.setFontSize(50*SC);
+        rankText.setFontSize(50 * SC);
+        nameText.setFontSize(50 * SC);
+        scoreText.setFontSize(50 * SC);
         // @ts-ignore
-        if(entry.playerID == this.facebook.playerID){
+        if (entry.playerID == this.facebook.playerID) {
             nameText.tint = 0xFF5757;
             return true;
         }
         return false;
     }
-    createPlayerScoreLine(){
-        if(!this.inLeaderboard){
-            var baseY = this.height / 2 + 100*SC;
+
+    createPlayerScoreLine() {
+        if (!this.inLeaderboard) {
+            var baseY = this.height / 2 + 100 * SC;
             var entry = this.highscores.playerScore;
             // @ts-ignore
-            this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1)*100*SC + 25*SC);
-         }
+            this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1) * 100 * SC + 25 * SC);
+        }
     }
-    createHighscoreTab(scores): void{
-        for(var i = 0; i < scores.length; i++) {
+
+    createHighscoreTab(scores): void {
+        for (var i = 0; i < scores.length; i++) {
             var entry = scores[i];
 
             this.load.image(entry.playerID, entry.playerPhotoURL);
         }
-        this.load.once("complete", (function()
-        {
+        this.load.once("complete", (function () {
             this.scores = scores;
 
-            var baseY = this.height / 2 + 100*SC;
+            var baseY = this.height / 2 + 100 * SC;
 
             this.inLeaderboard = false;
-            for(var i = 0; i < scores.length; i++){
+            for (var i = 0; i < scores.length; i++) {
                 var entry = scores[i];
 
-                if(this.addScoreEntry(entry, baseY + i * 100*SC))
+                if (this.addScoreEntry(entry, baseY + i * 100 * SC))
                     this.inLeaderboard = true;
             }
         }).bind(this));
 
 
-
-
         this.load.start();
     }
-    addPlayerPhoto ()
-    {
+
+    addPlayerPhoto() {
         // @ts-ignore
         var profile = this.add.image(0, 0, this.facebook.playerID);
 
-        var secondQuarterZone = this.add.zone(this.width / 2,  2 * this.height / 8, this.width, this.height*3 / 8);
+        var secondQuarterZone = this.add.zone(this.width / 2, 2 * this.height / 8, this.width, this.height * 3 / 8);
         profile.setScale(0);
         this.tweens.add({
             targets: profile,
@@ -651,8 +699,8 @@ export class Menu extends Phaser.Scene{
         Phaser.Display.Align.In.Center(profile, secondQuarterZone);
 
     }
-    startGame ()
-    {
+
+    startGame() {
         this.scene.start('MainScene');
         // @ts-ignore
         this.scene.get('MainScene').updateCharacter(this.character);

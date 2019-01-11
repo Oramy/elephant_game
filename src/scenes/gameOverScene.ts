@@ -182,6 +182,9 @@ export class GameOverScene extends Phaser.Scene{
         SC = this.height / 1920;
 
 
+        var background = this.add.image(this.width / 2, this.height / 2, 'menuBackground');
+        background.setScale(SC);
+
         var atlasTexture = this.textures.get('round');
         this.roundFrames = atlasTexture.getFrameNames();
         

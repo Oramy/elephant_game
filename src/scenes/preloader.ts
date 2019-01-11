@@ -55,6 +55,8 @@ export class Preloader extends Phaser.Scene{
 
         this.load.image('logo', 'assets/ui/fake_logo_final_v4.png');
 
+        this.load.image('menuBackground', 'assets/background/backgroundPastelPlus.png');
+
     }
 
     startGame ()
