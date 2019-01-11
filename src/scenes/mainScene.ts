@@ -18,6 +18,7 @@ import ScaleModes = Phaser.ScaleModes;
 import Color = Phaser.Display.Color;
 import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs";
 import Tween = Phaser.Tweens.Tween;
+import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatAlpha;
 
 function arrayRemove(arr, value) {
 
@@ -216,7 +217,7 @@ export class MainScene extends Phaser.Scene {
 
     }
     computeMeters(): integer{
-        return Math.trunc(-this.camera.scrollY / this.width * 20);
+        return Math.trunc(-this.camera.scrollY / this.height * 35);
     }
     createUI(): void{
         this.scoreText = this.add.bitmapText(20*SC,20*SC,'jungle', 'Score: ' + this.acquiredScore, 100*SC).setOrigin(0, 0);
@@ -487,7 +488,36 @@ export class MainScene extends Phaser.Scene {
             this.started = true;
         }, this);
 
+        this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
+            this.playerData.values.bestDistance + "m", "Best distance");
 
+        this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
+            this.playerData.values.lastDistance + "m", "Last distance");
+
+
+    }
+    scoreLine(y: number, color: number, rightText, leftText): void{
+        var line = new Phaser.Geom.Line(0, y, this.width, y);
+
+        var graphics = this.add.graphics({
+            lineStyle:{
+                width: 8,
+                color: color,
+                alpha: 1,
+
+            },
+            x: 0,
+            y: 0,
+
+        });
+        graphics.strokeLineShape(line);
+        var x = this.width - 50 * SC;
+        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5);
+        textEl.tint = color;
+        var x = 50 * SC;
+
+        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5);
+        textEl.tint = color;
     }
     onBlur(): void
     {
