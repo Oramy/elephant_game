@@ -369,7 +369,7 @@ export class Prefabs{
                     this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
                     break;
             case 11: // Spikes trap right
-                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_TL.png');
+                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_left.png');
 
                 var middle = this.genBarriers(4);
                 var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
@@ -388,7 +388,7 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
                 break;
             case 12:// Spikes trap left
-                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_TR.png');
+                this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_right.png');
 
                 var middle = this.genBarriers(4);
                 var middleLine = new Line(x + w / 2, y + h / 4 + 64*SC, x + w /2, y + h * 3 /4 +64 *SC);
@@ -997,8 +997,9 @@ export class Prefabs{
         var h = this.height;
         switch (id) {
             case 0: // Normal shelter
-                this.addObstaclesAndAnimals( x, y, 0, 0);
+
                 this.spawnShelter( x + w / 2, y + h/2);
+                this.addObstaclesAndAnimals( x, y, 0, 0);
                 break;
             case 1: //Spiked shelter
                 this.addObstaclesAndAnimals( x, y, 13, 0);
