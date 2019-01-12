@@ -29,7 +29,7 @@ export class Preloader extends Phaser.Scene{
 		// @ts-ignore
 	 	this.i18n.initialize(
     		{
-      			fallbackLng: 'en',
+      			fallbackLng: 'fr',
       			loadPath: 'assets/i18n/{{lng}}/{{ns}}.json',
    		   		debug: false,
     		},

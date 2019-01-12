@@ -1,8 +1,11 @@
 {
-	"score": "Score: {{score}}",
 	"welcome": "Welcome {{name}}! Touch your {{character}} to start.",
 	"welcome2": "Welcome {{name}}! Touch anywhere to start.",
+	"gotomenu": "Tap here to go to the menu.",
+	"touchtoplay": "Touch an animal to play with it.",
 	"locked": "This animal is locked...\n",
+	"unlocked": "Character unlocked!",
+	"unlocked_plural": "Characters unlocked!",
 	"pay": "Pay {{price}} animals to unlock this character.",
 	"animals": {
 		"narwhal": "Save 2000 gold animals to unlock this animal.\n({{n}}/2000)",

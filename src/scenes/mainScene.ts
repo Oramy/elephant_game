@@ -134,12 +134,12 @@ export class MainScene extends Phaser.Scene {
     
     private lastMeterMark: number;
     
-
     private animals: Group;
     private fps: Phaser.GameObjects.BitmapText;
-    constructor() {
+	
+	constructor() {
         super({
-            key: "MainScene",
+            key: 'MainScene',
             physics: {
                 default: 'matter',
                 matter: {
@@ -150,34 +150,22 @@ export class MainScene extends Phaser.Scene {
 
                 }
             }
-        });
+        })
     }
 
-    updateCharacter(character: string){
-        this.character = character;
-    }
-
-    preload(): void
-    {
+    updateCharacter(character: string) {
+        this.character = character
     }
 
     loadLeaderboards(): void{
-
         // @ts-ignore
-        this.facebook.once('getleaderboard', (function (leaderboard)
-        {
-            if(leaderboard.name == 'Highscores') {
-
+        this.facebook.once('getleaderboard', (function (leaderboard) {
+            if (leaderboard.name == 'Highscores') {
                 this.highscores = leaderboard;
-            }
-            else if(leaderboard.name == 'Amis.' + this.facebook.contextID){
+            } else if (leaderboard.name == 'Amis.' + this.facebook.contextID){
                 console.log("friends!!")
                 this.friends = leaderboard;
             }
-
-
-
-
         }).bind(this), this);
 
         // @ts-ignore
@@ -202,7 +190,8 @@ export class MainScene extends Phaser.Scene {
         }
 
         this.maxFollowingAnimals = 0;
-    }
+	}
+
     initializeAnimals(): void{
         this.animals = this.add.group({
             classType: Animal,
@@ -211,22 +200,20 @@ export class MainScene extends Phaser.Scene {
             defaultKey: 'roundQuarter',
             defaultFrame: 'elephant.png'
         });
-    }
+	}
+
     getAnimal(): Animal{
         let animal = this.animals.get();
-
 
         this.insideAnimals.push(animal);
 
         return animal;
-    }
-    createBackground(): void{
+	}
 
+    createBackground(): void{
         this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0);
         this.background.setScale(2*SC);
         this.background.setScrollFactor(0);
-
-
 
         this.lavaBottom = this.add.tileSprite(this.width/2, this.height, this.width, 128*SC, 'spritesheet_other', 'fluidRed.png');
         this.lavaBottom.setScale(2*SC);
@@ -249,15 +236,19 @@ export class MainScene extends Phaser.Scene {
     createUI(): void{
         this.rewardTweens = [];
 
-        this.fps = this.add.bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC);
+		// @ts-ignore
+		this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
         this.fps.setScrollFactor(0);
         this.fps.setDepth(Infinity);
-        this.scoreText = this.add.bitmapText(20*SC,20*SC,'jungle', 'Score: ' + this.acquiredScore, 100*SC).setOrigin(0, 0);
+
+		// @ts-ignore
+		this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
         this.scoreText.tint = 0xFFFFFF;
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
 
-        this.multiplierText = this.add.bitmapText(this.width - 200*SC,0,'jungle', 'x2', 100*SC).setOrigin(0, 0);
+		// @ts-ignore
+		this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x2', 100*SC).setOrigin(0, 0)
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
         this.multiplierText.setScrollFactor(0);
         this.multiplierText.setDepth(Infinity);
@@ -360,7 +351,7 @@ export class MainScene extends Phaser.Scene {
         this.lastMeterMark = 0;
 	}
 
-	createSideWalls(): void{
+	createSideWalls(): void {
         this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
         this.leftWall.setCollisionCategory(this.obstacleCat);
         this.leftWall.setDisplaySize(this.width * 0.5, this.height);
@@ -369,8 +360,9 @@ export class MainScene extends Phaser.Scene {
         this.rightWall.setCollisionCategory(this.obstacleCat);
         this.rightWall.setDisplaySize(this.width * 0.5, this.height);
         this.rightWall.setVisible(false);
-    }
-    createElephant(): void{
+	}
+	
+	createElephant(): void {
         this.disableControl = false;
         if(this.character === undefined){
             this.character = 'elephant';
@@ -396,9 +388,6 @@ export class MainScene extends Phaser.Scene {
 
     }
 
-
-
-
     /**
      * Collision logic, with assymetrical roles for bodyA and bodyB.
      * @param event
@@ -406,56 +395,58 @@ export class MainScene extends Phaser.Scene {
      * @param bodyB
      */
     checkOneSideCollision(event, bodyA, bodyB): void{
-        if(bodyA.label == 'animal' && (bodyB.label == 'elephant' || bodyB.label == 'followingAnimal')){
-
+        if (bodyA.label == 'animal' && (bodyB.label == 'elephant' || bodyB.label == 'followingAnimal')){
             bodyA.label = 'followingAnimal';
             this.followingAnimals.push(bodyA.gameObject);
             bodyA.gameObject.setCollidesWith(this.obstacleCat);
             bodyA.gameObject.setSensor(false);
-        }
-        if(bodyA.label == 'disableControl' && bodyB.label == 'elephant'){
+		}
+
+        if (bodyA.label == 'disableControl' && bodyB.label == 'elephant') {
             this.killElephant();
-        }
-        if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
-			console.log('olala')
+		}
 
-            this.savedAnimals += 1;
+        if (bodyA.label == 'followingAnimal' && bodyB.label == 'shelter') {
+            this.savedAnimals += 1
 
-            var animal = bodyA.gameObject.frame.name;
-            animal = animal.slice(0, animal.length - 4);
+            let animal = bodyA.gameObject.frame.name
+            animal = animal.slice(0, animal.length - 4)
 
-            this.playerData.values[animal + "Count"] += 1;
+            this.playerData.values[animal + 'Count'] += 1
 
-            if(bodyA.gameObject.gold){
-                this.playerData.values.goldSaved += 1;
+            if (bodyA.gameObject.gold) {
+                this.playerData.values.goldSaved += 1
             }
 
-            var shelter = bodyB.gameObject;
+            let shelter = bodyB.gameObject
 
-            var multiplier = SCORE_MULTIPLIER;
-            if(bodyA.gameObject.gold){
-                multiplier = multiplier ** 5;
-            }
-            if(shelter.score == 0)
-                shelter.score = BASE_SCORE * multiplier;
-            else
-                shelter.score *= multiplier;
-            if(this.tween === undefined || !this.tween.isPlaying()) {
+            let multiplier = SCORE_MULTIPLIER
+            if (bodyA.gameObject.gold) {
+                multiplier = multiplier ** 5
+			}
+
+			if (shelter.score == 0) {
+                shelter.score = BASE_SCORE * multiplier
+			} else {
+                shelter.score *= multiplier
+			}
+			
+			if (this.tween === undefined || !this.tween.isPlaying()) {
                 this.tween = this.tweens.add({
                     targets: this.scoreText,
                     duration: 50,
                     yoyo: true,
                     ease: 'Cubic.easeIn',
-
-                    y: (20 + Math.log(shelter.score) * 5)*SC
+                    y: (20 + Math.log(shelter.score) * 5) * SC
 
                 });
-            }
+			}
+
             this.killAnimal(bodyA.gameObject);
         }
-    }
-    create (): void {
+	}
 
+    create (): void {
         this.started = false;
 
         var atlasTexture = this.textures.get('round');
@@ -547,8 +538,9 @@ export class MainScene extends Phaser.Scene {
             this.playerData.values.lastDistance + "m", "Last distance");
     }
 
-    createRewardTween(text, color){
-        let textEl = this.add.bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
+	createRewardTween(text, color) {
+		// @ts-ignore
+        let textEl = this.add._bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
         textEl.setScale(0);
         textEl.setScrollFactor(0);
         textEl.tint = color;
@@ -583,29 +575,31 @@ export class MainScene extends Phaser.Scene {
         graphics.strokeLineShape(line)
 
         let x = this.width - 50 * SC
-        let textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5)
+		// @ts-ignore
+		let textEl = this.add._bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5)
         textEl.tint = color
         x = 50 * SC
 
         this.insideScreenObjects.push(textEl)
 
-        textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5)
+		// @ts-ignore
+        textEl = this.add._bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5)
         textEl.tint = color
 
         this.insideScreenObjects.push(textEl)
-    }
-    onBlur(): void
-    {
+	}
+
+    onBlur(): void {
         this.scene.pause('MainScene');
         this.pauseTime = this.lastTime;
-    }
-    onFocus(): void
-    {
+	}
+
+    onFocus(): void {
         this.scene.resume('MainScene');
         this.justResumed = true;
     }
-    update(time, delta): void
-    {
+
+	update(time, delta): void {
         if(this.matter.world != null) {
             if (this.lastUpdateTime == 0) {
                 this.lastUpdateTime = time;
@@ -634,38 +628,43 @@ export class MainScene extends Phaser.Scene {
                 i += 1;
             }
         }
-
-
-
-
     }
-    killAnimal(animal): void{
-        animal.kill();
-        if(this.insideAnimals.includes(animal))
-            this.insideAnimals.splice(this.insideAnimals.indexOf(animal), 1);
-        if(this.followingAnimals.includes(animal))
-            this.followingAnimals.splice(this.followingAnimals.indexOf(animal), 1);
-    }
-    computeMultiplier(): integer{
-        var s = 0;
-        this.followingAnimals.forEach((function(animal){
-            s += animal.gold ? 5 : 1;
-        }).bind(this));
-        var multiplier_log = Math.trunc(s / 5);
-        var multiplier = Math.trunc(Math.pow(2,multiplier_log));
+	
+	killAnimal(animal): void {
+		animal.kill()
 
-        return multiplier;
-    }
-    updateUI(): void{
+		if (this.insideAnimals.includes(animal)) {
+            this.insideAnimals.splice(this.insideAnimals.indexOf(animal), 1)
+		}
 
-        this.fps.setText("FPS: " + Math.trunc(this.game.loop.actualFps));
-        this.scoreText.setText("Score: " + Math.round(this.computeScore()));
+		if (this.followingAnimals.includes(animal)) {
+            this.followingAnimals.splice(this.followingAnimals.indexOf(animal), 1)
+		}
+	}
 
-        var multiplier = this.computeMultiplier();
-        if(this.multiplier != multiplier) {
+    computeMultiplier(): integer {
+		let s = 0
 
-            this.multiplierText.setText("x" + multiplier);
+        this.followingAnimals.forEach((function(animal) {
+            s += animal.gold ? 5 : 1
+        }).bind(this))
+		
+		let multiplier_log = Math.trunc(s / 5)
+        let multiplier = Math.trunc(Math.pow(2, multiplier_log))
 
+        return multiplier
+	}
+
+	updateUI(): void {
+		// @ts-ignore
+		this.fps._setText('FPS: ' + Math.trunc(this.game.loop.actualFps))
+		// @ts-ignore
+		this.scoreText._setText('Score: ' + Math.round(this.computeScore()))
+
+        let multiplier = this.computeMultiplier()
+		if (this.multiplier != multiplier) {
+			// @ts-ignore
+			this.multiplierText._setText(this.i18n.t('x' + multiplier))
 
             this.multiplierTween = this.tweens.addCounter({
                 duration: 500,
@@ -673,104 +672,95 @@ export class MainScene extends Phaser.Scene {
                 ease: 'Cubic.easeInOut',
                 from: this.multiplier,
                 to: multiplier
+			})
 
-            });
-            this.multiplier = multiplier;
-        }
-        if(this.multiplierTween !== undefined){
+            this.multiplier = multiplier
+		}
 
-            var truncValue = Math.trunc(this.multiplierTween.getValue());
+        if (this.multiplierTween !== undefined) {
+            let truncValue = Math.trunc(this.multiplierTween.getValue())
+			let logAdvance : integer
 
-            var logAdvance:integer;
-            logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255) ;
-            if(!isNaN(logAdvance)){
-                this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color);
-                this.multiplierText.setText('x'+truncValue);
-                this.multiplierText.setFontSize((100 + logAdvance/10)*SC);
-                this.multiplierText.setPosition(this.width, 100 * SC)
-                                    .setOrigin(1, 0);
-
+            logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255)
+            if (!isNaN(logAdvance)) {
+				this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color)
+				// @ts-ignore
+				this.multiplierText._setText('x' +  truncValue)
+                this.multiplierText.setFontSize((100 + logAdvance / 10) * SC)
+                this.multiplierText.setPosition(this.width, 100 * SC).setOrigin(1, 0)
             }
+		}
 
+        let meters = this.computeMeters()
+        if (meters > this.lastMeterMark) {
+            this.lastMeterMark += 500
+            this.scoreLine(-this.metersToCamera(this.lastMeterMark) + this.height/2, 0x2F4F4F, this.lastMeterMark + 'm', '')
         }
-        var meters = this.computeMeters();
-        if(meters > this.lastMeterMark){
-            this.lastMeterMark += 500;
-            this.scoreLine(-this.metersToCamera(this.lastMeterMark) + this.height/2, 0x2F4F4F, this.lastMeterMark + 'm', '');
+	}
 
-        }
+    metersToCamera (pos: number): number {
+        return pos / 35 * this.height
+	}
+	
+	updateAnimals (delta): void {
+        this.animalSpeed += delta * ANIMAL_ACC / 1000
 
+        // Following the elephant logic.
+        for (let i = 0; i < this.followingAnimals.length; i++) {
+            let animal = this.followingAnimals[i]
 
-    }
-    metersToCamera(pos: number): number{
-        return pos / 35 * this.height;
-    }
-    updateAchievements(): void{
+            let dir = this.elephant.getCenter().subtract(animal.getCenter())
+            animal.setVelocity(dir.x, dir.y)
+            let distance = dir.length()
+            dir.normalize()
 
-
-    }
-    updateAnimals(delta): void {
-        this.animalSpeed += delta * ANIMAL_ACC /1000;
-
-        //Following the elephant logic.
-        for (var i = 0; i < this.followingAnimals.length; i++) {
-            var animal = this.followingAnimals[i];
-
-            var dir = this.elephant.getCenter().subtract(animal.getCenter());
-            animal.setVelocity(dir.x, dir.y);
-            var distance = dir.length();
-            dir.normalize();
-
-            var scaleY = ((distance - this.elephant.width * this.elephant.scaleX * 0.2) * 2 / this.height);
-            var scaleX = this.animalSpeed * ANIMAL_SPEED_XY_RATIO;
-            scaleY *= this.animalSpeed ;
-            scaleY *= 0.05 + 0.95 * 1/(1 + (i+1));
-            dir.x = dir.x * scaleX;
-            dir.y = dir.y * scaleY;
-            animal.setVelocity(dir.x * SC, dir.y * SC);
-
-
+            let scaleY = ((distance - this.elephant.width * this.elephant.scaleX * 0.2) * 2 / this.height)
+            let scaleX = this.animalSpeed * ANIMAL_SPEED_XY_RATIO
+            scaleY *= this.animalSpeed
+            scaleY *= 0.05 + 0.95 * 1 / (1 + (i + 1))
+            dir.x = dir.x * scaleX
+            dir.y = dir.y * scaleY
+            animal.setVelocity(dir.x * SC, dir.y * SC)
 
             animal.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4;
         }
     }
-    computeScore():  number{
-        var score = 0;
-        for(var i = 0; i < this.liveShelters.length; i++){
+
+	computeScore():  number {
+		let score = 0
+        for (let i = 0; i < this.liveShelters.length; i++) {
             // @ts-ignore
-            score += this.liveShelters[i].score;
+            score += this.liveShelters[i].score
         }
-        score += this.acquiredScore;
+        score += this.acquiredScore
 
-        return score;
+        return score
+	}
 
+    inScreen(gameObject): boolean {
+        return gameObject.y - gameObject.displayHeight / 2 < this.camera.scrollY + this.camera.height
     }
-    inScreen(gameObject): boolean{
-        return gameObject.y - gameObject.displayHeight / 2 < this.camera.scrollY + this.camera.height;
-    }
-    deleteOutsideScreen(): void{
-
-        //Checking that objects are inside the screen.
-        var toDestroy = [];
+	
+	deleteOutsideScreen(): void {
+        // Checking that objects are inside the screen.
+        let toDestroy = [];
 
         this.insideAnimals.forEach((function(animal) {
-
             if (!this.inScreen(animal)) {
-                this.deadInLava += 1;
-                this.killAnimal(animal);
+                this.deadInLava += 1
+                this.killAnimal(animal)
             }
-        }).bind(this));
-        this.insideScreenObjects.forEach((function(object){
-            if (!this.inScreen(object)) {
+		}).bind(this))
 
+        this.insideScreenObjects.forEach((function(object) {
+            if (!this.inScreen(object)) {
                 // @ts-ignore
                 if (typeof object.score !== 'undefined') {
                     // @ts-ignore
-                    this.acquiredScore += object.score;
+                    this.acquiredScore += object.score
                 }
             }
-        }).bind(this));
-
+		}).bind(this))
 
         this.insideScreenObjects = this.insideScreenObjects.filter((this.inScreen).bind(this));
 
@@ -778,7 +768,8 @@ export class MainScene extends Phaser.Scene {
         this.followingAnimals = this.followingAnimals.filter((this.inScreen).bind(this));
         this.liveShelters = this.liveShelters.filter((this.inScreen).bind(this));
     }
-    updateElephant(): void{
+	
+	updateElephant(): void{
         if(!this.disableControl && this.started) {
             var nx = this.input.x + this.camera.scrollX;
             var ny = this.input.y + this.camera.scrollY + this.cameraSpeed;
@@ -802,11 +793,9 @@ export class MainScene extends Phaser.Scene {
             this.elephant.body.label = 'elephant';
         }
 
-    }
+	}
+
     updateCamera(time, delta): void{
-
-
-
         if(this.started) {
             if(this.cameraSpeed  > CAMERA_BASE_SPEED)
             {
@@ -1018,49 +1007,47 @@ export class MainScene extends Phaser.Scene {
 
             }.bind(this), this);
 
-           // @ts-ignore
+           	// @ts-ignore
             this.facebook.on('updatefail', function(e){
                 console.log("update failed" + e.message);
-            });
+			})
+
             this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
             if(this.friends != null){
                 // @ts-ignore
-
                 FBInstant.updateAsync({
                     action: 'LEADERBOARD',
                     // @ts-ignore
                     name: 'Amis.' + this.facebook.contextID,
                 });
-                console.log('ouf');
+				
+				console.log('ouf');
                 this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
-
             }
-
-
         }
-
     }
 
     addInsideScreenObject(object: Phaser.Physics.Matter.Image) {
-        this.insideScreenObjects.push(object);
+        this.insideScreenObjects.push(object)
     }
 
     addShelter(shelter: Phaser.Physics.Matter.Image) {
-        this.insideScreenObjects.push(shelter);
-        this.liveShelters.push(shelter);
+        this.insideScreenObjects.push(shelter)
+        this.liveShelters.push(shelter)
         // @ts-ignore
-        shelter.score = 0;
+        shelter.score = 0
     }
 
     getCharacter() {
-        return this.character;
-    }
-    setPlayerData(playerData){
-        this.playerData = playerData;
+        return this.character
+	}
+
+    setPlayerData(playerData) {
+        this.playerData = playerData
     }
 
     private killElephant() {
-        this.disableControl = true;
-        this.elephant.setTint(0x333333);
+        this.disableControl = true
+        this.elephant.setTint(0x333333)
     }
 }
