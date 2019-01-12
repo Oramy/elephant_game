@@ -1,25 +1,25 @@
-import { MainScene } from "./mainScene";
-import { Menu } from "./menu";
+import { MainScene } from './mainScene'
+import { Menu } from './menu'
 
-import BitmapText = Phaser.GameObjects.BitmapText;
-import Image = Phaser.GameObjects.Image;
-import Container = Phaser.GameObjects.Container;
+import BitmapText = Phaser.GameObjects.BitmapText
+import Image = Phaser.GameObjects.Image
+import Container = Phaser.GameObjects.Container
 
-export class PauseScene extends Phaser.Scene{
-    private width: number;
-    private height: number;
-    private camera: Phaser.Cameras.Scene2D.Camera;
+export class PauseScene extends Phaser.Scene {
+    private width: number
+    private height: number
+    private camera: Phaser.Cameras.Scene2D.Camera
 
-	private mainMenuImage: Image;
-	private resumeImage: Image;
-	private restartImage: Image;
+	private mainMenuImage: Image
+	private resumeImage: Image
+	private restartImage: Image
 
-	private buttonsContainer: Container;
+	private buttonsContainer: Container
 
-	constructor() {
+	constructor () {
 		super({
 			key: "PauseScene"
-		});
+		})
 	}
 
 	resume () {
@@ -28,50 +28,31 @@ export class PauseScene extends Phaser.Scene{
 	}
 	
 	create () {
-		let SC = this.sys.canvas.height / 1920;
+		let SC = this.sys.canvas.height / 1920
 		
-		this.height = this.sys.canvas.height;
-        this.width = this.sys.canvas.width;
-        this.camera = this.cameras.main;
+		this.height = this.sys.canvas.height
+        this.width = this.sys.canvas.width
+		this.camera = this.cameras.main
 
 		this.camera.setBackgroundColor('rgba(0, 0, 0, 0.6)')
 
-		this.mainMenuImage = this.add.image(0, 0, "iconsw", "home.png").setScale(0, 0).setInteractive() as Image;
-		this.resumeImage = this.add.image(0, 0, "iconsw", "forward.png").setScale(0, 0).setInteractive() as Image;
-		this.restartImage = this.add.image(0, 0, "iconsw", "return.png").setScale(0, 0).setInteractive() as Image;
+		this.mainMenuImage = this.add.image(0, 0, "iconsw", "home.png").setScale(3 * SC, 3 * SC).setInteractive() as Image
+		this.resumeImage = this.add.image(0, 0, "iconsw", "next.png").setScale(4 * SC, 4 * SC).setInteractive() as Image
+		this.restartImage = this.add.image(0, 0, "iconsw", "return.png").setScale(3 * SC, 3 * SC).setInteractive() as Image
 
-		Phaser.Display.Align.To.LeftCenter(this.mainMenuImage, this.resumeImage, 150)
-		Phaser.Display.Align.To.RightCenter(this.restartImage, this.resumeImage, 150)
+		Phaser.Display.Align.To.LeftCenter(this.mainMenuImage, this.resumeImage, 75)
+		Phaser.Display.Align.To.RightCenter(this.restartImage, this.resumeImage, 75)
 		
-		this.buttonsContainer = this.add.container(0, 0, this.mainMenuImage);
-		this.buttonsContainer.add(this.resumeImage);
-		this.buttonsContainer.add(this.restartImage);
+		this.buttonsContainer = this.add.container(0, 0, this.mainMenuImage)
+		this.buttonsContainer.add(this.resumeImage)
+		this.buttonsContainer.add(this.restartImage)
 
-		let title = this.add.bitmapText(0, 100, "jungle", "PAUSE", 120*SC); 
-    	let screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
-        let topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2);
+		var title = this.add.bitmapText(0, 100, "jungle", "PAUSE", 120*SC) 
+        var screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height)
+        var topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2)
 
-		Phaser.Display.Align.In.Center(this.buttonsContainer, screenZone);
-        Phaser.Display.Align.In.Center(title, topZone);
-
-		let timeline = this.tweens.timeline({
-			tweens: [{
-				targets: this.mainMenuImage,
-				scaleX: 3 * SC,
-				scaleY: 3 * SC,
-				duration: 100
-			}, {
-				targets: this.resumeImage,
-				scaleX: 4 * SC,
-				scaleY: 4 * SC,
-				duration: 100
-			}, {
-				targets: this.restartImage,
-				scaleX: 3 * SC,
-				scaleY: 3 * SC,
-				duration: 100
-			}]
-		})
+		Phaser.Display.Align.In.Center(this.buttonsContainer, screenZone)
+        Phaser.Display.Align.In.Center(title, topZone)
 
 		this.input.on('gameobjectdown', (pointer, gameObject) => {
 			switch (gameObject) {
@@ -86,6 +67,6 @@ export class PauseScene extends Phaser.Scene{
 					this.scene.start('MainScene')
 					break
 			}
-		});
+		})
 	}
 }

@@ -18,6 +18,9 @@ import ScaleModes = Phaser.ScaleModes;
 import Color = Phaser.Display.Color;
 import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs";
 import Tween = Phaser.Tweens.Tween;
+import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatAlpha;
+import Group = Phaser.GameObjects.Group;
+import {Animal} from "../gameobjects/animal";
 
 function arrayRemove(arr, value) {
 
@@ -45,7 +48,7 @@ export const BASE_SCORE = 10;
 export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
     0, 0.1, 0.07, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.04, -0.03, 0.08, 0.05];
 
-var SC;
+export var SC;
 
 export class MainScene extends Phaser.Scene {
     private elephant: Sprite;
@@ -68,7 +71,8 @@ export class MainScene extends Phaser.Scene {
     private spawnCount: number;
 
     //Objects that must stay inside screen space.
-    private insideScreenObjects: Array<Image>;
+    private insideScreenObjects: Array<GameObject>;
+    private insideAnimals : Array<Animal>;
 
     //Collision categories.
     obstacleCat: number;
@@ -97,7 +101,6 @@ export class MainScene extends Phaser.Scene {
     private multiplierTween: Phaser.Tweens.Tween;
 
     private unlockList= [];
-    private metersText: Phaser.GameObjects.BitmapText;
 
     private leftWall: Sprite;
     private rightWall: Sprite;
@@ -125,10 +128,15 @@ export class MainScene extends Phaser.Scene {
     private touchToPlay: Phaser.GameObjects.BitmapText[];
     private touchToPlayTweens: Tween[];
     private maxFollowingAnimals: number;
+    private rewardTweens: Tween[];
+    private highscored: boolean;
+    private bestDistanced: boolean;
     
-    
+    private lastMeterMark: number;
     
 
+    private animals: Group;
+    private fps: Phaser.GameObjects.BitmapText;
     constructor() {
         super({
             key: "MainScene",
@@ -148,6 +156,7 @@ export class MainScene extends Phaser.Scene {
     updateCharacter(character: string){
         this.character = character;
     }
+
     preload(): void
     {
     }
@@ -194,6 +203,23 @@ export class MainScene extends Phaser.Scene {
 
         this.maxFollowingAnimals = 0;
     }
+    initializeAnimals(): void{
+        this.animals = this.add.group({
+            classType: Animal,
+            maxSize: 50,
+            runChildUpdate: false,
+            defaultKey: 'roundQuarter',
+            defaultFrame: 'elephant.png'
+        });
+    }
+    getAnimal(): Animal{
+        let animal = this.animals.get();
+
+
+        this.insideAnimals.push(animal);
+
+        return animal;
+    }
     createBackground(): void{
 
         this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0);
@@ -216,18 +242,20 @@ export class MainScene extends Phaser.Scene {
 
     }
     computeMeters(): integer{
-        return Math.trunc(-this.camera.scrollY / this.width * 20);
+        return Math.trunc(-this.camera.scrollY / this.height * 35);
     }
     createUI(): void{
+
+        this.rewardTweens = [];
+
+        this.fps = this.add.bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC);
+        this.fps.setScrollFactor(0);
+        this.fps.setDepth(Infinity);
         this.scoreText = this.add.bitmapText(20*SC,20*SC,'jungle', 'Score: ' + this.acquiredScore, 100*SC).setOrigin(0, 0);
         this.scoreText.tint = 0xFFFFFF;
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
 
-        this.metersText = this.add.bitmapText(20*SC,120*SC,'jungle', this.computeScore() + 'm', 100*SC).setOrigin(0, 0);
-        this.metersText.tint = 0xFFFFFF;
-        this.metersText.setScrollFactor(0);
-        this.metersText.setDepth(Infinity);
 
         this.multiplierText = this.add.bitmapText(this.width - 200*SC,0,'jungle', 'x2', 100*SC).setOrigin(0, 0);
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
@@ -324,9 +352,14 @@ export class MainScene extends Phaser.Scene {
 				}
 			}
 		});
+	
+        this.bestDistanced = false;
+        this.highscored = false;
+
+        this.lastMeterMark = 0;
 	}
 
-    createSideWalls(): void{
+	createSideWalls(): void{
         this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
         this.leftWall.setCollisionCategory(this.obstacleCat);
         this.leftWall.setDisplaySize(this.width * 0.5, this.height);
@@ -417,7 +450,7 @@ export class MainScene extends Phaser.Scene {
 
                 });
             }
-            this.destroyObject(bodyA.gameObject);
+            this.killAnimal(bodyA.gameObject);
         }
     }
     create (): void {
@@ -442,6 +475,7 @@ export class MainScene extends Phaser.Scene {
         this.spawnCount = 0;
         this.followingAnimals = [];
         this.insideScreenObjects = [];
+        this.insideAnimals = [];
         this.liveShelters = [];
         this.acquiredScore = 0;
 
@@ -458,6 +492,8 @@ export class MainScene extends Phaser.Scene {
         this.createBackground();
         this.createElephant();
         this.createSideWalls();
+        this.initializeAnimals();
+
         this.prefabs = new Prefabs(this, this.width, this.height);
         //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1);
 
@@ -502,6 +538,64 @@ export class MainScene extends Phaser.Scene {
         this.input.once('pointerdown', function(){
             this.started = true;
         }, this);
+
+        this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
+            this.playerData.values.bestDistance + "m", "Best distance");
+
+        this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
+            this.playerData.values.lastDistance + "m", "Last distance");
+    }
+
+    createRewardTween(text, color){
+
+        var textEl = this.add.bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
+        textEl.setScale(0);
+        textEl.setScrollFactor(0);
+        textEl.tint = color;
+
+        let tween = this.add.tween({
+            targets: textEl,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 200,
+            yoyo: true,
+            ease: 'Quad.easeIn',
+            hold: 800,
+            onComplete: (function(){
+                this.rewardTweens = this.rewardTweens.filter(t => t != tween);
+            }).bind(this)
+        });
+        this.rewardTweens.push(tween);
+
+    }
+
+    scoreLine(y: number, color: number, rightText, leftText): void{
+        var line = new Phaser.Geom.Line(0, y, this.width, y);
+        var graphics = this.add.graphics({
+            lineStyle:{
+                width: 8,
+                color: color,
+                alpha: 1,
+
+            },
+            x: 0,
+            y: 0,
+
+        });
+        graphics.strokeLineShape(line);
+
+
+        var x = this.width - 50 * SC;
+        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5);
+        textEl.tint = color;
+        var x = 50 * SC;
+
+        this.insideScreenObjects.push(textEl);
+
+        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5);
+        textEl.tint = color;
+
+        this.insideScreenObjects.push(textEl);
     }
     onBlur(): void
     {
@@ -515,7 +609,6 @@ export class MainScene extends Phaser.Scene {
     }
     update(time, delta): void
     {
-
         if(this.matter.world != null) {
             if (this.lastUpdateTime == 0) {
                 this.lastUpdateTime = time;
@@ -540,7 +633,7 @@ export class MainScene extends Phaser.Scene {
                 this.updateAnimals(delta);
                 this.deleteOutsideScreen();
                 this.updateUI();
-                this.updateAchievements();
+                this.updateStats();
                 i += 1;
             }
         }
@@ -548,6 +641,13 @@ export class MainScene extends Phaser.Scene {
 
 
 
+    }
+    killAnimal(animal): void{
+        animal.kill();
+        if(this.insideAnimals.includes(animal))
+            this.insideAnimals.splice(this.insideAnimals.indexOf(animal), 1);
+        if(this.followingAnimals.includes(animal))
+            this.followingAnimals.splice(this.followingAnimals.indexOf(animal), 1);
     }
     computeMultiplier(): integer{
         var s = 0;
@@ -560,8 +660,9 @@ export class MainScene extends Phaser.Scene {
         return multiplier;
     }
     updateUI(): void{
+
+        this.fps.setText("FPS: " + Math.trunc(this.game.loop.actualFps));
         this.scoreText.setText("Score: " + Math.round(this.computeScore()));
-        this.metersText.setText(this.computeMeters() + 'm');
 
         var multiplier = this.computeMultiplier();
         if(this.multiplier != multiplier) {
@@ -588,21 +689,27 @@ export class MainScene extends Phaser.Scene {
             if(!isNaN(logAdvance)){
                 this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color);
                 this.multiplierText.setText('x'+truncValue);
-                this.multiplierText.setFontSize((100 + logAdvance/10)*SC)
+                this.multiplierText.setFontSize((100 + logAdvance/10)*SC);
+                this.multiplierText.setPosition(this.width, 100 * SC)
+                                    .setOrigin(1, 0);
 
-                var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
-                Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
             }
+
+        }
+        var meters = this.computeMeters();
+        if(meters > this.lastMeterMark){
+            this.lastMeterMark += 500;
+            this.scoreLine(-this.metersToCamera(this.lastMeterMark) + this.height/2, 0x2F4F4F, this.lastMeterMark + 'm', '');
 
         }
 
 
     }
+    metersToCamera(pos: number): number{
+        return pos / 35 * this.height;
+    }
     updateAchievements(): void{
-        if(this.followingAnimals.length >= this.maxFollowingAnimals){
-            this.maxFollowingAnimals = this.followingAnimals.length;
 
-        }
 
     }
     updateAnimals(delta): void {
@@ -647,38 +754,32 @@ export class MainScene extends Phaser.Scene {
     deleteOutsideScreen(): void{
 
         //Checking that objects are inside the screen.
-        var toDestroy = []
-        for(var i = 0; i < this.insideScreenObjects.length; i++){
-            var gameObject = this.insideScreenObjects[i];
+        var toDestroy = [];
 
-            if(!this.inScreen(gameObject)){
-                if(gameObject.body.label == 'animal' || gameObject.body.label == 'followingAnimal'){
-                    this.deadInLava += 1;
-                }
+        this.insideAnimals.forEach((function(animal) {
 
-                gameObject.destroy();
-                toDestroy.push(gameObject);
-                // @ts-ignore
-                if(typeof gameObject.score !== 'undefined'){
-                    // @ts-ignore
-                    this.acquiredScore += gameObject.score;
-                }
-
-
+            if (!this.inScreen(animal)) {
+                this.deadInLava += 1;
+                this.killAnimal(animal);
             }
+        }).bind(this));
+        this.insideScreenObjects.forEach((function(object){
+            if (!this.inScreen(object)) {
+
+                // @ts-ignore
+                if (typeof object.score !== 'undefined') {
+                    // @ts-ignore
+                    this.acquiredScore += object.score;
+                }
+            }
+        }).bind(this));
 
 
-        }
-        this.insideScreenObjects = this.insideScreenObjects.filter(function(ele){
-            return !toDestroy.includes(ele);
-        });
-        this.followingAnimals = this.followingAnimals.filter(function(ele){
-            return !toDestroy.includes(ele);
-        });
-        this.liveShelters = this.liveShelters.filter(function(ele){
+        this.insideScreenObjects = this.insideScreenObjects.filter((this.inScreen).bind(this));
 
-            return !toDestroy.includes(ele);
-        });
+        this.insideAnimals = this.insideAnimals.filter((this.inScreen).bind(this));
+        this.followingAnimals = this.followingAnimals.filter((this.inScreen).bind(this));
+        this.liveShelters = this.liveShelters.filter((this.inScreen).bind(this));
     }
     updateElephant(): void{
         if(!this.disableControl && this.started) {
@@ -706,8 +807,6 @@ export class MainScene extends Phaser.Scene {
 
     }
     updateCamera(time, delta): void{
-        
-
 
 
 
@@ -812,11 +911,51 @@ export class MainScene extends Phaser.Scene {
         this.liveShelters = this.liveShelters.filter(function(ele){
             return ele != gameObject;
         });
-        gameObject.destroy();
+        gameObject.setActive(false);
     }
     unlock(character){
-        if(!this.unlockList.includes(character))
+        if(!this.unlockList.includes(character) && this.playerData.values[character] !== 'unlocked') {
             this.unlockList.push(character);
+            this.createRewardTween(character + " unlocked !", 0xEBC500);
+        }
+    }
+    updateStats(){
+        if(this.followingAnimals.length >= this.maxFollowingAnimals){
+            this.maxFollowingAnimals = this.followingAnimals.length;
+
+        }
+        var score = this.computeScore();
+        if (score >= 5000) {
+            this.unlock('frog');
+        }
+        if (score >= 20000) {
+            this.unlock('giraffe');
+        }
+        if(score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored){
+            this.highscored = true;
+            this.createRewardTween("Best Highscore!", 0x4169E1);
+        }
+        if(this.computeMeters() > this.playerData.values.bestDistance 
+            && this.playerData.values.bestDistance > 0 && this.bestDistanced){
+            this.bestDistanced = true;
+            this.createRewardTween("Best Distance!", 0x4169E1);
+        }
+        if(this.maxFollowingAnimals >= 40){
+            this.unlock('gorilla');
+        }
+
+        if(this.playerData.values.mooseCount >= 500){
+            this.unlock('moose');
+        }
+        if(this.playerData.values.goldSaved >= 2000){
+            this.unlock('narwhal');
+        }
+        if(this.computeMeters() >= 5000){
+            this.unlock('snake');
+        }
+        if(this.savedAnimals >= 500){
+            this.unlock('hippo');
+        }
     }
     gameOver(): void{
         if(!this.gameOverB) {
@@ -852,28 +991,7 @@ export class MainScene extends Phaser.Scene {
 
             this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals;
 
-            if (this.computeScore() >= 5000) {
-                this.unlock('frog');
-            }
-            if (this.computeScore() >= 20000) {
-                this.unlock('giraffe');
-            }
-            if(this.maxFollowingAnimals >= 40){
-                this.unlock('gorilla');
-            }
-
-            if(this.playerData.values.mooseCount >= 500){
-                this.unlock('moose');
-            }
-            if(this.playerData.values.goldSaved >= 2000){
-                this.unlock('narwhal');
-            }
-            if(this.computeMeters() >= 5000){
-                this.unlock('snake');
-            }
-            if(this.savedAnimals >= 500){
-                this.unlock('hippo');
-            }
+            this.updateStats();
             this.scene.pause("MainScene");
 
             // @ts-ignore

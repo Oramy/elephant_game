@@ -92,35 +92,34 @@ export class Menu extends Phaser.Scene {
         this.indices['hippo'] = 'Save 500 in one run to unlock this animal.\n' +
             '                                                    (' + this.playerData.values.maxAnimalsSavedOneRun + "/500)";
 
-        var characterStatus = this.playerData.get(this.character);
+        let characterStatus = this.playerData.get(this.character);
         if (characterStatus == 'unlocked') {
-            this.playImage.setFrame('forward.png');
+			this.playImage.setFrame('forward.png')
             // @ts-ignore
-            this.touchToStart.setText("Welcome " + this.facebook.playerName + "! Touch your " + this.character + " to start.");
-
+			this.touchToStart.setText(this.i18n.t("welcome", {name: this.facebook.playerName, character: this.character}))
         } else if (characterStatus == 'locked') {
-            this.playImage.setFrame('locked.png');
+            this.playImage.setFrame('locked.png')
             // @ts-ignore
-            var touchText = "This animal is locked...\n";
-            if (this.indices[this.character] !== undefined)
-                touchText += this.indices[this.character];
-            this.touchToStart.setText(touchText);
+            let touchText = this.i18n.t('locked')
+			
+			if (this.indices[this.character] !== undefined) {
+				touchText += this.indices[this.character]
+			}
 
+            this.touchToStart.setText(touchText)
         } else if (characterStatus == 'buyable') {
+			this.playImage.setFrame('basket.png')
+			// @ts-ignore
+			this.touchToStart.setText(this.i18n.t('pay', {price: this.prices[this.character]}))
+		}
 
-
-            this.playImage.setFrame('basket.png');
-            this.touchToStart.setText("Pay " + this.prices[this.character] + " animals to unlock this character.");
-        }
-        var unlockedCount = 0;
-        for (var i = 0; i < this.characterNames.length; i++) {
+		let unlockedCount = 0
+        for (let i = 0; i < this.characterNames.length; i++) {
             if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
-                unlockedCount += 1;
+                unlockedCount += 1
             }
         }
-        this.unlocked.setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length));
-
-
+        this.unlocked.setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length))
     }
 
     updateCharacterImages(ind) {
@@ -454,14 +453,15 @@ export class Menu extends Phaser.Scene {
         // @ts-ignore
         //this.facebook.getLeaderboard('Amis.'+FBInstant.context.getID());
         // @ts-ignore
-        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "Welcome " + this.facebook.playerName + "! Touch anywhere to start.", 40 * SC);
-        var title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120 * SC);
-        var screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
-        var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
+		this.touchToStart = this.add.bitmapText(0, 0, "jungle", "welcome2", 40 * SC, {name: this.facebook.playerName});
+
+        let title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120 * SC);
+        let screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
+    	var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
         Phaser.Display.Align.In.Center(title, topZone);
 
-        var callback = this.startGame.bind(this);
+        let callback = this.startGame.bind(this);
         //this.input.on("pointerdown", callback);
 
 
