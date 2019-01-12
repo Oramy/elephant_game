@@ -59,27 +59,17 @@ export class Prefabs{
         var key = 'roundQuarter';
 
         var frame = notused[i];
-        var animal = scene.matter.add.image(x,y, key, frame, {
-            shape: {
-                type: 'circle',
-                radius: 16
-            },
-            render: {sprite: {xOffset: 0, yOffset: notused_offsets[i]}},
-            label: 'animal',
+        let animal = scene.getAnimal();
 
-        });
-
+        animal.spawn(x, y, frame, scene);
+        animal.body.render.sprite.yOffset = notused_offsets[i];
         notused = notused.filter(function (el,j) {
             return i!=j;
         });
         notused_offsets = notused_offsets.filter(function (el, j) {
             return i!=j;
         });
-        animal.setScale(ANIMAL_SCALE * SC);
-        animal.body.allowRotation = false;
-        animal.setCollisionCategory(scene.obstacleCat);
-        animal.setCollidesWith([scene.elephantCat, scene.obstacleCat]);
-        animal.setSensor(true);
+
         scene.addInsideScreenObject(animal);
         // @ts-ignore
         animal.gold = gold;
