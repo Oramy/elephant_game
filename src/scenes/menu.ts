@@ -1,5 +1,6 @@
-import {MainScene} from "./mainScene";
-import {CoinsComponent} from "../ui/coinsComponent";
+import { MainScene } from "./mainScene";
+import { CoinsComponent } from "../ui/coinsComponent";
+import { VolumeComponent } from '../ui/volumeComponent';
 import Image = Phaser.GameObjects.Image;
 import BitmapText = Phaser.GameObjects.BitmapText;
 
@@ -7,6 +8,8 @@ const LEADERBOARD_DRAW = 3;
 var SC;
 export const SQUARE_Y_OFFSETS = {'bear':0, 'buffalo':-0.015, 'chick':0, 'chicken' : 0.05, 'cow':0, 'crocodile':0, 'dog':0.1, 'duck':0, 'elephant':0.06, 'frog':0.02, 'giraffe':0.1, 'goat':0, 'gorilla':0, 'hippo':0, 'horse':0.05,
    'monkey': 0, 'moose':0.1, 'narwhal':0, 'owl':0, 'panda':0, 'parrot':0, 'penguin':0, 'pig':0, 'rabbit':0.14, 'rhino':0, 'sloth':0, 'snake':-0.05, 'walrus':-0.03, 'whale':0.02, 'zebra':0.05};
+
+const CURRENT_VERSION = 1
 
 export class Menu extends Phaser.Scene {
     private highscores: any;
@@ -48,6 +51,7 @@ export class Menu extends Phaser.Scene {
     };
     private characterNames: string[];
     private coinsComponent: CoinsComponent;
+    private volumeComponent: VolumeComponent;
     private prices = {'bear': 1000, 'crocodile': 5000, 'monkey': 2500, 'whale': 10000, 'panda': 5000};
 
     private saveCreated: boolean;
@@ -61,7 +65,6 @@ export class Menu extends Phaser.Scene {
     constructor() {
         super('Menu');
     }
-
 
     updateCharacter(character = this.character) {
         this.character = character;
@@ -100,7 +103,7 @@ export class Menu extends Phaser.Scene {
             this.playImage.setFrame('locked.png')
             // @ts-ignore
             let touchText = this.i18n.t('locked')
-			
+
 			if (this.indices[this.character] !== undefined) {
 				touchText += this.indices[this.character]
 			}
@@ -121,7 +124,9 @@ export class Menu extends Phaser.Scene {
 		}
 		// @ts-ignore
         this.unlocked._setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length))
-    }
+
+		this.game.sound.mute = !!this.playerData.values.mute
+	}
 
     updateCharacterImages(ind) {
         var next = this.nextUnlockableIndex(ind);
@@ -308,16 +313,17 @@ export class Menu extends Phaser.Scene {
             'bestScore': 0,
             'goldSaved': 0,
             'maxAnimalsSavedOneRun': 0,
-            'maxFollowingAnimals': 0
+            'maxFollowingAnimals': 0,
+			'mute': false,
+			'lastCharacter': 'elephant',
+			'version': CURRENT_VERSION
+		};
 
-        };
-
-
-        this.characterNames.forEach(character => data[character + "Count"] = 0 );
+        this.characterNames.forEach(character => data[character + "Count"] = 0)
 
         //@ts-ignore
-        this.facebook.saveData(data);
-        this.coinsComponent.smoothChangeScore(data['coins'], 1).play();
+        this.facebook.saveData(data)
+        this.coinsComponent.smoothChangeScore(data['coins'], 1).play()
 
     }
 
@@ -347,9 +353,7 @@ export class Menu extends Phaser.Scene {
 
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard) {
-
             if (leaderboard.name == 'Highscores') {
-
                 this.highscores = leaderboard;
                 leaderboard.on('getscores', (function (scores) {
                     this.createHighscoreTab(scores);
@@ -363,11 +367,12 @@ export class Menu extends Phaser.Scene {
                     }.bind(this), this);
 
                     this.highscores.getPlayerScore();
-                }).bind(this));
-                this.highscores.getScores(LEADERBOARD_DRAW, 0);
+				}).bind(this));
 
-            } else if (leaderboard.name == 'Amis')
-                this.friends = leaderboard;
+                this.highscores.getScores(LEADERBOARD_DRAW, 0);
+			} else if (leaderboard.name == 'Amis') {
+				this.friends = leaderboard;
+			}
 
 
         }).bind(this), this);
@@ -376,6 +381,8 @@ export class Menu extends Phaser.Scene {
         background.setScale(SC);
         this.coinsComponent = new CoinsComponent(this, 0);
         this.coinsComponent.create(SC);
+
+        this.volumeComponent = new VolumeComponent(this);
 
         this.characterImage = this.add.image(0, 0, 'squareOutline', 'elephant.png');
         this.characterImage.setScale(1.8 * SC);
@@ -480,7 +487,6 @@ export class Menu extends Phaser.Scene {
             Phaser.Display.Align.In.Center(text, topZone);
         }
 
-
         var dataKeys = this.characterNames.slice();
 
         dataKeys.push('coins');
@@ -493,6 +499,8 @@ export class Menu extends Phaser.Scene {
         dataKeys.push('goldSaved');
         dataKeys.push('maxAnimalsSavedOneRun');
         dataKeys.push('maxFollowingAnimals');
+		dataKeys.push('mute');
+		dataKeys.push('lastCharacter');
 
         this.characterNames.forEach(character => dataKeys.push(character + "Count"));
         // @ts-ignore
@@ -504,16 +512,13 @@ export class Menu extends Phaser.Scene {
 
             // @ts-ignore
             this.facebook.getData(dataKeys);
-
         }).bind(this));
-        // @ts-ignore
+
+		// @ts-ignore
         this.facebook.on('getdata', (function () {
             this.playerData = this.facebook.data;
             var s = false;
-            if ((this.facebook.data.values.elephant === undefined
-                || this.facebook.data.values.bear === 'locked'
-                || this.facebook.data.values.panda === 'locked') && !this.saveCreated) {
-
+            if (this.playerData.values.version !== CURRENT_VERSION && !this.saveCreated) {
                 s = true;
                 this.createSave();
 
@@ -531,9 +536,9 @@ export class Menu extends Phaser.Scene {
             //In order to update images and texts.
             this.updateCharacter();
             this.updatePlayerDataUI();
+            this.volumeComponent.update();
 
             this.scene.get('MainScene').setPlayerData(this.playerData);
-
         }).bind(this), this);
 
         var logo = this.add.image(this.width * 0.83, this.height * 0.9, 'logo');
