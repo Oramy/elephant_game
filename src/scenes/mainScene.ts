@@ -137,6 +137,10 @@ export class MainScene extends Phaser.Scene {
 
     private animals: Group;
     private fps: Phaser.GameObjects.BitmapText;
+
+    private instruments: Phaser.Sound.BaseSound[];
+    private soundLoopsCount: number;
+
     constructor() {
         super({
             key: "MainScene",
@@ -454,6 +458,42 @@ export class MainScene extends Phaser.Scene {
             this.killAnimal(bodyA.gameObject);
         }
     }
+    createSounds(): void{
+        this.soundLoopsCount = 0;
+        this.instruments = [];
+        this.instruments.push(this.sound.add('bass'));
+        this.instruments.push(this.sound.add('drums'));
+        this.instruments.push(this.sound.add('percussion'));
+        this.instruments.push(this.sound.add('synth1'));
+        this.instruments.push(this.sound.add('synth2'));
+        this.instruments.push(this.sound.add('top1'));
+        this.instruments.push(this.sound.add('top2'));
+
+        var loopMarker = {
+            name: 'loop',
+            start: 0,
+            duration: 7.68,
+            config: {
+                loop: true
+            }
+        };
+
+
+        this.instruments.forEach((function(instr){
+            instr.addMarker(loopMarker);
+
+            // Delay option can only be passed in config
+            instr.play('loop', {
+                delay: 0
+            });
+            instr.mute = true;
+        }).bind(this));
+
+        // @ts-ignore
+        this.instruments[0].mute = false;
+        this.instruments[0].on('looped', this.updateSounds, this);
+
+    }
     create (): void {
 
         this.started = false;
@@ -490,6 +530,7 @@ export class MainScene extends Phaser.Scene {
         this.roundFrames = atlasTexture.getFrameNames();
         this.loadLeaderboards();
         this.createUI();
+        this.createSounds();
         this.createBackground();
         this.createElephant();
         this.createSideWalls();
@@ -638,6 +679,22 @@ export class MainScene extends Phaser.Scene {
 
 
 
+    }
+    updateSounds(): void{
+        if(this.started && !this.gameOverB){
+            this.soundLoopsCount += 1;
+
+            if(this.soundLoopsCount < this.instruments.length){
+                // @ts-ignore
+                this.instruments[this.soundLoopsCount].mute = false;
+            }
+            else if(this.soundLoopsCount > this.instruments.length + 2)
+            {
+                var i = Phaser.Math.Between(0, this.instruments.length);
+                // @ts-ignore
+                this.instruments[i].mute =  !this.instruments[i].mute;
+            }
+        }
     }
     killAnimal(animal): void{
         animal.kill();
@@ -956,6 +1013,20 @@ export class MainScene extends Phaser.Scene {
     }
     gameOver(): void{
         if(!this.gameOverB) {
+
+
+            this.scene.get('GameOverScene').tweens.add({
+
+                targets: this.instruments,
+                volume: 0,
+
+                ease: 'Linear',
+                duration: 2000,
+
+                onComplete: (function(){
+                    this.instruments.forEach(instr => instr.stop());
+                }).bind(this)
+            });
             this.gameOverB = true;
             if(this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals)
                 this.playerData.values.maxFollowingAnimals = this.maxFollowingAnimals;

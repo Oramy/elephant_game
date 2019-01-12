@@ -68,6 +68,15 @@ export class Preloader extends Phaser.Scene{
         this.load.image('logo', 'assets/ui/fake_logo_final_v4.png');
 
         this.load.image('menuBackground', 'assets/background/backgroundPastelPlus.png');
+
+        this.load.audio('bass', ['assets/audio/tech/bass.ogg', 'assets/audio/tech/bass.mp3']);
+        this.load.audio('drums', ['assets/audio/tech/drums.ogg', 'assets/audio/tech/drums.mp3']);
+        this.load.audio('percussion', ['assets/audio/tech/percussion.ogg', 'assets/audio/tech/percussion.mp3']);
+        this.load.audio('synth1', ['assets/audio/tech/synth1.ogg', 'assets/audio/tech/synth1.mp3']);
+        this.load.audio('synth2', ['assets/audio/tech/synth2.ogg', 'assets/audio/tech/synth2.mp3']);
+        this.load.audio('top1', ['assets/audio/tech/top1.ogg', 'assets/audio/tech/top1.mp3']);
+        this.load.audio('top2', ['assets/audio/tech/top2.ogg', 'assets/audio/tech/top2.mp3']);
+
     }
 
     startGame () {
