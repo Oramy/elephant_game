@@ -68,6 +68,10 @@ export class CreditScene extends Phaser.Scene{
 		"\n" +
 		"Bonsaiheldin\n" +
 		"http://bonsaiheld.org\n" +
+		"Sons:\n" +
+		"\n" +
+		"LittleRobotSoundFactory\n" +
+		"License: https://creativecommons.org/licenses/by/3.0/\n" +
 		"\n" +
 		"\n" +
 		"Absolue Monarchliste.";

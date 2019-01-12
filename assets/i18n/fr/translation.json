@@ -1,12 +1,22 @@
 {
+	"welcome": "Bienvenue {{name}} ! Tape sur {{character}} pour jouer.",
+	"welcome2": "Bienvenue {{name}}! Tape n’importe où pour jouer.",
+	"gotomenu": "Tape ici pour retourner au menu.",
+	"touchtoplay": "Tape un animal pour jouer lui.",
+	"locked": "Cet animal est bloqué...\n",
+	"unlocked": "Animal débloqué !",
+	"unlocked_plural": "Animaux débloqués !",
+	"pay": "Paie {{price}} animaux pour débloquer cet animal.",
 	"animals": {
-		"narwhal": "Économisez 2000 animaux d’or pour débloquer cet animal.\n({{n}}/2000)",
-		"moose": "Save 500 of this type to unlock this animal.\n({{n}}/500)",
-		"parrot": "Let 1000 die in lava to unlock this animal.\n({{n}}/1000)",
-		"snake": "Escape the fire on 5000m to unlock this animal.\n({{n}}/5000)",
-		"gorilla": "Have more than 40 animals following you to \nto unlock this animal. ({{n}}/40)",
-		"giraffe": "Score over 20000 to unlock this animal.\n({{n}}/20000)",
-		"frog": "Score over 5000 to unlock this animal.\n({{n}}/5000)",
-		"hippo": "Save 500 in one run to unlock this animal.\n({{n}}/500)"
-	}
+		"narwhal": "Sauve 2000 animaux d’or pour débloquer\ncet animal. ({{n}}/2000)",
+		"moose": "Sauve 500 animaux de ce type pour\ndébloquer cet animal. ({{n}}/500)",
+		"parrot": "Laisse 1000 animaux brûler pour\ndébloquer cet animal. ({{n}}/1000)",
+		"snake": "Fuis sur plus de 5000m pour débloquer cet animal.\n({{n}}/5000)",
+		"gorilla": "Fais toi suivre par plus de 40 animaux pour\ndébloquer cet animal. ({{n}}/40)",
+		"giraffe": "Fais un score de plus 20000 pour\ndébloquer cet animal. ({{n}}/20000)",
+		"frog": "Fais un score 5000 pour débloquer cet animal.\n({{n}}/5000)",
+		"hippo": "Sauve 500 animaux en une course pour\ndébloquer cet animal. ({{n}}/500)"
+	},
+	"drag": "Glisser votre animal pour le déplacer.",
+	"escape": "Fuis la lave !"
 }

@@ -16,6 +16,8 @@ export class PauseScene extends Phaser.Scene {
 
 	private buttonsContainer: Container
 
+	private clickSound: Phaser.Sound.BaseSound
+
 	constructor () {
 		super({
 			key: "PauseScene"
@@ -29,7 +31,8 @@ export class PauseScene extends Phaser.Scene {
 	
 	create () {
 		let SC = this.sys.canvas.height / 1920
-		
+
+		this.clickSound = this.sound.add('clickSound')
 		this.height = this.sys.canvas.height
         this.width = this.sys.canvas.width
 		this.camera = this.cameras.main
@@ -47,9 +50,10 @@ export class PauseScene extends Phaser.Scene {
 		this.buttonsContainer.add(this.resumeImage)
 		this.buttonsContainer.add(this.restartImage)
 
-		var title = this.add.bitmapText(0, 100, "jungle", "PAUSE", 120*SC) 
-        var screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height)
-        var topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2)
+		// @ts-ignore
+		let title = this.add._bitmapText(0, 100, "jungle", "PAUSE", 120*SC) 
+        let screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height)
+    	let topZone = this.add.zone(this.width / 2, 200*SC, this.width, this.height / 2)
 
 		Phaser.Display.Align.In.Center(this.buttonsContainer, screenZone)
         Phaser.Display.Align.In.Center(title, topZone)
@@ -59,12 +63,15 @@ export class PauseScene extends Phaser.Scene {
 				case this.mainMenuImage:
 					this.scene.stop('MainScene')
 					this.scene.start('Menu')
+					this.clickSound.play()
 					break
 				case this.resumeImage:
 					this.resume()
+					this.clickSound.play()
 					break
 				case this.restartImage:
 					this.scene.start('MainScene')
+					this.clickSound.play()
 					break
 			}
 		})

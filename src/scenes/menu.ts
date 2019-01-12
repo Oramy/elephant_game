@@ -58,6 +58,9 @@ export class Menu extends Phaser.Scene {
     private nextImage: Phaser.GameObjects.Image;
     private prevImage: Phaser.GameObjects.Image;
 
+    private clickSound: Phaser.Sound.BaseSound;
+    private buySound : Phaser.Sound.BaseSound;
+
     constructor() {
         super('Menu');
     }
@@ -75,22 +78,21 @@ export class Menu extends Phaser.Scene {
 
 	updatePlayerDataUI() {
 		// @ts-ignore
-		this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved});
-        this.indices['moose'] = 'Save 500 of this type to unlock this animal.' +
-            '\n                                                  ('+ this.playerData.values.mooseCount + "/500)";
-        this.indices['parrot'] = 'Let 1000 die in lava to unlock this animal.' +
-            '\n                                                  ('+ this.playerData.values.deadInLava + "/1000)";
-        this.indices['snake'] = 'Escape the fire on 5000m to unlock this animal.' +
-            '\n                                                  ('+ this.playerData.values.bestDistance + "/5000)";
-
-        this.indices['gorilla'] = 'Have more than 40 animals following you \n' +
-            '                              to unlock this animal. (' + this.playerData.values.maxFollowingAnimals + "/40)";
-        this.indices['giraffe'] = 'Score over 20000 to unlock this animal.\n' +
-            '                                                    (' + this.playerData.values.bestScore + "/20000)";
-        this.indices['frog'] = 'Score over 5000 to unlock this animal.\n' +
-            '                                                    (' + this.playerData.values.bestScore + "/5000)";
-        this.indices['hippo'] = 'Save 500 in one run to unlock this animal.\n' +
-            '                                                    (' + this.playerData.values.maxAnimalsSavedOneRun + "/500)";
+		this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved})
+		// @ts-ignore
+		this.indices['moose'] = this.i18n.t('animals.moose', {n: this.playerData.values.mooseCount})
+		// @ts-ignore
+		this.indices['parrot'] = this.i18n.t('animals.parrot', {n: this.playerData.values.deadInLava})
+		// @ts-ignore
+		this.indices['snake'] = this.i18n.t('animals.snake', {n: this.playerData.values.bestDistance})
+		// @ts-ignore
+        this.indices['gorilla'] = this.i18n.t('animals.gorilla', {n: this.playerData.values.maxFollowingAnimals})
+		// @ts-ignore
+		this.indices['giraffe'] = this.i18n.t('animals.giraffe', {n: this.playerData.values.bestScore})
+		// @ts-ignore
+		this.indices['frog'] = this.i18n.t('animals.frog', {n: this.playerData.values.bestScore})
+		// @ts-ignore
+		this.indices['hippo'] = this.i18n.t('animals.hippo', {n: this.playerData.values.maxAnimalsSavedOneRun})
 
         let characterStatus = this.playerData.get(this.character);
         if (characterStatus == 'unlocked') {
@@ -106,7 +108,8 @@ export class Menu extends Phaser.Scene {
 				touchText += this.indices[this.character]
 			}
 
-            this.touchToStart.setText(touchText)
+			// @ts-ignore
+            this.touchToStart._setText(touchText)
         } else if (characterStatus == 'buyable') {
 			this.playImage.setFrame('basket.png')
 			// @ts-ignore
@@ -118,8 +121,9 @@ export class Menu extends Phaser.Scene {
             if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
                 unlockedCount += 1
             }
-        }
-        this.unlocked.setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length))
+		}
+		// @ts-ignore
+        this.unlocked._setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length))
     }
 
     updateCharacterImages(ind) {
@@ -217,6 +221,7 @@ export class Menu extends Phaser.Scene {
 
     next(pointer, gameObject) {
         if (gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
+            this.clickSound.play()
             this.addMoveTween((
                 function () {
                     var ind = this.characterNames.findIndex((function (el) {
@@ -232,7 +237,7 @@ export class Menu extends Phaser.Scene {
 
     prev(pointer, gameObject) {
         if (gameObject == this.prevCharacterImage || gameObject == this.prevCharacterSImage) {
-
+            this.clickSound.play()
             this.addMoveTween((
                 function () {
                     var ind = this.characterNames.findIndex((function (el) {
@@ -246,15 +251,17 @@ export class Menu extends Phaser.Scene {
 
     play(pointer, gameObject) {
         if (this.characterImage === gameObject) {
+
             this.addMoveTween((
                 function () {
                     var characterStatus = this.playerData.get(this.character);
                     if (characterStatus == 'unlocked') {
                         this.startGame();
+                        this.clickSound.play()
                     } else if (characterStatus == 'buyable') {
 
                         if (this.playerData.values.coins >= this.prices[this.character]) {
-
+                            this.buySound.play()
                             this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
                             this.playerData.values.coins -= this.prices[this.character];
                             this.playerData.values[this.character] = 'unlocked';
@@ -334,6 +341,10 @@ export class Menu extends Phaser.Scene {
         SC = this.height / 1920;
         this.camera = this.cameras.main;
         var atlasTexture = this.textures.get('round');
+
+        this.clickSound = this.sound.add('clickSound')
+        this.buySound = this.sound.add('buySound')
+
         this.characterFrames = atlasTexture.getFrameNames();
         this.characterFrames = ['buffalo.png', 'chick.png', 'chicken.png', 'cow.png', 'dog.png', 'duck.png', 'elephant.png',
             'frog.png', 'giraffe.png', 'goat.png', 'hippo.png', 'horse.png', 'moose.png', 'narwhal.png', 'owl.png',
@@ -541,6 +552,7 @@ export class Menu extends Phaser.Scene {
         logo.setInteractive();
         this.input.on('gameobjectdown', function (pointer, gameObject) {
             if (gameObject === logo) {
+                this.clickSound.play()
                 this.scene.pause('Menu');
                 this.scene.launch('CreditScene');
             }
