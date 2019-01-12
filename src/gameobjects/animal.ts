@@ -35,6 +35,9 @@ export class Animal extends Phaser.Physics.Matter.Image{
         this.setActive(false);
         this.body.label = 'dead';
         this.setVisible(false);
+        this.setVelocity(0);
+        this.setAngularVelocity(0);
+        this.setRotation(0);
         this.setCollidesWith([]);
         this.emit('killed');
     }
