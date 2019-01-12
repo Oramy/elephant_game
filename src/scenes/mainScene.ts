@@ -3,141 +3,136 @@
  * @copyright    2018 Digitsensitive
  * @license      Digitsensitive
  */
-import Body = MatterJS.Body;
-import MatterPhysics = Phaser.Physics.Matter.MatterPhysics;
-import GameObject = Phaser.GameObjects.GameObject;
-import Image = Phaser.Physics.Matter.Image;
-import Sprite = Phaser.Physics.Matter.Sprite;
-import Composite = MatterJS.Composite;
-import combined = Phaser.Cameras.Sprite3D.combined;
-import { Menu } from "./menu";
-import { PauseScene } from "./pauseScene";
-import "../prefabs/prefabs.ts";
-import {Prefabs} from "../prefabs/prefabs";
-import ScaleModes = Phaser.ScaleModes;
-import Color = Phaser.Display.Color;
-import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs";
-import Tween = Phaser.Tweens.Tween;
-import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatAlpha;
-import Group = Phaser.GameObjects.Group;
-import {Animal} from "../gameobjects/animal";
+import Body = MatterJS.Body
+import MatterPhysics = Phaser.Physics.Matter.MatterPhysics
+import GameObject = Phaser.GameObjects.GameObject
+import Image = Phaser.Physics.Matter.Image
+import Sprite = Phaser.Physics.Matter.Sprite
+import Composite = MatterJS.Composite
+import combined = Phaser.Cameras.Sprite3D.combined
+import { Menu } from "./menu"
+import { PauseScene } from "./pauseScene"
+import "../prefabs/prefabs.ts"
+import {Prefabs} from "../prefabs/prefabs"
+import ScaleModes = Phaser.ScaleModes
+import Color = Phaser.Display.Color
+import {EASY_OBSTACLE_MAX_ID} from "../prefabs/prefabs"
+import Tween = Phaser.Tweens.Tween
+import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatAlpha
+import Group = Phaser.GameObjects.Group
+import {Animal} from "../gameobjects/animal"
 
 function arrayRemove(arr, value) {
-
-    return arr.filter(function(ele){
-        return ele !== value;
-    });
-
+    return arr.filter(function(ele) {
+        return ele !== value
+    })
 }
-export const ELEPHANT_SCALE = 2;
-export const ANIMAL_SCALE = 3;
+
+export const ELEPHANT_SCALE = 2
+export const ANIMAL_SCALE = 3
 //1 = NO DELAY
-export const MOVE_DELAY_COEFF = 0.1;
-export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2;
-export const ANIMAL_BASE_SPEED = 280;
-export const ANIMAL_SPEED_XY_RATIO = 1/20;
-export const CAMERA_BASE_SPEED = -15; // -15;
-export const CAMERA_BEGIN_SPEED = -5;
-export const ANIMAL_ACC = 6;
-export const CAMERA_ACC = -2; // -0;
-export const ANIMALS_SPAWN = 5;
-export const SCORE_MULTIPLIER = 1.148698355; // 2 ^ (1/5)
-export const BASE_SCORE = 10;
+export const MOVE_DELAY_COEFF = 0.1
+export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2
+export const ANIMAL_BASE_SPEED = 280
+export const ANIMAL_SPEED_XY_RATIO = 1/20
+export const CAMERA_BASE_SPEED = -15 // -15
+export const CAMERA_BEGIN_SPEED = -5
+export const ANIMAL_ACC = 6
+export const CAMERA_ACC = -2 // -0
+export const ANIMALS_SPAWN = 5
+export const SCORE_MULTIPLIER = 1.148698355 // 2 ^ (1/5)
+export const BASE_SCORE = 10
 
-//For each frame, yOffset in percent, for the collision mesh and the image to fit together.
+// For each frame, yOffset in percent, for the collision mesh and the image to fit together.
 export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
-    0, 0.1, 0.07, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.04, -0.03, 0.08, 0.05];
+    0, 0.1, 0.07, 0, 0, 0, 0, 0, 0.14, 0, 0, -0.04, -0.03, 0.08, 0.05]
 
-export var SC;
+export let SC
 
 export class MainScene extends Phaser.Scene {
-    private elephant: Sprite;
-    private elephantDirection: Phaser.Math.Vector2;
-    //Last recorded position of the Elephant. This is used to orientate the elephant without shaking.
-    private lastPosition: number[];
+    private elephant: Sprite
+    private elephantDirection: Phaser.Math.Vector2
+    // Last recorded position of the Elephant. This is used to orientate the elephant without shaking.
+    private lastPosition: number[]
 
+    private camera: Phaser.Cameras.Scene2D.Camera
 
-    private camera: Phaser.Cameras.Scene2D.Camera;
+    private followingAnimals: Array<Image>
+    private liveShelters: Array<Image>
 
-    private followingAnimals: Array<Image>;
-    private liveShelters: Array<Image>;
+    character: string
+    // List of atlas 'round' frame names.
+    roundFrames: string[]
 
+    // Counting how many times we spawned animals.
+    private spawnCount: number
 
-    character: string;
-    //List of atlas 'round' frame names.
-    roundFrames: string[];
+    // Objects that must stay inside screen space.
+    private insideScreenObjects: Array<GameObject>
+    private insideAnimals : Array<Animal>
 
-    //Counting how many times we spawned animals.
-    private spawnCount: number;
+    // Collision categories.
+    obstacleCat: number
+    elephantCat: number
 
-    //Objects that must stay inside screen space.
-    private insideScreenObjects: Array<GameObject>;
-    private insideAnimals : Array<Animal>;
+    private background
 
-    //Collision categories.
-    obstacleCat: number;
-    elephantCat: number;
+    private cameraSpeed: number
+    private animalSpeed: number
+    private acquiredScore: number
+    private scoreText: Phaser.GameObjects.BitmapText
 
+    private highscores: any
+    private friends: any
 
-    private background;
+    private gameOverB: any
+    private height: number
+    private width: number
 
-    private cameraSpeed: number;
-    private animalSpeed: number;
-    private acquiredScore: number;
-    private scoreText: Phaser.GameObjects.BitmapText;
+    private prefabs: Prefabs
+    private multiplierText: Phaser.GameObjects.BitmapText
+    private tween: Phaser.Tweens.Tween
+    private multiplier: number
+    private multiplierTween: Phaser.Tweens.Tween
 
+    private unlockList= []
 
-    private highscores: any;
-    private friends : any;
+    private leftWall: Sprite
+    private rightWall: Sprite
 
-    private gameOverB : any;
-    private height: number;
-    private width: number;
+    private playerData: any
+    private savedAnimals: number
+    private deadInLava: number
 
-    private prefabs: Prefabs;
-    private multiplierText: Phaser.GameObjects.BitmapText;
-    private tween: Phaser.Tweens.Tween;
-    private multiplier: number;
-    private multiplierTween: Phaser.Tweens.Tween;
+    private characterNames: string[]
+    private characterFrames: string[]
 
-    private unlockList= [];
+    private lava: any
+    private lavaMoveType: integer
+    private lavaNextBeginTime: integer
+    private lavaNextEndTime: integer
+    private lavaBottom: Phaser.GameObjects.TileSprite
 
-    private leftWall: Sprite;
-    private rightWall: Sprite;
+    private disableControl: boolean
+    private lastUpdateTime: number
+    private pauseTime: number
+    private justResumed: boolean
+    private lastTime: number
+    private started: boolean
 
-    private playerData: any;
-    private savedAnimals: number;
-    private deadInLava: number;
-
-    private characterNames: string[];
-    private characterFrames: string[];
-
-    private lava: any;
-    private lavaMoveType: integer;
-    private lavaNextBeginTime: integer;
-    private lavaNextEndTime: integer;
-    private lavaBottom: Phaser.GameObjects.TileSprite;
-
-    private disableControl: boolean;
-    private lastUpdateTime: number;
-    private pauseTime: number;
-    private justResumed: boolean;
-    private lastTime: number;
-    private started: boolean;
-
-    private touchToPlay: Phaser.GameObjects.BitmapText[];
-    private touchToPlayTweens: Tween[];
-    private maxFollowingAnimals: number;
-    private rewardTweens: Tween[];
-    private highscored: boolean;
-    private bestDistanced: boolean;
+    private touchToPlay: Phaser.GameObjects.BitmapText[]
+    private touchToPlayTweens: Tween[]
+    private maxFollowingAnimals: number
+    private rewardTweens: Tween[]
+    private highscored: boolean
+    private bestDistanced: boolean
     
-    private lastMeterMark: number;
+    private lastMeterMark: number
     
-    private animals: Group;
-    private fps: Phaser.GameObjects.BitmapText;
-    private instruments: Phaser.Sound.BaseSound[];
-    private soundLoopsCount: number;
+    private animals: Group
+    private fps: Phaser.GameObjects.BitmapText
+    private instruments: Phaser.Sound.BaseSound[]
+    private soundLoopsCount: number
 
     constructor() {
         super({
@@ -163,35 +158,35 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         this.facebook.once('getleaderboard', (function (leaderboard) {
             if (leaderboard.name == 'Highscores') {
-                this.highscores = leaderboard;
-            } else if (leaderboard.name == 'Amis.' + this.facebook.contextID){
+                this.highscores = leaderboard
+            } else if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
                 console.log("friends!!")
-                this.friends = leaderboard;
+                this.friends = leaderboard
             }
-        }).bind(this), this);
+        }).bind(this), this)
 
         // @ts-ignore
-        this.facebook.getLeaderboard('Highscores');
+        this.facebook.getLeaderboard('Highscores')
         // @ts-ignore
-        this.facebook.getPlayers();
+        this.facebook.getPlayers()
         // @ts-ignore
-        this.facebook.once('players', (function(event, data){
-            this.facebook.createContext(data.playerID);
-        }).bind(this));
+        this.facebook.once('players', (function(event, data) {
+            this.facebook.createContext(data.playerID)
+        }).bind(this))
         // @ts-ignore
-        this.facebook.once('create', (function(event, data){
-            if(this.facebook.contextID != null){
+        this.facebook.once('create', (function(event, data) {
+            if (this.facebook.contextID != null) {
                 // @ts-ignore
-                this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
+                this.facebook.getLeaderboard('Amis.' + this.facebook.contextID)
             }
-        }).bind(this));
+        }).bind(this))
         // @ts-ignore
-        if(this.facebook.contextID != null){
+        if (this.facebook.contextID != null) {
             // @ts-ignore
-            this.facebook.getLeaderboard('Amis.' + this.facebook.contextID);
+            this.facebook.getLeaderboard('Amis.' + this.facebook.contextID)
         }
 
-        this.maxFollowingAnimals = 0;
+        this.maxFollowingAnimals = 0
 	}
 
     initializeAnimals(): void{
@@ -201,86 +196,86 @@ export class MainScene extends Phaser.Scene {
             runChildUpdate: false,
             defaultKey: 'roundQuarter',
             defaultFrame: 'elephant.png'
-        });
+        })
 	}
 
     getAnimal(): Animal{
-        let animal = this.animals.get();
+        let animal = this.animals.get()
 
-        this.insideAnimals.push(animal);
+        this.insideAnimals.push(animal)
 
-        return animal;
+        return animal
 	}
 
     createBackground(): void{
-        this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0);
-        this.background.setScale(2*SC);
-        this.background.setScrollFactor(0);
+        this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0)
+        this.background.setScale(2*SC)
+        this.background.setScrollFactor(0)
 
-        this.lavaBottom = this.add.tileSprite(this.width/2, this.height, this.width, 128*SC, 'spritesheet_other', 'fluidRed.png');
-        this.lavaBottom.setScale(2*SC);
-        this.lavaBottom.setScrollFactor(0);
-        this.lavaBottom.setDepth(2);
-        this.lava = this.add.tileSprite(this.width/2, this.height - 64*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png');
-        this.lava.setScale(2*SC);
-        this.lava.setScrollFactor(0);
-        this.lava.setDepth(2);
+        this.lavaBottom = this.add.tileSprite(this.width/2, this.height, this.width, 128*SC, 'spritesheet_other', 'fluidRed.png')
+        this.lavaBottom.setScale(2*SC)
+        this.lavaBottom.setScrollFactor(0)
+        this.lavaBottom.setDepth(2)
+        this.lava = this.add.tileSprite(this.width/2, this.height - 64*SC, this.width, 64*SC, 'spritesheet_other', 'fluidRed_top.png')
+        this.lava.setScale(2*SC)
+        this.lava.setScrollFactor(0)
+        this.lava.setDepth(2)
 
-        this.lavaNextBeginTime = 0;
-        this.lavaNextEndTime = 0;
+        this.lavaNextBeginTime = 0
+        this.lavaNextEndTime = 0
 
 	}
 
     computeMeters(): integer{
-        return Math.trunc(-this.camera.scrollY / this.height * 35);
+        return Math.trunc(-this.camera.scrollY / this.height * 35)
 	}
 
-    createUI(): void{
-        this.rewardTweens = [];
+    createUI(): void {
+        this.rewardTweens = []
 
 		// @ts-ignore
 		this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
-        this.fps.setScrollFactor(0);
-        this.fps.setDepth(Infinity);
+        this.fps.setScrollFactor(0)
+        this.fps.setDepth(Infinity)
 
 		// @ts-ignore
 		this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
-        this.scoreText.tint = 0xFFFFFF;
-        this.scoreText.setScrollFactor(0);
-        this.scoreText.setDepth(Infinity);
+        this.scoreText.tint = 0xFFFFFF
+        this.scoreText.setScrollFactor(0)
+        this.scoreText.setDepth(Infinity)
 
 		// @ts-ignore
 		this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x2', 100*SC).setOrigin(0, 0)
-        this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
-        this.multiplierText.setScrollFactor(0);
-        this.multiplierText.setDepth(Infinity);
-        this.multiplierText.setOrigin(-0.5, 0);
+        this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2)
+        this.multiplierText.setScrollFactor(0)
+        this.multiplierText.setDepth(Infinity)
+        this.multiplierText.setOrigin(-0.5, 0)
 
-        let zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
-        Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
+        let zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC)
+        Phaser.Display.Align.In.TopRight(this.multiplierText, zone)
 
-        this.touchToPlay = [];
+        this.touchToPlay = []
 		
-		let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5);
-        drag.tint = 0xFFFFFF;
-        drag.setScale(1);
-        drag.setScrollFactor(0);
-        drag.setDepth(Infinity);
+		let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5)
+        drag.tint = 0xFFFFFF
+        drag.setScale(1)
+        drag.setScrollFactor(0)
+        drag.setDepth(Infinity)
 
-        let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 100*SC).setOrigin(0.5, 0.5);
-        escape.tint = 0xFFFFFF;
-        escape.setScrollFactor(0);
-        escape.setDepth(Infinity);
-        escape.setAlpha(0);
+        let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 100*SC).setOrigin(0.5, 0.5)
+        escape.tint = 0xFFFFFF
+        escape.setScrollFactor(0)
+        escape.setDepth(Infinity)
+        escape.setAlpha(0)
 		
-		let touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png');
-        touch.setDepth(Infinity);
-        touch.setScale(4 * SC);
-        touch.setScrollFactor(0);
+		let touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png')
+        touch.setDepth(Infinity)
+        touch.setScale(4 * SC)
+        touch.setScrollFactor(0)
 		
-		this.touchToPlay.push(drag);
-        this.touchToPlay.push(escape);
-        this.touchToPlayTweens = [];
+		this.touchToPlay.push(drag)
+        this.touchToPlay.push(escape)
+        this.touchToPlayTweens = []
         this.touchToPlayTweens.push(this.tweens.add({
             targets: touch,
             x: this.width * 0.65,
@@ -289,7 +284,7 @@ export class MainScene extends Phaser.Scene {
             duration: 600,
             yoyo: true,
             repeat: Infinity,
-            hold: 600}));
+            hold: 600}))
         this.touchToPlayTweens.push(this.tweens.add({
             targets: escape,
             alpha : 1,
@@ -297,7 +292,7 @@ export class MainScene extends Phaser.Scene {
             duration: 180,
             yoyo: true,
             repeat: Infinity,
-            hold: 240}));
+            hold: 240}))
         this.touchToPlayTweens.push(this.tweens.add({
             targets: drag,
             scaleX: 0.98,
@@ -306,68 +301,71 @@ export class MainScene extends Phaser.Scene {
             duration: 600,
             yoyo: true,
             repeat: Infinity,
-            hold: 0}));
-        this.input.once('pointerdown', function(){
-            this.touchToPlayTweens.forEach(function(tween){
-                tween.stop();
+            hold: 0}))
+        this.input.once('pointerdown', function() {
+            this.touchToPlayTweens.forEach(function(tween) {
+                tween.stop()
 
-            });
+			})
+
             this.tweens.add({
                 targets: touch,
                 x: this.width *  1.2,
                 y: this.height * 0.2,
                 ease: 'Quad.easeOut',
-                duration: 800});
-            this.tweens.add({
+                duration: 800})
+			
+			this.tweens.add({
                 targets: escape,
                 alpha : 0,
                 ease: 'Quad.easeOut',
-                duration: 800});
-           this.tweens.add({
+                duration: 800})
+        	
+			this.tweens.add({
                 targets: drag,
                 scaleX: 0,
                 scaleY: 0,
                 ease: 'Quad.easeOut',
-                duration: 800});
-            this.touchToPlayTweens = [];
+                duration: 800})
+			
+			this.touchToPlayTweens = []
+        }, this)
 
-        }, this);
-
-        let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png');
-		image.setDepth(Infinity);
-		image.setScrollFactor(0);
-		image.setInteractive();
+        let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png')
+		image.setDepth(Infinity)
+		image.setScrollFactor(0)
+		image.setInteractive()
 
 		this.input.on('gameobjectdown', (pointer, gameObject) => {
 			if (gameObject === image) {	
 		    	if (this.started) {
-            	    this.scene.pause('MainScene');
-            	    this.scene.launch('PauseScene');
+            	    this.scene.pause('MainScene')
+            	    this.scene.launch('PauseScene')
 				}
 			}
-		});
+		})
 	
-        this.bestDistanced = false;
-        this.highscored = false;
+        this.bestDistanced = false
+        this.highscored = false
 
-        this.lastMeterMark = 0;
+        this.lastMeterMark = 0
 	}
 
 	createSideWalls(): void {
-        this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
-        this.leftWall.setCollisionCategory(this.obstacleCat);
-        this.leftWall.setDisplaySize(this.width * 0.5, this.height);
-        this.leftWall.setVisible(false);
-        this.rightWall = this.matter.add.sprite(this.width * 1.9,this.height/2, 'round', 'elephant.png', { isStatic: true});
-        this.rightWall.setCollisionCategory(this.obstacleCat);
-        this.rightWall.setDisplaySize(this.width * 0.5, this.height);
-        this.rightWall.setVisible(false);
+        this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true})
+        this.leftWall.setCollisionCategory(this.obstacleCat)
+        this.leftWall.setDisplaySize(this.width * 0.5, this.height)
+        this.leftWall.setVisible(false)
+        this.rightWall = this.matter.add.sprite(this.width * 1.9,this.height/2, 'round', 'elephant.png', { isStatic: true})
+        this.rightWall.setCollisionCategory(this.obstacleCat)
+        this.rightWall.setDisplaySize(this.width * 0.5, this.height)
+        this.rightWall.setVisible(false)
 	}
 	
 	createElephant(): void {
-        this.disableControl = false;
-        if(this.character === undefined){
-            this.character = 'elephant';
+        this.disableControl = false
+        if (this.character === undefined) {
+            this.character = 'elephant'
         }
         this.elephant = this.matter.add.sprite(this.width/2, this.height * 0.6, 'round', this.character + '.png',
             {
@@ -377,16 +375,16 @@ export class MainScene extends Phaser.Scene {
 
                 },
                 render: { sprite: { xOffset: 0, yOffset: ROUND_Y_OFFSETS[this.characterNames.indexOf(this.character)]} }
-            });
-        this.elephant.setDepth(1);
-        this.elephant.setScale(ELEPHANT_SCALE*SC);
-        this.elephant.setCollisionCategory(this.elephantCat);
-        this.elephant.setCollidesWith(this.obstacleCat);
+            })
+        this.elephant.setDepth(1)
+        this.elephant.setScale(ELEPHANT_SCALE*SC)
+        this.elephant.setCollisionCategory(this.elephantCat)
+        this.elephant.setCollidesWith(this.obstacleCat)
         //We forbid the engine to use physics on the rotation parameter.
-        this.elephant.body.allowRotation = false;
+        this.elephant.body.allowRotation = false
 
-        this.elephantDirection = new Phaser.Math.Vector2(0, 1);
-        this.lastPosition = [0.5 * this.width, 0.5 * this.height];
+        this.elephantDirection = new Phaser.Math.Vector2(0, 1)
+        this.lastPosition = [0.5 * this.width, 0.5 * this.height]
 
     }
 
@@ -396,16 +394,16 @@ export class MainScene extends Phaser.Scene {
      * @param bodyA
      * @param bodyB
      */
-    checkOneSideCollision(event, bodyA, bodyB): void{
-        if (bodyA.label == 'animal' && (bodyB.label == 'elephant' || bodyB.label == 'followingAnimal')){
-            bodyA.label = 'followingAnimal';
-            this.followingAnimals.push(bodyA.gameObject);
-            bodyA.gameObject.setCollidesWith(this.obstacleCat);
-            bodyA.gameObject.setSensor(false);
+    checkOneSideCollision(event, bodyA, bodyB): void {
+        if (bodyA.label == 'animal' && (bodyB.label == 'elephant' || bodyB.label == 'followingAnimal')) {
+            bodyA.label = 'followingAnimal'
+            this.followingAnimals.push(bodyA.gameObject)
+            bodyA.gameObject.setCollidesWith(this.obstacleCat)
+            bodyA.gameObject.setSensor(false)
 		}
 
         if (bodyA.label == 'disableControl' && bodyB.label == 'elephant') {
-            this.killElephant();
+            this.killElephant()
 		}
 
         if (bodyA.label == 'followingAnimal' && bodyB.label == 'shelter') {
@@ -441,148 +439,145 @@ export class MainScene extends Phaser.Scene {
                     ease: 'Cubic.easeIn',
                     y: (20 + Math.log(shelter.score) * 5) * SC
 
-                });
+                })
 			}
 
-            this.killAnimal(bodyA.gameObject);
+            this.killAnimal(bodyA.gameObject)
         }
    	}
 
     createSounds(): void {
-        this.soundLoopsCount = 0;
-        this.instruments = [];
-        this.instruments.push(this.sound.add('bass'));
-        this.instruments.push(this.sound.add('drums'));
-        this.instruments.push(this.sound.add('percussion'));
-        this.instruments.push(this.sound.add('synth1'));
-        this.instruments.push(this.sound.add('synth2'));
-        this.instruments.push(this.sound.add('top1'));
-        this.instruments.push(this.sound.add('top2'));
+        this.soundLoopsCount = 0
+        this.instruments = []
+        this.instruments.push(this.sound.add('bass'))
+        this.instruments.push(this.sound.add('drums'))
+        this.instruments.push(this.sound.add('percussion'))
+        this.instruments.push(this.sound.add('synth1'))
+        this.instruments.push(this.sound.add('synth2'))
+        this.instruments.push(this.sound.add('top1'))
+        this.instruments.push(this.sound.add('top2'))
 
-        var loopMarker = {
+        let loopMarker = {
             name: 'loop',
             start: 0,
             duration: 7.68,
             config: {
                 loop: true
             }
-        };
+        }
 
 
-        this.instruments.forEach((function(instr){
-            instr.addMarker(loopMarker);
+        this.instruments.forEach((function(instr) {
+            instr.addMarker(loopMarker)
 
             // Delay option can only be passed in config
             instr.play('loop', {
                 delay: 0
-            });
-            instr.mute = true;
-        }).bind(this));
+            })
+            instr.mute = true
+        }).bind(this))
 
         // @ts-ignore
-        this.instruments[0].mute = false;
-        this.instruments[0].on('looped', this.updateSounds, this);
+        this.instruments[0].mute = false
+        this.instruments[0].on('looped', this.updateSounds, this)
     }
 
     create (): void {
-        this.started = false;
+        this.started = false
 
-        var atlasTexture = this.textures.get('round');
-        this.characterFrames = atlasTexture.getFrameNames();
-        this.characterNames = this.characterFrames.map(function(frame){
-            return frame.slice(0, frame.length - 4);
-        });
+        let atlasTexture = this.textures.get('round')
+        this.characterFrames = atlasTexture.getFrameNames()
+        this.characterNames = this.characterFrames.map(function(frame) {
+            return frame.slice(0, frame.length - 4)
+        })
 
-        this.savedAnimals = 0;
-        this.deadInLava = 0;
+        this.savedAnimals = 0
+        this.deadInLava = 0
 
-        SC = this.sys.canvas.height / 1920;
-        this.gameOverB = false;
+        SC = this.sys.canvas.height / 1920
+        this.gameOverB = false
         //Initializing categories.
-        this.obstacleCat = this.matter.world.nextCategory();
-        this.elephantCat = this.matter.world.nextCategory();
+        this.obstacleCat = this.matter.world.nextCategory()
+        this.elephantCat = this.matter.world.nextCategory()
 
-        this.spawnCount = 0;
-        this.followingAnimals = [];
-        this.insideScreenObjects = [];
-        this.insideAnimals = [];
-        this.liveShelters = [];
-        this.acquiredScore = 0;
+        this.spawnCount = 0
+        this.followingAnimals = []
+        this.insideScreenObjects = []
+        this.insideAnimals = []
+        this.liveShelters = []
+        this.acquiredScore = 0
 
-        this.height = this.sys.canvas.height;
-        this.width = this.sys.canvas.width;
+        this.height = this.sys.canvas.height
+        this.width = this.sys.canvas.width
 
-        this.camera = this.cameras.main;
+        this.camera = this.cameras.main
 
 
-        var atlasTexture = this.textures.get('round');
-        this.roundFrames = atlasTexture.getFrameNames();
-        this.loadLeaderboards();
-        this.createUI();
-        this.createSounds();
-        this.createBackground();
-        this.createElephant();
-        this.createSideWalls();
-        this.initializeAnimals();
+        atlasTexture = this.textures.get('round')
+        this.roundFrames = atlasTexture.getFrameNames()
+        this.loadLeaderboards()
+        this.createUI()
+        this.createSounds()
+        this.createBackground()
+        this.createElephant()
+        this.createSideWalls()
+        this.initializeAnimals()
 
-        this.prefabs = new Prefabs(this, this.width, this.height);
-        //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1);
+        this.prefabs = new Prefabs(this, this.width, this.height)
+        //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1)
 
-        var collisionCallback = (function (event) {
-                var pairs = event.pairs;
+        let collisionCallback = (function (event) {
+            let pairs = event.pairs
 
-                for (var i = 0, j = pairs.length; i != j; ++i) {
-                    var pair = pairs[i];
-
-                    this.checkOneSideCollision(event, pair.bodyA, pair.bodyB);
-                    this.checkOneSideCollision(event, pair.bodyB, pair.bodyA);
-
-                }
-
+            for (let i = 0, j = pairs.length; i != j; ++i) {
+            	let pair = pairs[i]
+                
+				this.checkOneSideCollision(event, pair.bodyA, pair.bodyB)
+                this.checkOneSideCollision(event, pair.bodyB, pair.bodyA)
             }
-        ).bind(this);
 
-        this.matter.world.on('collisionstart', collisionCallback);
+        }).bind(this)
 
+        this.matter.world.on('collisionstart', collisionCallback)
 
-        this.cameraSpeed = CAMERA_BEGIN_SPEED;
-		this.animalSpeed = ANIMAL_BASE_SPEED;
+        this.cameraSpeed = CAMERA_BEGIN_SPEED
+		this.animalSpeed = ANIMAL_BASE_SPEED
 
 		/*this.input.on('pointerup', function () {
-		    if(this.started) {
-                this.scene.pause();
-                this.scene.launch('pausescene');
+		    if (this.started) {
+                this.scene.pause()
+                this.scene.launch('pausescene')
             }
-		}, this);*/
-		this.events.on('pause', function(){
-		    this.pauseTime = this.lastTime;
-        }, this);
+		}, this)*/
+		this.events.on('pause', function() {
+		    this.pauseTime = this.lastTime
+        }, this)
         this.events.on('resume', function () {
-            this.justResumed = true;
-        }, this);
-        window.addEventListener('focus', this.onFocus.bind(this));
-        window.addEventListener('blur', this.onBlur.bind(this));
-        this.justResumed = false;
-        this.pauseTime = 0;
-        this.lastUpdateTime = 0;
+            this.justResumed = true
+        }, this)
+        window.addEventListener('focus', this.onFocus.bind(this))
+        window.addEventListener('blur', this.onBlur.bind(this))
+        this.justResumed = false
+        this.pauseTime = 0
+        this.lastUpdateTime = 0
 
-        this.input.once('pointerdown', function(){
-            this.started = true;
-        }, this);
+        this.input.once('pointerdown', function() {
+            this.started = true
+        }, this)
 
         this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
-            this.playerData.values.bestDistance + "m", "Best distance");
+            this.playerData.values.bestDistance + "m", "Best distance")
 
         this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
-            this.playerData.values.lastDistance + "m", "Last distance");
+            this.playerData.values.lastDistance + "m", "Last distance")
     }
 
 	createRewardTween(text, color) {
 		// @ts-ignore
-        let textEl = this.add._bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
-        textEl.setScale(0);
-        textEl.setScrollFactor(0);
-        textEl.tint = color;
+        let textEl = this.add._bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5)
+        textEl.setScale(0)
+        textEl.setScrollFactor(0)
+        textEl.tint = color
 
         let tween = this.add.tween({
             targets: textEl,
@@ -592,8 +587,8 @@ export class MainScene extends Phaser.Scene {
             yoyo: true,
             ease: 'Quad.easeIn',
             hold: 800,
-            onComplete: (function(){
-                this.rewardTweens = this.rewardTweens.filter(t => t != tween);
+            onComplete: (function() {
+                this.rewardTweens = this.rewardTweens.filter(t => t != tween)
             }).bind(this)
 		})
 
@@ -629,42 +624,42 @@ export class MainScene extends Phaser.Scene {
 	}
 
     onBlur(): void {
-        this.scene.pause('MainScene');
-        this.pauseTime = this.lastTime;
+        this.scene.pause('MainScene')
+        this.pauseTime = this.lastTime
 	}
 
     onFocus(): void {
-        this.scene.resume('MainScene');
-        this.justResumed = true;
+        this.scene.resume('MainScene')
+        this.justResumed = true
     }
 
 	update(time, delta): void {
-        if(this.matter.world != null) {
+        if (this.matter.world != null) {
             if (this.lastUpdateTime == 0) {
-                this.lastUpdateTime = time;
+                this.lastUpdateTime = time
             }
             if (this.justResumed) {
-                this.lastUpdateTime = this.lastUpdateTime - this.lastTime + time;
-                this.justResumed = false;
+                this.lastUpdateTime = this.lastUpdateTime - this.lastTime + time
+                this.justResumed = false
             }
-            this.lastTime = time;
+            this.lastTime = time
 
-            var i = 0;
+            let i = 0
             while (i < 3 && time - this.lastUpdateTime > 1000 / 60) {
-                this.matter.step(1000 / 60, 1);
-                this.lastUpdateTime += 1000 / 60;
+                this.matter.step(1000 / 60, 1)
+                this.lastUpdateTime += 1000 / 60
 
-                this.updateCamera(time, delta);
+                this.updateCamera(time, delta)
 
                 if (this.elephant != null)
-                    this.updateElephant();
+                    this.updateElephant()
 
-                this.updateScrolling();
-                this.updateAnimals(delta);
-                this.deleteOutsideScreen();
-                this.updateUI();
-                this.updateStats();
-                i += 1;
+                this.updateScrolling()
+                this.updateAnimals(delta)
+                this.deleteOutsideScreen()
+                this.updateUI()
+                this.updateStats()
+                i += 1
             }
         }
     }
@@ -694,19 +689,17 @@ export class MainScene extends Phaser.Scene {
 		return multiplier
 	}
 	
-	updateSounds(): void{
-        if(this.started && !this.gameOverB){
-            this.soundLoopsCount += 1;
+	updateSounds(): void {
+        if (this.started && !this.gameOverB) {
+            this.soundLoopsCount += 1
 
-            if(this.soundLoopsCount < this.instruments.length){
+            if (this.soundLoopsCount < this.instruments.length) {
                 // @ts-ignore
-                this.instruments[this.soundLoopsCount].mute = false;
-            }
-            else if(this.soundLoopsCount > this.instruments.length + 2)
-            {
-                var i = Phaser.Math.Between(0, this.instruments.length);
+                this.instruments[this.soundLoopsCount].mute = false
+            } else if (this.soundLoopsCount > this.instruments.length + 2) {
+                let i = Phaser.Math.Between(0, this.instruments.length)
                 // @ts-ignore
-                this.instruments[i].mute =  !this.instruments[i].mute;
+                this.instruments[i].mute =  !this.instruments[i].mute
             }
         }
     }
@@ -778,7 +771,7 @@ export class MainScene extends Phaser.Scene {
             dir.y = dir.y * scaleY
             animal.setVelocity(dir.x * SC, dir.y * SC)
 
-            animal.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4;
+            animal.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4
         }
     }
 
@@ -799,7 +792,7 @@ export class MainScene extends Phaser.Scene {
 	
 	deleteOutsideScreen(): void {
         // Checking that objects are inside the screen.
-        let toDestroy = [];
+        let toDestroy = []
 
         this.insideAnimals.forEach((function(animal) {
             if (!this.inScreen(animal)) {
@@ -818,281 +811,283 @@ export class MainScene extends Phaser.Scene {
             }
 		}).bind(this))
 
-        this.insideScreenObjects = this.insideScreenObjects.filter((this.inScreen).bind(this));
+        this.insideScreenObjects = this.insideScreenObjects.filter((this.inScreen).bind(this))
 
-        this.insideAnimals = this.insideAnimals.filter((this.inScreen).bind(this));
-        this.followingAnimals = this.followingAnimals.filter((this.inScreen).bind(this));
-        this.liveShelters = this.liveShelters.filter((this.inScreen).bind(this));
+        this.insideAnimals = this.insideAnimals.filter((this.inScreen).bind(this))
+        this.followingAnimals = this.followingAnimals.filter((this.inScreen).bind(this))
+        this.liveShelters = this.liveShelters.filter((this.inScreen).bind(this))
     }
 	
 	updateElephant(): void{
-        if(!this.disableControl && this.started) {
-            var nx = this.input.x + this.camera.scrollX;
-            var ny = this.input.y + this.camera.scrollY + this.cameraSpeed;
-            var x = this.elephant.getCenter().x;
-            var y = this.elephant.getCenter().y;
-            var mx = (nx - x) * MOVE_DELAY_COEFF;
-            var my = (ny - y) * MOVE_DELAY_COEFF;
-            my = Phaser.Math.Clamp(my, -this.height / 2 * MOVE_DELAY_COEFF, this.height / 2 * MOVE_DELAY_COEFF);
+        if (!this.disableControl && this.started) {
+            let nx = this.input.x + this.camera.scrollX
+            let ny = this.input.y + this.camera.scrollY + this.cameraSpeed
+            let x = this.elephant.getCenter().x
+            let y = this.elephant.getCenter().y
+            let mx = (nx - x) * MOVE_DELAY_COEFF
+            let my = (ny - y) * MOVE_DELAY_COEFF
+            my = Phaser.Math.Clamp(my, -this.height / 2 * MOVE_DELAY_COEFF, this.height / 2 * MOVE_DELAY_COEFF)
 
-            this.elephant.setVelocity(mx, my);
+            this.elephant.setVelocity(mx, my)
 
-            var move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0],
-                this.input.y - this.lastPosition[1]);
+            let move = new Phaser.Math.Vector2(this.input.x - this.lastPosition[0], this.input.y - this.lastPosition[1])
 
             if (move.lengthSq() > DIRECTION_UPDATE_DIST_SQ) {
-
-                this.lastPosition = [this.input.x, this.input.y];
-                this.elephantDirection = move;
+                this.lastPosition = [this.input.x, this.input.y]
+                this.elephantDirection = move
             }
-            this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4;
-            this.elephant.body.label = 'elephant';
+		
+			this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4
+            this.elephant.body.label = 'elephant'
         }
-
 	}
 
     updateCamera(time, delta): void{
-        if(this.started) {
-            if(this.cameraSpeed  > CAMERA_BASE_SPEED)
-            {
-                this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC;
-                if(this.cameraSpeed  < CAMERA_BASE_SPEED)
-                {
-                    this.cameraSpeed = CAMERA_BASE_SPEED;
+        if (this.started) {
+            if (this.cameraSpeed  > CAMERA_BASE_SPEED) {
+                this.cameraSpeed += delta * CAMERA_ACC / 1000 * SC
+                if (this.cameraSpeed  < CAMERA_BASE_SPEED) {
+                    this.cameraSpeed = CAMERA_BASE_SPEED
                 }
             }
-            this.camera.scrollY += this.cameraSpeed;
-        }
-        this.background.tilePositionY = this.camera.scrollY / (SC * 2);
-        this.lava.tilePositionX += 3;
-        this.lavaBottom.tilePositionX = this.lava.tilePositionX;
+            this.camera.scrollY += this.cameraSpeed
+		}
 
+        this.background.tilePositionY = this.camera.scrollY / (SC * 2)
+        this.lava.tilePositionX += 3
+        this.lavaBottom.tilePositionX = this.lava.tilePositionX
 
+        if (time > this.lavaNextEndTime) {
+            this.lavaMoveType = Phaser.Math.Between(0, 1)
 
-        if(time > this.lavaNextEndTime){
-            this.lavaMoveType = Phaser.Math.Between(0, 1);
-
-            this.lavaNextBeginTime = time;
-            if(this.lavaMoveType == 0)
-                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(2000, 4000);
+            this.lavaNextBeginTime = time
+            if (this.lavaMoveType == 0)
+                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(2000, 4000)
             else
-                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(1000, 3000);
+                this.lavaNextEndTime = this.lavaNextBeginTime + Phaser.Math.FloatBetween(1000, 3000)
 
 
-            this.lava.y = Math.trunc(this.height - 64 * SC );
-            this.lavaBottom.y =  Math.trunc(this.height + 16 * SC);
+            this.lava.y = Math.trunc(this.height - 64 * SC )
+            this.lavaBottom.y =  Math.trunc(this.height + 16 * SC)
 
-        }
-        else if(time > this.lavaNextBeginTime){
-            var duration = this.lavaNextEndTime - this.lavaNextBeginTime;
-            var t = (time - this.lavaNextBeginTime) / duration;
+        } else if (time > this.lavaNextBeginTime) {
+            let duration = this.lavaNextEndTime - this.lavaNextBeginTime
+            let t = (time - this.lavaNextBeginTime) / duration
 
             switch (this.lavaMoveType) {
                 case 0:
-                    this.lava.y = Math.trunc(this.height - 64 * SC - 10 * SC* (1 - Math.cos(Math.PI * 2 * t)));
-                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  10 * SC* ( 1 - Math.cos(Math.PI * 2 * t)));
+                    this.lava.y = Math.trunc(this.height - 64 * SC - 10 * SC* (1 - Math.cos(Math.PI * 2 * t)))
+                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  10 * SC* ( 1 - Math.cos(Math.PI * 2 * t)))
 
-                    break;
+                    break
                 case 1:
-                    this.lava.y = Math.trunc(this.height - 64 * SC - 50 * SC* (1 - Math.cos(Math.PI * 2 * t)));
-                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  50 * SC* ( 1 - Math.cos(Math.PI * 2 * t)));
+                    this.lava.y = Math.trunc(this.height - 64 * SC - 50 * SC* (1 - Math.cos(Math.PI * 2 * t)))
+                    this.lavaBottom.y =  Math.trunc(this.height + 16 * SC -  50 * SC* ( 1 - Math.cos(Math.PI * 2 * t)))
 
-                    break;
+                    break
             }
-
         }
 
-        this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2);
-        this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2);
-    }
+        this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2)
+        this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2)
+	}
+
     private updateScrolling() : void {
-        if(this.camera.scrollY < -this.spawnCount * this.height){
-            var x = 0;
-            var y = - (this.spawnCount + 1) * this.height;
+        if (this.camera.scrollY < -this.spawnCount * this.height) {
+            let x = 0
+            let y = - (this.spawnCount + 1) * this.height
 
-            if(this.spawnCount % 8 == 1)
-            {
-                if(this.spawnCount < 50)
-                {
-                    this.prefabs.addObstaclesWithShelter(x, y, 0);
-                }
-                else
-                    this.prefabs.addObstaclesWithShelter(x, y);
-            }
+            if (this.spawnCount % 8 == 1) {
+                if (this.spawnCount < 50) {
+                    this.prefabs.addObstaclesWithShelter(x, y, 0)
+                } else {
+                    this.prefabs.addObstaclesWithShelter(x, y)
+				}
+			} else if (this.spawnCount == 0) {
+                this.prefabs.addObstaclesAndAnimals(x, y, 0)
+			} else {
+                if (this.spawnCount < 50) {
+                    this.prefabs.addObstaclesAndAnimals(x, y, Phaser.Math.Between(0,EASY_OBSTACLE_MAX_ID))
+                } else {
+                    this.prefabs.addObstaclesAndAnimals(x, y)
+				}
+			}
 
-            else if(this.spawnCount == 0)
-                this.prefabs.addObstaclesAndAnimals(x, y, 0);
-            else{
-                if(this.spawnCount < 50)
-                {
+            this.spawnCount++
+		}
 
-                    this.prefabs.addObstaclesAndAnimals(x, y, Phaser.Math.Between(0,EASY_OBSTACLE_MAX_ID));
-                }
-                else
-                    this.prefabs.addObstaclesAndAnimals(x, y);
-            }
-
-            this.spawnCount ++;
-
-        }
-        if(!this.inScreen(this.elephant)){
-            this.gameOver();
+        if (!this.inScreen(this.elephant)) {
+            this.gameOver()
         }
     }
 
     private destroyObject(gameObject: any) {
-        this.insideScreenObjects = this.insideScreenObjects.filter(function(ele){
-            return ele != gameObject;
-        });
-        this.followingAnimals = this.followingAnimals.filter(function(ele){
-            return ele != gameObject;
-        });
-        if(typeof gameObject.score !== 'undefined'){
-            this.acquiredScore += gameObject.score;
+        this.insideScreenObjects = this.insideScreenObjects.filter(function(ele) {
+            return ele != gameObject
+        })
+		
+		this.followingAnimals = this.followingAnimals.filter(function(ele) {
+            return ele != gameObject
+        })
+		
+		if (typeof gameObject.score !== 'undefined') {
+            this.acquiredScore += gameObject.score
         }
-        this.liveShelters = this.liveShelters.filter(function(ele){
-            return ele != gameObject;
-        });
-        gameObject.setActive(false);
+		
+		this.liveShelters = this.liveShelters.filter(function(ele) {
+            return ele != gameObject
+        })
+	
+		gameObject.setActive(false)
     }
-    unlock(character){
-        if(!this.unlockList.includes(character) && this.playerData.values[character] !== 'unlocked') {
-            this.unlockList.push(character);
-            this.createRewardTween(character + " unlocked !", 0xEBC500);
+	
+	unlock(character) {
+        if (!this.unlockList.includes(character) && this.playerData.values[character] !== 'unlocked') {
+            this.unlockList.push(character)
+            this.createRewardTween(character + " unlocked !", 0xEBC500)
         }
-    }
-    updateStats(){
-        if(this.followingAnimals.length >= this.maxFollowingAnimals){
-            this.maxFollowingAnimals = this.followingAnimals.length;
+	}
+
+    updateStats() {
+        if (this.followingAnimals.length >= this.maxFollowingAnimals) {
+            this.maxFollowingAnimals = this.followingAnimals.length
 
         }
-        var score = this.computeScore();
-        if (score >= 5000) {
-            this.unlock('frog');
+	   
+		let score = this.computeScore()
+		
+		if (score >= 5000) {
+            this.unlock('frog')
         }
-        if (score >= 20000) {
-            this.unlock('giraffe');
+		
+		if (score >= 20000) {
+            this.unlock('giraffe')
         }
-        if(score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored){
-            this.highscored = true;
-            this.createRewardTween("Best Highscore!", 0x4169E1);
+		
+		if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
+            this.highscored = true
+            this.createRewardTween("Best Highscore!", 0x4169E1)
         }
-        if(this.computeMeters() > this.playerData.values.bestDistance 
-            && this.playerData.values.bestDistance > 0 && this.bestDistanced){
-            this.bestDistanced = true;
-            this.createRewardTween("Best Distance!", 0x4169E1);
+		
+		if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && this.bestDistanced) {
+            this.bestDistanced = true
+            this.createRewardTween("Best Distance!", 0x4169E1)
         }
-        if(this.maxFollowingAnimals >= 40){
-            this.unlock('gorilla');
+        if (this.maxFollowingAnimals >= 40) {
+            this.unlock('gorilla')
         }
 
-        if(this.playerData.values.mooseCount >= 500){
-            this.unlock('moose');
+        if (this.playerData.values.mooseCount >= 500) {
+            this.unlock('moose')
         }
-        if(this.playerData.values.goldSaved >= 2000){
-            this.unlock('narwhal');
+		
+		if (this.playerData.values.goldSaved >= 2000) {
+            this.unlock('narwhal')
         }
-        if(this.computeMeters() >= 5000){
-            this.unlock('snake');
+		
+		if (this.computeMeters() >= 5000) {
+            this.unlock('snake')
+		}
+
+        if (this.savedAnimals >= 500) {
+            this.unlock('hippo')
         }
-        if(this.savedAnimals >= 500){
-            this.unlock('hippo');
-        }
-    }
+	}
+
     gameOver(): void{
-        if(!this.gameOverB) {
-
-
+        if (!this.gameOverB) {
             this.scene.get('GameOverScene').tweens.add({
-
                 targets: this.instruments,
                 volume: 0,
 
                 ease: 'Linear',
                 duration: 2000,
 
-                onComplete: (function(){
-                    this.instruments.forEach(instr => instr.stop());
+                onComplete: (function() {
+                    this.instruments.forEach(instr => instr.stop())
                 }).bind(this)
-            });
-            this.gameOverB = true;
-            if(this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals)
-                this.playerData.values.maxFollowingAnimals = this.maxFollowingAnimals;
+			})
+
+            this.gameOverB = true
+			
+			if (this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals) {
+                this.playerData.values.maxFollowingAnimals = this.maxFollowingAnimals
+			}
 
 
-            var data = {
+            let data = {
                 character: this.character
-            }
-            var menu = this.scene.get("menu");
+			}
 
-            var oldAnimalCount = this.playerData.values.coins;
+            let menu = this.scene.get("menu")
 
-            this.playerData.values.coins += this.savedAnimals;
-            this.playerData.values.gameCount += 1;
-            this.playerData.values.deadInLava += this.deadInLava;
-            this.playerData.values.lastScore = this.computeScore();
+            let oldAnimalCount = this.playerData.values.coins
 
-            var lastDist = this.computeMeters();
-            this.playerData.values.lastDistance = lastDist;
-            if(this.playerData.values.bestDistance < lastDist){
-                this.playerData.values.bestDistance = lastDist;
-            }
+            this.playerData.values.coins += this.savedAnimals
+            this.playerData.values.gameCount += 1
+            this.playerData.values.deadInLava += this.deadInLava
+            this.playerData.values.lastScore = this.computeScore()
 
-            var score = Math.trunc(this.computeScore());
-            this.playerData.lastScore = score;
-
-            if(this.playerData.values.bestScore < score){
-                this.playerData.values.bestScore = score;
+            let lastDist = this.computeMeters()
+            this.playerData.values.lastDistance = lastDist
+            if (this.playerData.values.bestDistance < lastDist) {
+                this.playerData.values.bestDistance = lastDist
             }
 
-            this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals;
+            let score = Math.trunc(this.computeScore())
+            this.playerData.lastScore = score
 
-            this.updateStats();
-            this.scene.pause("MainScene");
+            if (this.playerData.values.bestScore < score) {
+                this.playerData.values.bestScore = score
+            }
+
+            this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals
+
+            this.updateStats()
+            this.scene.pause("MainScene")
 
             // @ts-ignore
             this.highscores.on('setscore', function (key) {
-                var unlocked = [];
-                for(var i = 0; i < this.characterNames.length; i++){
-                    if(this.playerData.get(this.characterNames[i]) === 'unlocked')
-                    {
-                        unlocked.push(this.characterNames[i]);
+                let unlocked = []
+				
+				for (let i = 0; i < this.characterNames.length; i++) {
+                    if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
+                        unlocked.push(this.characterNames[i])
                     }
                 }
-                this.scene.get('GameOverScene').initStats(Math.trunc(this.computeScore()), this.unlockList, unlocked, this.character, oldAnimalCount, this.savedAnimals, this.playerData);
+
+				this.scene.get('GameOverScene').initStats(Math.trunc(this.computeScore()), this.unlockList, unlocked, this.character, oldAnimalCount, this.savedAnimals, this.playerData)
 
                 if (this.unlockList.length > 0) {
                     // @ts-ignore
-                    this.unlockList.forEach((function(character){
-                        this.facebook.data.set(character, 'unlocked');
-                    }).bind(this));
+                    this.unlockList.forEach((function(character) {
+                        this.facebook.data.set(character, 'unlocked')
+                    }).bind(this))
 
-                    this.facebook.on('savedata', this.scene.get('Menu').updateCharacter);
+                    this.facebook.on('savedata', this.scene.get('Menu').updateCharacter)
                 }
 
+                this.scene.start('GameOverScene')
 
-                this.scene.start('GameOverScene');
-
-                this.scene.get('Menu').lastScore = Math.trunc(this.computeScore());
-
-            }.bind(this), this);
+                this.scene.get('Menu').lastScore = Math.trunc(this.computeScore())
+            }.bind(this), this)
 
            	// @ts-ignore
-            this.facebook.on('updatefail', function(e){
-                console.log("update failed" + e.message);
+            this.facebook.on('updatefail', function(e) {
+                console.log("update failed" + e.message)
 			})
 
-            this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
-            if(this.friends != null){
+            this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data))
+            if (this.friends != null) {
                 // @ts-ignore
                 FBInstant.updateAsync({
                     action: 'LEADERBOARD',
                     // @ts-ignore
                     name: 'Amis.' + this.facebook.contextID,
-                });
+                })
 				
-				console.log('ouf');
-                this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data));
+				console.log('ouf')
+                this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data))
             }
         }
     }
