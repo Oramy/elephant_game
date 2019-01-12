@@ -76,6 +76,7 @@ export class Preloader extends Phaser.Scene{
         this.load.audio('synth2', ['assets/audio/tech/synth2.ogg', 'assets/audio/tech/synth2.mp3']);
         this.load.audio('top1', ['assets/audio/tech/top1.ogg', 'assets/audio/tech/top1.mp3']);
         this.load.audio('top2', ['assets/audio/tech/top2.ogg', 'assets/audio/tech/top2.mp3']);
+        this.load.audio('pickCoin', 'assets/audio/399196__spiceprogram__perc-bip.wav');
 
     }
 

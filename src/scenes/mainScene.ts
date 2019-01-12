@@ -140,6 +140,7 @@ export class MainScene extends Phaser.Scene {
 
     private instruments: Phaser.Sound.BaseSound[];
     private soundLoopsCount: number;
+    private pickSound: Phaser.Sound.BaseSound;
 
     constructor() {
         super({
@@ -416,12 +417,15 @@ export class MainScene extends Phaser.Scene {
             this.followingAnimals.push(bodyA.gameObject);
             bodyA.gameObject.setCollidesWith(this.obstacleCat);
             bodyA.gameObject.setSensor(false);
+
         }
         if(bodyA.label == 'disableControl' && bodyB.label == 'elephant'){
             this.killElephant();
         }
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
 			console.log('olala')
+
+            this.pickSound.play();
 
             this.savedAnimals += 1;
 
@@ -459,6 +463,7 @@ export class MainScene extends Phaser.Scene {
         }
     }
     createSounds(): void{
+        this.pickSound = this.sound.add('pickCoin');
         this.soundLoopsCount = 0;
         this.instruments = [];
         this.instruments.push(this.sound.add('bass'));
