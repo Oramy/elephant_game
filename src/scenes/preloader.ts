@@ -5,30 +5,29 @@ import { GameOverScene } from "./gameOverScene";
 import { PauseScene } from "./pauseScene";
 
 export class Preloader extends Phaser.Scene{
-    constructor ()
-    {
+    constructor () {
         super('Preloader');
-    }
-    resize() {
-    var canvas = this.sys.canvas, width = window.innerWidth, height = window.innerHeight;
-    var wratio = width / height, ratio = canvas.width / canvas.height;
+	}
 
-    if (wratio < ratio) {
-        canvas.style.width = width + "px";
-        canvas.style.height = (width / ratio) + "px";
-    } else {
-        canvas.style.width = (height * ratio) + "px";
-        canvas.style.height = height + "px";
-    }
-}
+    resize () {
+	    var canvas = this.sys.canvas, width = window.innerWidth, height = window.innerHeight;
+	    var wratio = width / height, ratio = canvas.width / canvas.height;
 
+	    if (wratio < ratio) {
+   	    	canvas.style.width = width + "px";
+        	canvas.style.height = (width / ratio) + "px";
+    	} else {
+        	canvas.style.width = (height * ratio) + "px";
+        	canvas.style.height = height + "px";
+    	}
+	}
 
     create () {
         window.addEventListener('resize', this.resize.bind(this));
         this.resize();
-    }
-    preload ()
-    {
+	}
+
+    preload () {
         // @ts-ignore
         this.facebook.once('startgame', this.startGame, this);
         // @ts-ignore
@@ -56,12 +55,9 @@ export class Preloader extends Phaser.Scene{
         this.load.image('logo', 'assets/ui/fake_logo_final_v4.png');
 
         this.load.image('menuBackground', 'assets/background/backgroundPastelPlus.png');
-
     }
 
-    startGame ()
-    {
+    startGame () {
         this.scene.start('Menu');
     }
-
 }

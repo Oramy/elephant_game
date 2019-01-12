@@ -310,7 +310,22 @@ export class MainScene extends Phaser.Scene {
             this.touchToPlayTweens = [];
 
         }, this);
-    }
+
+        let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png');
+		image.setDepth(Infinity);
+		image.setScrollFactor(0);
+		image.setInteractive();
+
+		this.input.on('gameobjectdown', (pointer, gameObject) => {
+			if (gameObject === image) {	
+		    	if (this.started) {
+            	    this.scene.pause('MainScene');
+            	    this.scene.launch('PauseScene');
+				}
+			}
+		});
+	}
+
     createSideWalls(): void{
         this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true});
         this.leftWall.setCollisionCategory(this.obstacleCat);
@@ -368,6 +383,7 @@ export class MainScene extends Phaser.Scene {
             this.killElephant();
         }
         if(bodyA.label == 'followingAnimal' && bodyB.label == 'shelter'){
+			console.log('olala')
 
             this.savedAnimals += 1;
 
@@ -468,7 +484,7 @@ export class MainScene extends Phaser.Scene {
 		/*this.input.on('pointerup', function () {
 		    if(this.started) {
                 this.scene.pause();
-                this.scene.launch('PauseScene');
+                this.scene.launch('pausescene');
             }
 		}, this);*/
 		this.events.on('pause', function(){
@@ -486,8 +502,6 @@ export class MainScene extends Phaser.Scene {
         this.input.once('pointerdown', function(){
             this.started = true;
         }, this);
-
-
     }
     onBlur(): void
     {

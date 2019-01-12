@@ -17,9 +17,10 @@
     "typescript": "3.1.6",
     "webpack": "4.25.1",
     "webpack-cli": "3.1.2",
-    "webpack-dev-server": "3.1.10"
+    "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
+    "@koreez/phaser3-i18n": "^2.0.5",
     "openssl": "^1.1.0",
     "phaser": "3.10.1"
   },

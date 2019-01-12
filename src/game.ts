@@ -13,6 +13,7 @@ import { Preloader } from "./scenes/preloader";
 import { GameOverScene } from "./scenes/gameOverScene";
 import { CreditScene } from "./scenes/creditScene";
 import { PauseScene } from "./scenes/pauseScene";
+import { I18nPlugin } from "@koreez/phaser3-i18n";
 
 // main game configuration
 
@@ -44,7 +45,15 @@ var config: any = {
         gravity: { y: 0 }
       }
     },
-
+    plugins: {
+        scene: [
+            {
+                key: "i18nPlugin",
+                plugin: I18nPlugin,
+                mapping: "i18n"
+            }
+        ]
+    }
   };
   new Game(config);
 });

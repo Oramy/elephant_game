@@ -73,9 +73,9 @@ export class Menu extends Phaser.Scene {
         this.updateCharacterImages(ind);
     }
 
-    updatePlayerDataUI() {
-        this.indices['narwhal'] = 'Save 2000 gold animals to unlock this animal.' +
-            '\n                                                  ('+ this.playerData.values.goldSaved + "/2000)";
+	updatePlayerDataUI() {
+		// @ts-ignore
+		this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved});
         this.indices['moose'] = 'Save 500 of this type to unlock this animal.' +
             '\n                                                  ('+ this.playerData.values.mooseCount + "/500)";
         this.indices['parrot'] = 'Let 1000 die in lava to unlock this animal.' +
