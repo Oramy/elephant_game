@@ -240,12 +240,13 @@ export class MainScene extends Phaser.Scene {
         this.lavaNextBeginTime = 0;
         this.lavaNextEndTime = 0;
 
-    }
+	}
+
     computeMeters(): integer{
         return Math.trunc(-this.camera.scrollY / this.height * 35);
-    }
-    createUI(): void{
+	}
 
+    createUI(): void{
         this.rewardTweens = [];
 
         this.fps = this.add.bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC);
@@ -256,35 +257,35 @@ export class MainScene extends Phaser.Scene {
         this.scoreText.setScrollFactor(0);
         this.scoreText.setDepth(Infinity);
 
-
         this.multiplierText = this.add.bitmapText(this.width - 200*SC,0,'jungle', 'x2', 100*SC).setOrigin(0, 0);
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2);
         this.multiplierText.setScrollFactor(0);
         this.multiplierText.setDepth(Infinity);
         this.multiplierText.setOrigin(-0.5, 0);
 
-        var zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
+        let zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC);
         Phaser.Display.Align.In.TopRight(this.multiplierText, zone);
 
         this.touchToPlay = [];
-        var drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle',
-            'Drag your character to move it.', 60*SC).setOrigin(0.5, 0.5);
+		
+		let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5);
         drag.tint = 0xFFFFFF;
         drag.setScale(1);
         drag.setScrollFactor(0);
         drag.setDepth(Infinity);
 
-        var escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle',
-            'Escape the lava!', 100*SC).setOrigin(0.5, 0.5);
+        let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 100*SC).setOrigin(0.5, 0.5);
         escape.tint = 0xFFFFFF;
         escape.setScrollFactor(0);
         escape.setDepth(Infinity);
         escape.setAlpha(0);
-        var touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png');
+		
+		let touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png');
         touch.setDepth(Infinity);
         touch.setScale(4 * SC);
         touch.setScrollFactor(0);
-        this.touchToPlay.push(drag);
+		
+		this.touchToPlay.push(drag);
         this.touchToPlay.push(escape);
         this.touchToPlayTweens = [];
         this.touchToPlayTweens.push(this.tweens.add({
@@ -547,8 +548,7 @@ export class MainScene extends Phaser.Scene {
     }
 
     createRewardTween(text, color){
-
-        var textEl = this.add.bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
+        let textEl = this.add.bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5);
         textEl.setScale(0);
         textEl.setScrollFactor(0);
         textEl.tint = color;
@@ -564,38 +564,35 @@ export class MainScene extends Phaser.Scene {
             onComplete: (function(){
                 this.rewardTweens = this.rewardTweens.filter(t => t != tween);
             }).bind(this)
-        });
-        this.rewardTweens.push(tween);
+		})
 
+        this.rewardTweens.push(tween)
     }
 
-    scoreLine(y: number, color: number, rightText, leftText): void{
-        var line = new Phaser.Geom.Line(0, y, this.width, y);
-        var graphics = this.add.graphics({
+    scoreLine(y: number, color: number, rightText, leftText): void {
+        let line = new Phaser.Geom.Line(0, y, this.width, y)
+        let graphics = this.add.graphics({
             lineStyle:{
                 width: 8,
                 color: color,
-                alpha: 1,
-
+                alpha: 1
             },
             x: 0,
-            y: 0,
+            y: 0
+		})
+        graphics.strokeLineShape(line)
 
-        });
-        graphics.strokeLineShape(line);
+        let x = this.width - 50 * SC
+        let textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5)
+        textEl.tint = color
+        x = 50 * SC
 
+        this.insideScreenObjects.push(textEl)
 
-        var x = this.width - 50 * SC;
-        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5);
-        textEl.tint = color;
-        var x = 50 * SC;
+        textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5)
+        textEl.tint = color
 
-        this.insideScreenObjects.push(textEl);
-
-        var textEl = this.add.bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5);
-        textEl.tint = color;
-
-        this.insideScreenObjects.push(textEl);
+        this.insideScreenObjects.push(textEl)
     }
     onBlur(): void
     {

@@ -1,0 +1,19 @@
+{
+	"score": "Score: {{score}}",
+	"welcome": "Welcome {{name}}! Touch your {{character}} to start.",
+	"welcome2": "Welcome {{name}}! Touch anywhere to start.",
+	"locked": "This animal is locked...\n",
+	"pay": "Pay {{price}} animals to unlock this character.",
+	"animals": {
+		"narwhal": "Save 2000 gold animals to unlock this animal.\n({{n}}/2000)",
+		"moose": "Save 500 of this type to unlock this animal.\n({{n}}/500)",
+		"parrot": "Let 1000 die in lava to unlock this animal.\n({{n}}/1000)",
+		"snake": "Escape the fire on 5000m to unlock this animal.\n({{n}}/5000)",
+		"gorilla": "Have more than 40 animals following you to \nto unlock this animal. ({{n}}/40)",
+		"giraffe": "Score over 20000 to unlock this animal.\n({{n}}/20000)",
+		"frog": "Score over 5000 to unlock this animal.\n({{n}}/5000)",
+		"hippo": "Save 500 in one run to unlock this animal.\n({{n}}/500)"
+	},
+	"drag": "Drag your character to move it.",
+	"escape": "Escape the lava!"
+}
