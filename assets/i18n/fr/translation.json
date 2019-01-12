@@ -18,5 +18,6 @@
 		"hippo": "Sauve 500 animaux en une course pour\ndébloquer cet animal. ({{n}}/500)"
 	},
 	"drag": "Glisser votre animal pour le déplacer.",
-	"escape": "Fuis la lave !"
+	"escape": "Fuis la lave !",
+    "lastScore": "Dernier Score : {{score}}"
 }
