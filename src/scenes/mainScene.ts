@@ -34,11 +34,11 @@ export const ANIMAL_SCALE = 3
 //1 = NO DELAY
 export const MOVE_DELAY_COEFF = 0.1
 export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2
-export const ANIMAL_BASE_SPEED = 280
+export const ANIMAL_BASE_SPEED = 700
 export const ANIMAL_SPEED_XY_RATIO = 1/20
 export const CAMERA_BASE_SPEED = -15 // -15
 export const CAMERA_BEGIN_SPEED = -5
-export const ANIMAL_ACC = 6
+export const ANIMAL_ACC = 0
 export const CAMERA_ACC = -2 // -0
 export const ANIMALS_SPAWN = 5
 export const SCORE_MULTIPLIER = 1.148698355 // 2 ^ (1/5)
@@ -71,6 +71,7 @@ export class MainScene extends Phaser.Scene {
     // Objects that must stay inside screen space.
     private insideScreenObjects: Array<GameObject>
     private insideAnimals : Array<Animal>
+    private animalsToKill: Array<Animal>
 
     // Collision categories.
     obstacleCat: number
@@ -464,7 +465,7 @@ export class MainScene extends Phaser.Scene {
                 })
             }
 
-            this.killAnimal(bodyA.gameObject)
+            this.queueKillAnimal(bodyA.gameObject)
         }
 
     }
@@ -552,6 +553,7 @@ export class MainScene extends Phaser.Scene {
 
         this.goldSaved = 0
         this.animalIndivSaved = {}
+        this.animalsToKill = []
         this.characterNames.forEach(character => this.animalIndivSaved[character] = 0)
         this.prefabs = new Prefabs(this, this.width, this.height)
         //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1)
@@ -686,7 +688,10 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-    killAnimal(animal): void {
+    queueKillAnimal(animal): void {
+        this.animalsToKill.push(animal)
+    }
+    killAnimal(animal): void{
         animal.kill(this)
 
         if (this.insideAnimals.includes(animal)) {
@@ -777,6 +782,9 @@ export class MainScene extends Phaser.Scene {
 	}
 
 	updateAnimals (delta): void {
+
+        this.animalsToKill.forEach(animal => this.killAnimal(animal))
+        this.animalsToKill = []
         this.animalSpeed += delta * ANIMAL_ACC / 1000
 
         // Following the elephant logic.
@@ -822,7 +830,7 @@ export class MainScene extends Phaser.Scene {
         this.insideAnimals.forEach((function(animal) {
             if (!this.inScreen(animal)) {
                 this.deadInLava += 1
-                this.killAnimal(animal)
+                this.queueKillAnimal(animal)
             }
         }).bind(this))
 
