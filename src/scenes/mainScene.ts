@@ -142,6 +142,9 @@ export class MainScene extends Phaser.Scene {
 
     private screenZoneMargins: Zone;
 
+    private goldSaved: number
+    private animalIndivSaved: any
+
     constructor() {
         super({
             key: 'MainScene',
@@ -431,10 +434,10 @@ export class MainScene extends Phaser.Scene {
             let animal = bodyA.gameObject.frame.name
             animal = animal.slice(0, animal.length - 4)
 
-            this.playerData.values[animal + 'Count'] += 1
+            this.animalIndivSaved[animal] += 1
 
             if (bodyA.gameObject.gold) {
-                this.playerData.values.goldSaved += 1
+                this.goldSaved += 1
             }
 
             let shelter = bodyB.gameObject
@@ -547,6 +550,9 @@ export class MainScene extends Phaser.Scene {
         this.createSideWalls()
         this.initializeAnimals()
 
+        this.goldSaved = 0
+        this.animalIndivSaved = {}
+        this.characterNames.forEach(character => this.animalIndivSaved[character] = 0)
         this.prefabs = new Prefabs(this, this.width, this.height)
         //this.prefabs.addObstaclesAndAnimals(0, 0, 16, 1)
 
@@ -968,52 +974,56 @@ export class MainScene extends Phaser.Scene {
     }
 
     updateStats() {
-        if (this.followingAnimals.length >= this.maxFollowingAnimals) {
-            this.maxFollowingAnimals = this.followingAnimals.length
+        if(!this.gameOverB)
+        {
+            if (this.followingAnimals.length >= this.maxFollowingAnimals) {
+                this.maxFollowingAnimals = this.followingAnimals.length
 
+            }
+
+            let score = this.computeScore()
+
+            if (score >= 5000) {
+                this.unlock('frog')
+            }
+
+            if (score >= 20000) {
+                this.unlock('giraffe')
+            }
+
+            if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
+                this.highscored = true
+                this.createRewardTween("rewardHighscore", 0x4169E1)
+            }
+
+            if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && !this.bestDistanced) {
+                this.bestDistanced = true
+                this.createRewardTween("rewardDistance", 0x4169E1)
+            }
+            if (this.maxFollowingAnimals >= 40) {
+                this.unlock('gorilla')
+            }
+            if(this.playerData.values.deadInLava + this.deadInLava > 1000){
+                this.unlock('parrot')
+            }
+            if (this.playerData.values.mooseCount + this.animalIndivSaved['moose'] >= 500) {
+
+                this.unlock('moose')
+            }
+
+            if (this.playerData.values.goldSaved + this.goldSaved >= 2000) {
+                this.unlock('narwhal')
+            }
+
+            if (this.computeMeters() >= 5000) {
+                this.unlock('snake')
+            }
+
+            if (this.savedAnimals >= 500) {
+                this.unlock('hippo')
+            }
         }
 
-        let score = this.computeScore()
-
-        if (score >= 5000) {
-            this.unlock('frog')
-        }
-
-        if (score >= 20000) {
-            this.unlock('giraffe')
-        }
-
-        if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
-            this.highscored = true
-            this.createRewardTween("rewardHighscore", 0x4169E1)
-        }
-
-        if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && !this.bestDistanced) {
-            this.bestDistanced = true
-            this.createRewardTween("rewardDistance", 0x4169E1)
-        }
-        if (this.maxFollowingAnimals >= 40) {
-            this.unlock('gorilla')
-        }
-        if(this.playerData.values.deadInLava + this.deadInLava > 1000){
-            this.unlock('parrot')
-        }
-
-        if (this.playerData.values.mooseCount >= 500) {
-            this.unlock('moose')
-        }
-
-        if (this.playerData.values.goldSaved >= 2000) {
-            this.unlock('narwhal')
-        }
-
-        if (this.computeMeters() >= 5000) {
-            this.unlock('snake')
-        }
-
-        if (this.savedAnimals >= 500) {
-            this.unlock('hippo')
-        }
     }
 
     stopSounds(scene = 'GameOverScene'): void {
@@ -1058,7 +1068,8 @@ export class MainScene extends Phaser.Scene {
             this.playerData.values.gameCount += 1
             this.playerData.values.deadInLava += this.deadInLava
             this.playerData.values.lastScore = this.computeScore()
-
+            this.characterNames.forEach(character => this.playerData.values[character + 'Count'] += this.animalIndivSaved[character])
+            this.playerData.values.goldSaved += this.goldSaved
             let lastDist = this.computeMeters()
             this.playerData.values.lastDistance = lastDist
             if (this.playerData.values.bestDistance < lastDist) {
