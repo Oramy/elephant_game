@@ -157,6 +157,8 @@ export class MainScene extends Phaser.Scene {
 
     updateCharacter(character: string) {
         this.character = character
+        // @ts-ignore
+        this.facebook.data.values.lastCharacter = this.character
     }
 
     loadLeaderboards(): void{

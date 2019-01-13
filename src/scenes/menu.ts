@@ -375,7 +375,6 @@ export class Menu extends Phaser.Scene {
                     // @ts-ignore
                     this.highscores.on('getplayerscore', function (score, name) {
                         var data = JSON.parse(score.data);
-                        this.updateCharacter(data.character);
                         this.createPlayerScoreLine();
 
                     }.bind(this), this);
@@ -520,7 +519,6 @@ export class Menu extends Phaser.Scene {
         this.facebook.getData(dataKeys);
         //@ts-ignore
         this.facebook.on('savedata', (function () {
-            this.updateCharacter();
             this.updatePlayerDataUI();
 
             // @ts-ignore
@@ -546,7 +544,7 @@ export class Menu extends Phaser.Scene {
 
 
             //In order to update images and texts.
-            this.updateCharacter();
+            this.updateCharacter(this.playerData.values.lastCharacter);
             this.updatePlayerDataUI();
             this.volumeComponent.update();
 
@@ -557,6 +555,7 @@ export class Menu extends Phaser.Scene {
         logo.setScale(1.5 * SC);
 
         logo.setInteractive();
+
         this.input.on('gameobjectdown', function (pointer, gameObject) {
             if (gameObject === logo) {
                 this.clickSound.play()
@@ -564,6 +563,7 @@ export class Menu extends Phaser.Scene {
                 this.scene.launch('CreditScene');
             }
         }, this);
+
         this.tweens.add({
             targets: logo,
             scaleX: 1.6 * SC,
@@ -574,6 +574,7 @@ export class Menu extends Phaser.Scene {
             repeat: Infinity,
             delay: 2000
         });
+
         this.tweens.add({
             targets: [this.characterImage],
             scaleX: 1.8 * 1.03 * SC,
@@ -584,6 +585,7 @@ export class Menu extends Phaser.Scene {
             repeat: Infinity,
             delay: 200
         });
+
         this.tweens.add({
             targets: [this.playImage],
             scaleX: 3 * 1.03 * SC,

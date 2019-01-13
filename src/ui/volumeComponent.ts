@@ -42,11 +42,9 @@ export class VolumeComponent {
     update() {
 		// @ts-ignore
 		if (this.scene.facebook.data && !!this.scene.facebook.data.values.mute) {
-            console.log('update mute')
             this.muteImage.setVisible(true)
 			this.unmuteImage.setVisible(false)
         } else {
-            console.log('update unmute')
 			this.muteImage.setVisible(false)
 			this.unmuteImage.setVisible(true)
 		}
