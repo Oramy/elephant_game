@@ -161,7 +161,7 @@ export class Prefabs{
     }
     animalCircle(x:number, y:number, radius:number,  angle:number, count:integer){
         var aliveCondition = function(animal){
-                return animal.body != undefined && animal.body.label === "animal";};
+            return animal.body != undefined && animal.body.label === "animal";};
         var animals = this.genAnimals(count);
         return this.objectCircle(x, y, radius, angle, animals, aliveCondition);
     }
@@ -372,10 +372,10 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(middle, middleLine);
                 break;
             case 10: // Block circle
-                    var angle = 0.02;
-                    angle *= variant_id % 2 == 0 ? 1 : -1;
-                    this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
-                    break;
+                var angle = 0.02;
+                angle *= variant_id % 2 == 0 ? 1 : -1;
+                this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
+                break;
             case 11: // Spikes trap right
                 this.addBarrier(x + w/2, y + h * 7 / 8, 1, 'signArrow_left.png');
 
@@ -476,7 +476,7 @@ export class Prefabs{
                 angle *= variant_id % 2 == 0 ? 1 : -1;
                 this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
                 var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 - 96*SC, angle,
-                    2, 'spikesHigh.png', -Math.PI /2, true, this.spikesOptions);
+                  2, 'spikesHigh.png', -Math.PI /2, true, this.spikesOptions);
                 spikes.forEach(function(spike){
                     spike.setOrigin(0.5, 0.5);
                 });
@@ -488,18 +488,18 @@ export class Prefabs{
                 angle *= sign;
                 this.barrierCircle(x + w/2, y + h/2, w/3, angle, 2, 'blockBrown.png');
                 var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 100*SC, angle,
-                    2, 'spikesHigh.png', Math.PI /2, true, this.spikesOptions);
+                  2, 'spikesHigh.png', Math.PI /2, true, this.spikesOptions);
 
                 var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 - 100*SC, angle,
-                    2, 'spikesHigh.png', -Math.PI /2, true, this.spikesOptions);
+                  2, 'spikesHigh.png', -Math.PI /2, true, this.spikesOptions);
 
                 var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 15*SC, angle,
-                    2, 'spikesHigh.png', 0, true, this.spikesOptions);
+                  2, 'spikesHigh.png', 0, true, this.spikesOptions);
 
                 Phaser.Actions.RotateAroundDistance(spikes,{x: x +w/2, y:y+h/2}, -20*SC*angle*sign,  w/3 + 15 * SC);
 
                 var spikes = this.barrierCircle(x + w/2, y + h/2, w/3 + 15*SC, angle,
-                    2, 'spikesHigh.png', Math.PI, true, this.spikesOptions);
+                  2, 'spikesHigh.png', Math.PI, true, this.spikesOptions);
 
                 Phaser.Actions.RotateAroundDistance(spikes,{x: x +w/2, y:y+h/2}, 20*SC*angle*sign,  w/3 + 15 * SC);
 

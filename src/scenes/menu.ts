@@ -7,7 +7,7 @@ import BitmapText = Phaser.GameObjects.BitmapText;
 const LEADERBOARD_DRAW = 3;
 var SC;
 export const SQUARE_Y_OFFSETS = {'bear':0, 'buffalo':-0.015, 'chick':0, 'chicken' : 0.05, 'cow':0, 'crocodile':0, 'dog':0.1, 'duck':0, 'elephant':0.06, 'frog':0.02, 'giraffe':0.1, 'goat':0, 'gorilla':0, 'hippo':0, 'horse':0.05,
-   'monkey': 0, 'moose':0.1, 'narwhal':0, 'owl':0, 'panda':0, 'parrot':0, 'penguin':0, 'pig':0, 'rabbit':0.14, 'rhino':0, 'sloth':0, 'snake':-0.05, 'walrus':-0.03, 'whale':0.02, 'zebra':0.05};
+    'monkey': 0, 'moose':0.1, 'narwhal':0, 'owl':0, 'panda':0, 'parrot':0, 'penguin':0, 'pig':0, 'rabbit':0.14, 'rhino':0, 'sloth':0, 'snake':-0.05, 'walrus':-0.03, 'whale':0.02, 'zebra':0.05};
 
 const CURRENT_VERSION = 1
 
@@ -41,7 +41,7 @@ export class Menu extends Phaser.Scene {
     private indices = {
         'elephant': '', 'frog': 'Score over 5000 to unlock this animal.',
         'gorilla': 'Have more than 40 animals following you \n' +
-            '                              to unlock this animal.',
+          '                              to unlock this animal.',
         'giraffe': 'Score over 20000 to unlock this animal.',
         'snake': 'Escape the fire on 5000m to unlock this animal.',
         'moose': 'Save 500 of this type to unlock this animal.',
@@ -82,57 +82,57 @@ export class Menu extends Phaser.Scene {
         this.updateCharacterImages(ind);
     }
 
-	updatePlayerDataUI() {
-		// @ts-ignore
-		this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved})
-		// @ts-ignore
-		this.indices['moose'] = this.i18n.t('animals.moose', {n: this.playerData.values.mooseCount})
-		// @ts-ignore
-		this.indices['parrot'] = this.i18n.t('animals.parrot', {n: this.playerData.values.deadInLava})
-		// @ts-ignore
-		this.indices['snake'] = this.i18n.t('animals.snake', {n: this.playerData.values.bestDistance})
-		// @ts-ignore
+    updatePlayerDataUI() {
+        // @ts-ignore
+        this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved})
+        // @ts-ignore
+        this.indices['moose'] = this.i18n.t('animals.moose', {n: this.playerData.values.mooseCount})
+        // @ts-ignore
+        this.indices['parrot'] = this.i18n.t('animals.parrot', {n: this.playerData.values.deadInLava})
+        // @ts-ignore
+        this.indices['snake'] = this.i18n.t('animals.snake', {n: this.playerData.values.bestDistance})
+        // @ts-ignore
         this.indices['gorilla'] = this.i18n.t('animals.gorilla', {n: this.playerData.values.maxFollowingAnimals})
-		// @ts-ignore
-		this.indices['giraffe'] = this.i18n.t('animals.giraffe', {n: this.playerData.values.bestScore})
-		// @ts-ignore
-		this.indices['frog'] = this.i18n.t('animals.frog', {n: this.playerData.values.bestScore})
-		// @ts-ignore
-		this.indices['hippo'] = this.i18n.t('animals.hippo', {n: this.playerData.values.maxAnimalsSavedOneRun})
+        // @ts-ignore
+        this.indices['giraffe'] = this.i18n.t('animals.giraffe', {n: this.playerData.values.bestScore})
+        // @ts-ignore
+        this.indices['frog'] = this.i18n.t('animals.frog', {n: this.playerData.values.bestScore})
+        // @ts-ignore
+        this.indices['hippo'] = this.i18n.t('animals.hippo', {n: this.playerData.values.maxAnimalsSavedOneRun})
 
         let characterStatus = this.playerData.get(this.character);
         if (characterStatus == 'unlocked') {
-			this.playImage.setFrame('forward.png')
+            this.playImage.setFrame('forward.png')
             // @ts-ignore
-			this.touchToStart.setText(this.i18n.t("welcome", {name: this.facebook.playerName, character: this.character}))
+            this.touchToStart.setText(this.i18n.t("welcome", {name: this.facebook.playerName, character: this.character}))
         } else if (characterStatus == 'locked') {
             this.playImage.setFrame('locked.png')
             // @ts-ignore
             let touchText = this.i18n.t('locked')
 
-			if (this.indices[this.character] !== undefined) {
-				touchText += this.indices[this.character]
-			}
+            if (this.indices[this.character] !== undefined) {
+                touchText += this.indices[this.character]
+            }
 
-			// @ts-ignore
+            // @ts-ignore
             this.touchToStart._setText(touchText)
         } else if (characterStatus == 'buyable') {
-			this.playImage.setFrame('basket.png')
-			// @ts-ignore
-			this.touchToStart.setText(this.i18n.t('pay', {price: this.prices[this.character]}))
-		}
+            this.playImage.setFrame('basket.png')
+            // @ts-ignore
+            this.touchToStart.setText(this.i18n.t('pay', {price: this.prices[this.character]}))
+        }
 
-		let unlockedCount = 0
+        let unlockedCount = 0
         for (let i = 0; i < this.characterNames.length; i++) {
             if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
                 unlockedCount += 1
             }
-		}
-		// @ts-ignore
+        }
+        // @ts-ignore
         this.unlocked._setText(unlockedCount + '/' + (Object.keys(this.indices).length + Object.keys(this.prices).length))
 
-		this.game.sound.mute = !!this.playerData.values.mute
-	}
+        this.game.sound.mute = !!this.playerData.values.mute
+    }
 
     updateCharacterImages(ind) {
         var next = this.nextUnlockableIndex(ind);
@@ -231,13 +231,13 @@ export class Menu extends Phaser.Scene {
         if (gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
             this.clickSound.play()
             this.addMoveTween((
-                function () {
-                    var ind = this.characterNames.findIndex((function (el) {
-                        return el == this.character
-                    }).bind(this));
-                    ind = this.nextUnlockableIndex(ind);
-                    this.updateCharacterImages(ind);
-                }).bind(this));
+              function () {
+                  var ind = this.characterNames.findIndex((function (el) {
+                      return el == this.character
+                  }).bind(this));
+                  ind = this.nextUnlockableIndex(ind);
+                  this.updateCharacterImages(ind);
+              }).bind(this));
 
 
         }
@@ -247,13 +247,13 @@ export class Menu extends Phaser.Scene {
         if (gameObject == this.prevCharacterImage || gameObject == this.prevCharacterSImage) {
             this.clickSound.play()
             this.addMoveTween((
-                function () {
-                    var ind = this.characterNames.findIndex((function (el) {
-                        return el == this.character
-                    }).bind(this));
-                    ind = this.prevUnlockableIndex(ind);
-                    this.updateCharacterImages(ind);
-                }).bind(this));
+              function () {
+                  var ind = this.characterNames.findIndex((function (el) {
+                      return el == this.character
+                  }).bind(this));
+                  ind = this.prevUnlockableIndex(ind);
+                  this.updateCharacterImages(ind);
+              }).bind(this));
         }
     }
 
@@ -261,22 +261,22 @@ export class Menu extends Phaser.Scene {
         if (this.characterImage === gameObject) {
 
             this.addMoveTween((
-                function () {
-                    var characterStatus = this.playerData.get(this.character);
-                    if (characterStatus == 'unlocked') {
-                        this.startGame();
-                        this.clickSound.play()
-                    } else if (characterStatus == 'buyable') {
+              function () {
+                  var characterStatus = this.playerData.get(this.character);
+                  if (characterStatus == 'unlocked') {
+                      this.startGame();
+                      this.clickSound.play()
+                  } else if (characterStatus == 'buyable') {
 
-                        if (this.playerData.values.coins >= this.prices[this.character]) {
-                            this.buySound.play()
-                            this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
-                            this.playerData.values.coins -= this.prices[this.character];
-                            this.playerData.values[this.character] = 'unlocked';
-                        }
-                        this.updateCharacter();
-                    }
-                }).bind(this));
+                      if (this.playerData.values.coins >= this.prices[this.character]) {
+                          this.buySound.play()
+                          this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
+                          this.playerData.values.coins -= this.prices[this.character];
+                          this.playerData.values[this.character] = 'unlocked';
+                      }
+                      this.updateCharacter();
+                  }
+              }).bind(this));
 
         }
     }
@@ -325,10 +325,10 @@ export class Menu extends Phaser.Scene {
             'goldSaved': 0,
             'maxAnimalsSavedOneRun': 0,
             'maxFollowingAnimals': 0,
-			'mute': false,
-			'lastCharacter': 'elephant',
-			'version': CURRENT_VERSION
-		};
+            'mute': false,
+            'lastCharacter': 'elephant',
+            'version': CURRENT_VERSION
+        };
 
         this.characterNames.forEach(character => data[character + "Count"] = 0)
 
@@ -381,12 +381,12 @@ export class Menu extends Phaser.Scene {
                     }.bind(this), this);
 
                     this.highscores.getPlayerScore();
-				}).bind(this));
+                }).bind(this));
 
                 this.highscores.getScores(LEADERBOARD_DRAW, 0);
-			} else if (leaderboard.name == 'Amis') {
-				this.friends = leaderboard;
-			}
+            } else if (leaderboard.name == 'Amis') {
+                this.friends = leaderboard;
+            }
         }).bind(this), this);
 
         var background = this.add.image(this.width / 2, this.height / 2, 'menuBackground');
@@ -473,12 +473,12 @@ export class Menu extends Phaser.Scene {
         // @ts-ignore
         //this.facebook.getLeaderboard('Amis.'+FBInstant.context.getID());
         // @ts-ignore
-		    this.touchToStart = this.add.bitmapText(0, 0, "jungle", "welcome2", 40 * SC, {name: this.facebook.playerName});
+        this.touchToStart = this.add.bitmapText(0, 0, "jungle", "welcome2", 40 * SC, {name: this.facebook.playerName});
         this.touchToStart.tint = 0xe5e5e5;
         let title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120 * SC);
         title.tint = 0xe5e5e5;
         let screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
-    	var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
+        var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
         Phaser.Display.Align.In.Center(title, topZone);
 
@@ -513,8 +513,8 @@ export class Menu extends Phaser.Scene {
         dataKeys.push('goldSaved');
         dataKeys.push('maxAnimalsSavedOneRun');
         dataKeys.push('maxFollowingAnimals');
-		dataKeys.push('mute');
-		dataKeys.push('lastCharacter');
+        dataKeys.push('mute');
+        dataKeys.push('lastCharacter');
         dataKeys.push('version');
 
         this.characterNames.forEach(character => dataKeys.push(character + "Count"));
@@ -529,7 +529,7 @@ export class Menu extends Phaser.Scene {
             this.facebook.getData(dataKeys);
         }).bind(this));
 
-		// @ts-ignore
+        // @ts-ignore
         this.facebook.on('getdata', (function () {
             this.playerData = this.facebook.data;
             var s = false;

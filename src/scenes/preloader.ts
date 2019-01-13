@@ -7,7 +7,7 @@ import { PauseScene } from "./pauseScene";
 export class Preloader extends Phaser.Scene{
     constructor () {
         super('Preloader');
-	}
+	  }
 
     resize() {
     	let canvas = this.sys.canvas, width = window.innerWidth, height = window.innerHeight;
@@ -19,8 +19,8 @@ export class Preloader extends Phaser.Scene{
     	} else {
         	canvas.style.width = (height * ratio) + "px";
         	canvas.style.height = height + "px";
-    	}	
-	}
+    	}
+	  }
 
     create () {
         window.addEventListener('resize', this.resize.bind(this));
@@ -85,5 +85,5 @@ export class Preloader extends Phaser.Scene{
 
     startGame () {
         this.scene.start('Menu');
-    }
+  }
 }

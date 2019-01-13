@@ -50,7 +50,7 @@ export class GameOverScene extends Phaser.Scene{
                 }
             }
         })
-        
+
     }
     shuffle(array) {
         let currentIndex = array.length, temporaryValue, randomIndex
@@ -76,7 +76,7 @@ export class GameOverScene extends Phaser.Scene{
         if(notused.length == 0){
             notused = notused.concat(this.roundFrames)
             notused_offsets = ROUND_Y_OFFSETS
-		}
+        }
 
         let i = Phaser.Math.Between(0, notused.length - 1)
         let key = gold ? 'roundOutline': 'round'
@@ -90,32 +90,32 @@ export class GameOverScene extends Phaser.Scene{
             render: {sprite: {xOffset: 0, yOffset: notused_offsets[i]}},
             label: 'animal',
 
-		})
+        })
         animal.setBounce(0.5)
-		
-		notused = notused.filter(function (el,j) {
+
+        notused = notused.filter(function (el,j) {
             return i!=j
         })
         notused_offsets = notused_offsets.filter(function (el, j) {
             return i!=j
         })
-		
-		animal.setScale(ANIMAL_SCALE * scale / 4 * SC)
+
+        animal.setScale(ANIMAL_SCALE * scale / 4 * SC)
         animal.body.allowRotation = false
         // @ts-ignore
         animal.gold = gold
-		
-		if (gold) {
+
+        if (gold) {
             animal.tint = 0xDAA520
 
         }
-		
-		return animal
-	}
+
+        return animal
+    }
 
     spawnAnimalRel (u = 0, v = 0, offsetX = 0, offsetY = 0){
         this.spawnAnimal(u * this.width + offsetX, v * this.height + offsetY)
-	}
+    }
 
     /***
      * Spawns count animals in rectangle of coordinates (x,y,x2,y2).
@@ -162,8 +162,8 @@ export class GameOverScene extends Phaser.Scene{
         this.bottomWall.setVisible(false)
 
     }
-	
-	initStats(score, unlockedList, unlocked,  character, oldAnimalCount, gainedAnimals, playerData){
+
+    initStats(score, unlockedList, unlocked,  character, oldAnimalCount, gainedAnimals, playerData){
         this.score = score
         this.unlockList = unlockedList
         this.character = character
@@ -178,8 +178,8 @@ export class GameOverScene extends Phaser.Scene{
 
 
     }
-	
-	create () {
+
+    create () {
         let unlockSound = this.sound.add('unlockSound');
         this.clickSound = this.sound.add('clickSound')
 
@@ -198,7 +198,7 @@ export class GameOverScene extends Phaser.Scene{
 
         let atlasTexture = this.textures.get('round')
         this.roundFrames = atlasTexture.getFrameNames()
-        
+
         this.createSideWalls()
         this.spawnAnimals(0, 0, this.width, -this.height * 2, this.gainedAnimals*3)
         background = this.add.image(this.width * 0.5,this.height * 0.70, 'squareSilhouette', "gorilla.png")
@@ -213,11 +213,11 @@ export class GameOverScene extends Phaser.Scene{
 
         this.scoreCenter = true
 
-		// @ts-ignore
+        // @ts-ignore
         let scoreText = this.add._bitmapText(this.width * 0.5, this.height * 0.25, 'jungle', 'Score: ' + this.score, 150 * SC)
-		scoreText._setText('Score: ' + this.score)
-		scoreText.setOrigin(0.5, 0.5)
-		scoreText.setScale(0)
+        scoreText._setText('Score: ' + this.score)
+        scoreText.setOrigin(0.5, 0.5)
+        scoreText.setScale(0)
 
         let disableScoreCenter = (function() {
             this.scoreCenter = false
@@ -232,7 +232,7 @@ export class GameOverScene extends Phaser.Scene{
 
         let onComplete = function() {
             coinsTimeline.play()
-		}
+        }
 
         timeline2.add({
             targets: scoreText,
@@ -255,7 +255,7 @@ export class GameOverScene extends Phaser.Scene{
                 return el != this.character
             }).bind(this)).slice(0, Math.min(this.unlocked.length, 2))
             list.push(this.character)
-		} else {
+        } else {
             list =  this.unlockList.slice(0, Math.min(this.unlockList.length, 2))
             if(list.length < 2){
                 list = list.concat(this.unlocked.filter((function(el){
@@ -263,14 +263,14 @@ export class GameOverScene extends Phaser.Scene{
                 }).bind(this)).slice(0, Math.min(this.unlocked.length, 1-list.length)))
             }
             list.push(this.character)
-		}
+        }
 
         if (this.unlockList.length != 0) {
             let charactersUnlockedText = this.add.bitmapText(this.width / 2, this.height * 0.13, 'jungle', (this.unlockList.length > 1 ? 'unlocked_plural' : 'unlocked'), 90 * SC).setOrigin(0.5, 0.5)
             charactersUnlockedText.tint = 0xFF5757
             charactersUnlockedText.angle = 0
             charactersUnlockedText.setScale(100)
-			charactersUnlockedText.setAlpha(0)
+            charactersUnlockedText.setAlpha(0)
 
             timeline.add({
                 targets: charactersUnlockedText,
@@ -286,21 +286,21 @@ export class GameOverScene extends Phaser.Scene{
                     unlockSound.play()
                 }
             })
-		    }
+        }
 
         list.forEach((function (character, i){
             let characterImg
-			if (list.length % 2 == 0 || i < list.length - 1) {
-               characterImg = this.add.image(this.width * 0.35 + this.width * 0.3 * (i%2), this.height * 0.65 + this.height * 0.15 * (i-i%2)/2,
-                    'square_nodetailsOutline', character + '.png')
-			} else {
+            if (list.length % 2 == 0 || i < list.length - 1) {
+                characterImg = this.add.image(this.width * 0.35 + this.width * 0.3 * (i%2), this.height * 0.65 + this.height * 0.15 * (i-i%2)/2,
+                  'square_nodetailsOutline', character + '.png')
+            } else {
                 characterImg = this.add.image(this.width * 0.35 + this.width * 0.3 * 0.5, this.height * 0.65 + this.height * 0.15 * (i-i%2)/2,
-                    'square_nodetailsOutline', character + '.png')
-			}
+                  'square_nodetailsOutline', character + '.png')
+            }
 
             characterImg.setScale(0)
-		
-			timeline.add({
+
+            timeline.add({
                 targets: characterImg,
                 scaleX: 1,
                 scaleY: 1,
@@ -315,18 +315,18 @@ export class GameOverScene extends Phaser.Scene{
                     }
                 }).bind(this)
             })
-			
-			characterImg.setInteractive()
-			
-			this.input.on('gameobjectdown', (function(event, gameobject){
-               if(gameobject === characterImg){
-                   this.startGame(character)
-                   this.clickSound.play()
-               }
+
+            characterImg.setInteractive()
+
+            this.input.on('gameobjectdown', (function(event, gameobject){
+                if(gameobject === characterImg){
+                    this.startGame(character)
+                    this.clickSound.play()
+                }
             }).bind(this))
         }).bind(this))
-	   
-		let addBlinkingTween = (function(){
+
+        let addBlinkingTween = (function(){
             this.tweens.add({
                 targets: touchToPlay,
                 alpha: 1,
@@ -336,7 +336,7 @@ export class GameOverScene extends Phaser.Scene{
                 repeat: Infinity,
                 hold: 400})
 
-		}).bind(this)
+        }).bind(this)
 
         timeline.add({
             targets: [this.returnToMenu],
@@ -348,23 +348,23 @@ export class GameOverScene extends Phaser.Scene{
             delay: 100,
             onComplete: addBlinkingTween
         })
-	
-		timeline2.play()
-	}
+
+        timeline2.play()
+    }
 
     addParticleOnAnimal(animal, key, frame) {
         let logoSource = {
             getRandomPoint: (function (vec) {
-                    let x = Phaser.Math.Between(0, animal.width)
-                    let y = Phaser.Math.Between(0, animal.height)
-                    let pixel =  this.textures.getPixel(x, y, key, frame)
+                let x = Phaser.Math.Between(0, animal.width)
+                let y = Phaser.Math.Between(0, animal.height)
+                let pixel =  this.textures.getPixel(x, y, key, frame)
 
-                    return vec.setTo(x + animal.getTopLeft().x, y + animal.getTopLeft().y)
+                return vec.setTo(x + animal.getTopLeft().x, y + animal.getTopLeft().y)
 
             }).bind(this)
         }
-		
-		let particles = this.add.particles('blue')
+
+        let particles = this.add.particles('blue')
         particles.createEmitter({
             x: 0,
             y: 0,
@@ -376,8 +376,8 @@ export class GameOverScene extends Phaser.Scene{
             emitZone: { type: 'random', source: logoSource }
         })
     }
-	
-	update() {
+
+    update() {
         /*if(this.scoreCenter){
             Phaser.Display.Align.In.RightCenter(this.newCoinsText, this.animalCoinsText)
 
@@ -385,7 +385,7 @@ export class GameOverScene extends Phaser.Scene{
         }*/
         this.coinsComponent.update()
 
-	}
+    }
 
     startGame(character) {
         this.scene.start('MainScene')
@@ -394,9 +394,9 @@ export class GameOverScene extends Phaser.Scene{
     }
 
     goToMenu (event, gameObject) {
-		if(gameObject === this.returnToMenu) {
+        if(gameObject === this.returnToMenu) {
             this.scene.start('Menu')
-        this.clickSound.play()
-		}
-	}
+            this.clickSound.play()
+        }
+    }
 }

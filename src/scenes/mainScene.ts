@@ -644,7 +644,7 @@ export class MainScene extends Phaser.Scene {
         this.insideScreenObjects.push(textEl)
     }
 
-	update(time, delta): void {
+    update(time, delta): void {
         if (this.matter.world != null) {
             if (this.lastUpdateTime == 0) {
                 this.lastUpdateTime = time
