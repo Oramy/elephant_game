@@ -171,17 +171,25 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         this.facebook.data.values.lastCharacter = this.character
     }
-
+    getLeaderboard(leaderboard){
+        if (leaderboard.name == 'Highscores') {
+            this.highscores = leaderboard
+        } else {
+            // @ts-ignore
+            if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
+                        console.log("friends!!")
+                        this.friends = leaderboard
+                    }
+        }
+        // @ts-ignore
+        if(this.highscores !== undefined && (this.friends !== undefined ||this.facebook.contextID == null)){
+            // @ts-ignore
+            this.facebook.removeListener('getleaderboard', this.getLeaderboard);
+        }
+    }
     loadLeaderboards(): void{
         // @ts-ignore
-        this.facebook.once('getleaderboard', (function (leaderboard) {
-            if (leaderboard.name == 'Highscores') {
-                this.highscores = leaderboard
-            } else if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
-                console.log("friends!!")
-                this.friends = leaderboard
-            }
-        }).bind(this), this)
+        this.facebook.on('getleaderboard', this.getLeaderboard, this)
         // @ts-ignore
         this.facebook.getLeaderboard('Highscores')
         // @ts-ignore
@@ -199,15 +207,6 @@ export class MainScene extends Phaser.Scene {
         }).bind(this))
         // @ts-ignore
         if (this.facebook.contextID != null) {
-            // @ts-ignore
-            this.facebook.once('getleaderboard', (function (leaderboard) {
-                if (leaderboard.name == 'Highscores') {
-                    this.highscores = leaderboard
-                } else if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
-                    console.log("friends!!")
-                    this.friends = leaderboard
-                }
-            }).bind(this), this)
             // @ts-ignore
             this.facebook.getLeaderboard('Amis.' + this.facebook.contextID)
         }
@@ -1013,6 +1012,8 @@ export class MainScene extends Phaser.Scene {
     updateStats() {
         if(!this.gameOverB)
         {
+            // @ts-ignore
+            this.facebook.removeListener('getleaderboard', this.loadLeaderboards)
             if (this.followingAnimals.length >= this.maxFollowingAnimals) {
                 this.maxFollowingAnimals = this.followingAnimals.length
 
