@@ -182,7 +182,6 @@ export class MainScene extends Phaser.Scene {
                 this.friends = leaderboard
             }
         }).bind(this), this)
-
         // @ts-ignore
         this.facebook.getLeaderboard('Highscores')
         // @ts-ignore
@@ -201,10 +200,19 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         if (this.facebook.contextID != null) {
             // @ts-ignore
+            this.facebook.once('getleaderboard', (function (leaderboard) {
+                if (leaderboard.name == 'Highscores') {
+                    this.highscores = leaderboard
+                } else if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
+                    console.log("friends!!")
+                    this.friends = leaderboard
+                }
+            }).bind(this), this)
+            // @ts-ignore
             this.facebook.getLeaderboard('Amis.' + this.facebook.contextID)
         }
 
-        this.maxFollowingAnimals = 0
+
     }
 
     initializeAnimals(): void{
@@ -521,6 +529,7 @@ export class MainScene extends Phaser.Scene {
 
     create (): void {
         this.started = false
+        this.maxFollowingAnimals = 0
 
         let atlasTexture = this.textures.get('round')
         this.characterFrames = atlasTexture.getFrameNames()
@@ -1114,7 +1123,6 @@ export class MainScene extends Phaser.Scene {
             this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals
 
             this.scene.pause("MainScene")
-
             // @ts-ignore
             this.highscores.on('setscore', function (key) {
                 let unlocked = []
