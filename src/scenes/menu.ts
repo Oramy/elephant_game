@@ -527,6 +527,8 @@ export class Menu extends Phaser.Scene {
             this.facebook.getData(dataKeys);
         }).bind(this));
 
+        let olala = false;
+
         // @ts-ignore
         this.facebook.on('getdata', (function () {
             this.playerData = this.facebook.data;
@@ -546,7 +548,11 @@ export class Menu extends Phaser.Scene {
 
 
             //In order to update images and texts.
-            this.updateCharacter(this.playerData.values.lastCharacter);
+            if (!olala) {
+                this.updateCharacter(this.playerData.values.lastCharacter);
+                olala = true
+            }
+
             this.updatePlayerDataUI();
             this.volumeComponent.update();
 
