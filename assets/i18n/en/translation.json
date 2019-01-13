@@ -25,5 +25,8 @@
     "rewardUnlocked": "{{character}} unlocked!",
     "rewardHighscore": "Highscore!",
     "rewardDistance": "Best Distance!",
-    "leaderboard": "Leaderboard"
+    "leaderboard": "Leaderboard",
+    "rank": "{{rank}}th",
+    "firstRank": "1st",
+    "secondRank": "2nd"
 }

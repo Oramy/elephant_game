@@ -25,5 +25,8 @@
     "rewardUnlocked": "{{character}} débloqué !",
     "rewardHighscore": "Meilleur Score !",
     "rewardDistance": "Meilleure Distance !",
-    "leaderboard": "Classement"
+    "leaderboard": "Classement",
+    "rank": "{{rank}}ème",
+    "firstRank": "1er",
+    "secondRank": "2ème"
 }

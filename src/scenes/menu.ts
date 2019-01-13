@@ -68,6 +68,8 @@ export class Menu extends Phaser.Scene {
     private buySound : Phaser.Sound.BaseSound;
     private crownId: integer
 
+    private bigRankText: BitmapText;
+
     constructor() {
         super('Menu');
     }
@@ -529,6 +531,8 @@ export class Menu extends Phaser.Scene {
         var leadText = this.add.bitmapText(this.width * 0.36, this.height * 0.6, 'jungle', 'leaderboard', 90 * SC).setOrigin(0.5, 0.5)
         leadText.tint = 0xe5e5e5
 
+
+
         var dataKeys = this.characterNames.slice();
 
         dataKeys.push('coins');
@@ -657,7 +661,7 @@ export class Menu extends Phaser.Scene {
         rankText.tint = 0xe5e5e5;
         var nameText = this.add.bitmapText(400 * SC - 1000 * SC, y, "jungle", entry.playerName);
         nameText.tint = 0xe5e5e5;
-        var scoreText = this.add.bitmapText(400 * SC - 1000 * SC, y + 50 * SC, "jungle", "Score: " + entry.scoreFormatted);
+        var scoreText = this.add.bitmapText(400 * SC - 1000 * SC, y + 50 * SC, "jungle", "Score " + entry.scoreFormatted);
         scoreText.tint = 0xe5e5e5;
 
         this.tweens.add({
@@ -725,6 +729,35 @@ export class Menu extends Phaser.Scene {
             var entry = this.highscores.playerScore;
             // @ts-ignore
             this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1) * 100 * SC + 25 * SC);
+
+            let rank = entry.rank
+            let text = 'rank'
+            let options = {}
+            switch (rank) {
+                case 1:
+                    text = 'firstRank'
+                    options = {}
+                    break
+                case 2:
+                    text = 'secondRank'
+                    options = {}
+                    break
+                default:
+                    text = 'rank'
+                    options = {rank: rank}
+            }
+            // @ts-ignore
+            this.bigRankText = this.add.bitmapText(this.width * 0.70, this.height * 0.22, 'jungle',
+                text, 90 * SC, options).setOrigin(0, 0.5)
+            this.bigRankText.tint = 0xe5e5e5
+            this.bigRankText.alpha = 0
+            this.tweens.add({
+                    targets : this.bigRankText,
+                    duration : 1000,
+                    alpha : 1
+                }
+            )
+
         }
     }
 
