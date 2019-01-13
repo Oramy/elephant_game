@@ -19,5 +19,11 @@
 	},
 	"drag": "Drag your character to move it.",
 	"escape": "Escape the lava!",
-    "lastScore": "Last score: {{score}}"
+    "lastScore": "Last score: {{score}}",
+    "lastDistance": "Last distance",
+    "bestDistance": "Best distance",
+    "rewardUnlocked": "{{character}} unlocked!",
+    "rewardHighscore": "Highscore!",
+    "rewardDistance": "Best Distance!",
+    "leaderboard": "Leaderboard"
 }

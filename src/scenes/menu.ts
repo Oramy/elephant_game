@@ -500,6 +500,9 @@ export class Menu extends Phaser.Scene {
             Phaser.Display.Align.In.Center(text, topZone);
         }
 
+        var leadText = this.add.bitmapText(this.width * 0.36, this.height * 0.6, 'jungle', 'leaderboard', 90 * SC).setOrigin(0.5, 0.5)
+        leadText.tint = 0xe5e5e5
+
         var dataKeys = this.characterNames.slice();
 
         dataKeys.push('coins');
@@ -674,7 +677,7 @@ export class Menu extends Phaser.Scene {
 
     createPlayerScoreLine() {
         if (!this.inLeaderboard) {
-            var baseY = this.height / 2 + 100 * SC;
+            var baseY = this.height / 2 + 300 * SC;
             var entry = this.highscores.playerScore;
             // @ts-ignore
             this.addScoreEntry(entry, baseY + (LEADERBOARD_DRAW + 1) * 100 * SC + 25 * SC);
@@ -690,7 +693,7 @@ export class Menu extends Phaser.Scene {
         this.load.once("complete", (function () {
             this.scores = scores;
 
-            var baseY = this.height / 2 + 100 * SC;
+            var baseY = this.height / 2 + 300 * SC;
 
             this.inLeaderboard = false;
             for (var i = 0; i < scores.length; i++) {

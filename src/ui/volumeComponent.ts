@@ -11,10 +11,10 @@ export class VolumeComponent {
 		this.scene = scene
 		let SC = this.scene.sys.canvas.height / 1920
 
-		this.muteImage = this.scene.add.image(100 * SC, 100 * SC, 'iconsw', 'musicOff.png').setInteractive() as Image
-		this.unmuteImage = this.scene.add.image(100 * SC, 100 * SC, 'iconsw', 'musicOn.png').setInteractive() as Image
-		this.muteImage.setDepth(Infinity).setScale(3 * SC)
-		this.unmuteImage.setDepth(Infinity).setScale(3 * SC)
+		this.muteImage = this.scene.add.image(0 * SC, 0 * SC, 'iconsw', 'musicOff.png').setOrigin(0,0).setInteractive() as Image
+		this.unmuteImage = this.scene.add.image(0 * SC, 0 * SC, 'iconsw', 'musicOn.png').setOrigin(0,0).setInteractive() as Image
+		this.muteImage.setDepth(Infinity).setScale(2 * SC)
+		this.unmuteImage.setDepth(Infinity).setScale(2 * SC)
 
         this.update()
 

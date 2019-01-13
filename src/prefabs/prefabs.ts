@@ -326,7 +326,7 @@ export class Prefabs{
                 var leftLine = new Line(x + 64 * SC, y + h / 4, x + w * 1 / 4 + 64 * SC, y + h / 4);
                 var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w * 1  / 4 + 64 * SC, y + h * 3 / 4);
 
-                Phaser.Actions.PlaceOnLine(left3, leftLine);
+                Phaser.Actions.PlaceOnLine(left3, leftLine3);
                 Phaser.Actions.PlaceOnLine(left, leftLine);
                 Phaser.Actions.PlaceOnLine(left2, leftLine2);
                 break;

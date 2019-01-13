@@ -21,6 +21,7 @@ import Tween = Phaser.Tweens.Tween
 import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatAlpha
 import Group = Phaser.GameObjects.Group
 import {Animal} from "../gameobjects/animal"
+import Zone = Phaser.GameObjects.Zone
 
 function arrayRemove(arr, value) {
     return arr.filter(function(ele) {
@@ -139,6 +140,8 @@ export class MainScene extends Phaser.Scene {
     private clickSound: Phaser.Sound.BaseSound
     private pickAnimalSound: Phaser.Sound.BaseSound
 
+    private screenZoneMargins: Zone;
+
     constructor() {
         super({
             key: 'MainScene',
@@ -241,27 +244,26 @@ export class MainScene extends Phaser.Scene {
         this.rewardTweens = []
 
         // @ts-ignore
-        this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
+        this.fps = this.add._bitmapText(0, this.height- 20*SC, 'jungle', 'FPS: 60', 80 * SC).setOrigin(0, 1 );
         this.fps.tint = 0xe5e5e5;
         this.fps.setScrollFactor(0)
         this.fps.setDepth(Infinity)
 
         // @ts-ignore
-        this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
+        this.scoreText = this.add._bitmapText(this.width / 2, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0.5, 0)
         this.scoreText.tint = 0xe5e5e5
         this.scoreText.setScrollFactor(0)
         this.scoreText.setDepth(Infinity)
 
         // @ts-ignore
-        this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x1', 100*SC).setOrigin(0, 0)
+        this.multiplierText = this.add._bitmapText(+ 200 * SC, 0, 'jungle', 'x1', 100*SC).setOrigin(0, 0)
         this.multiplierText.tint = 0xe5e5e5
-        this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2)
         this.multiplierText.setScrollFactor(0)
         this.multiplierText.setDepth(Infinity)
-        this.multiplierText.setOrigin(-0.5, 0)
+        this.multiplierText.setOrigin(0.5, 0)
 
-        let zone = this.add.zone(this.width/2, this.height/2, this.width + 100*SC, this.height + 50*SC)
-        Phaser.Display.Align.In.TopRight(this.multiplierText, zone)
+        this.screenZoneMargins = this.add.zone(50 * SC, 100 * SC, this.width - 100*SC, this.height - 200*SC).setOrigin(0,0)
+        Phaser.Display.Align.In.TopCenter(this.multiplierText, this.screenZoneMargins)
 
         this.touchToPlay = []
 
@@ -341,7 +343,8 @@ export class MainScene extends Phaser.Scene {
             this.touchToPlayTweens = []
         }, this)
 
-        let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png')
+        let image = this.add.image(0 * SC, 0 * SC, 'iconsw', 'pause.png').setOrigin(0, 0)
+        image.setScale(2 * SC)
 		image.setDepth(Infinity)
 		image.setScrollFactor(0)
 		image.setInteractive()
@@ -589,15 +592,15 @@ export class MainScene extends Phaser.Scene {
 
         if(this.playerData.values.bestDistance > 0)
             this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
-          this.playerData.values.bestDistance + "m", "Best distance")
-        if(this.playerData.values.lastDistance > 0)
+          this.playerData.values.bestDistance + "m", "bestDistance")
+        if(this.playerData.values.lastDistance > 0 && this.playerData.values.bestDistance != this.playerData.values.bestDistance)
             this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
-          this.playerData.values.lastDistance + "m", "Last distance")
+          this.playerData.values.lastDistance + "m", "lastDistance")
     }
 
-    createRewardTween(text, color) {
+    createRewardTween(text, color, options={}) {
         // @ts-ignore
-        let textEl = this.add._bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5)
+        let textEl = this.add.bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC, options).setOrigin(0.5, 0.5)
         textEl.setScale(0)
         textEl.setScrollFactor(0)
         textEl.tint = color
@@ -743,13 +746,16 @@ export class MainScene extends Phaser.Scene {
             let truncValue = Math.trunc(this.multiplierTween.getValue())
             let logAdvance : integer
 
-            logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255)
+            logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 224)
             if (!isNaN(logAdvance)) {
-                this.multiplierText.setTint(new Color(logAdvance, 1, 1, 1).color)
+                this.multiplierText.setTint(new Color(224, 224 - logAdvance, 224 - logAdvance, 1).color)
                 // @ts-ignore
                 this.multiplierText._setText('x' +  truncValue)
                 this.multiplierText.setFontSize((100 + logAdvance / 10) * SC)
-                this.multiplierText.setPosition(this.width, 100 * SC).setOrigin(1, 0)
+                this.multiplierText.setPosition(this.width, 200 * SC).setOrigin(1, 0)
+
+                Phaser.Display.Align.In.TopCenter(this.multiplierText, this.screenZoneMargins)
+
             }
         }
 
@@ -957,7 +963,7 @@ export class MainScene extends Phaser.Scene {
     unlock(character) {
         if (!this.unlockList.includes(character) && this.playerData.values[character] !== 'unlocked') {
             this.unlockList.push(character)
-            this.createRewardTween(character + " unlocked !", 0xEBC500)
+            this.createRewardTween('rewardUnlocked', 0xEBC500, {character: character})
         }
     }
 
@@ -979,12 +985,12 @@ export class MainScene extends Phaser.Scene {
 
         if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
             this.highscored = true
-            this.createRewardTween("Best Highscore!", 0x4169E1)
+            this.createRewardTween("rewardHighscore", 0x4169E1)
         }
 
-        if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && this.bestDistanced) {
+        if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && !this.bestDistanced) {
             this.bestDistanced = true
-            this.createRewardTween("Best Distance!", 0x4169E1)
+            this.createRewardTween("rewardDistance", 0x4169E1)
         }
         if (this.maxFollowingAnimals >= 40) {
             this.unlock('gorilla')

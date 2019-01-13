@@ -10,24 +10,24 @@ export class CreditScene extends Phaser.Scene{
 
     private touchToResume: BitmapText;
 	private speed;
-    private text="Game Design, Level Design, Programmation:\n" +
+    private text="Game Design, Level Design, Programmation\n\n" +
 		"Amaury Absolu Butaux\n" +
-		"\n" +
-		"Stagiaire Programmation:\n" +
+		"\n\n\n" +
+		"Stagiaire Programmation\n\n" +
 		"Johyn Enigm'Absolu Papin\n" +
-		"\n" +
-		"Assistance Game Design:\n" +
+		"\n\n\n" +
+		"Assistance Game Design\n\n" +
 		"Aloïs Butaux\n" +
 		"Felix Szczesny\n" +
-		"\n" +
-		"Concept initial:\n" +
+		"\n\n" +
+		"Concept initial\n\n" +
 		"Amaury Absolu Butaux\n" +
 		"Johyn Enigm'Absolu Papin\n" +
 		"Margot Absolu Tinturier\n" +
 		"Mathieu Absolu Huet\n" +
 		"\n" +
 		"\n" +
-		"Test:\n" +
+		"Test\n" +
 		"\n" +
 		"Alex Enigm'Absolu Bouez\n" +
 		"Alix Absolu Bruckert\n" +
@@ -61,16 +61,16 @@ export class CreditScene extends Phaser.Scene{
 		"Victor Absolu Saunier\n" +
 		"Xavier Absolu Bouclé\n" +
 		"\n" +
-		"Graphismes:\n" +
+		"Graphismes\n" +
 		"\n" +
 		"Kenney\n" +
-		"https://kenney.nl/\n" +
+		"kenney.nl\n" +
 		"\n" +
 		"Bonsaiheldin\n" +
-		"http://bonsaiheld.org\n" +
+		"bonsaiheld.org\n" +
 		"\n" +
 		"LittleRobotSoundFactory\n" +
-		"License: https://creativecommons.org/licenses/by/3.0/\n" +
+		"License; creativecommons.org/licenses/by/3.0/\n" +
 		"\n" +
 		"\n" +
 		"Absolue Monarchliste.";
@@ -82,7 +82,8 @@ export class CreditScene extends Phaser.Scene{
 		});
 	}
 	addCenteredText(y: number, text:string) : void{
-		this.add.bitmapText(this.width/2, y, 'jungle', text, 50*SC).setOrigin(0.5, 0.5);
+		// @ts-ignore
+        this.add._bitmapText(this.width/2, y, 'jungle', text, 50*SC).setOrigin(0.5, 0.5);
 	}
 	create () {
 		this.height = this.sys.canvas.height;
@@ -94,6 +95,7 @@ export class CreditScene extends Phaser.Scene{
 
 		var i = 0;
 		this.text.split(/\r?\n/).forEach(function(line){
+		    console.log(line)
 			this.addCenteredText(this.height + i * 50 * SC, line);
 			i += 1;
 		}, this);

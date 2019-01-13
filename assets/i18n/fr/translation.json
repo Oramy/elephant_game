@@ -2,7 +2,7 @@
 	"welcome": "Bienvenue {{name}} ! Tape sur {{character}} pour jouer.",
 	"welcome2": "Bienvenue {{name}}! Tape n’importe où pour jouer.",
 	"gotomenu": "Tape ici pour retourner au menu.",
-	"touchtoplay": "Tape un animal pour jouer lui.",
+	"touchtoplay": "Tape un animal pour le jouer.",
 	"locked": "Cet animal est bloqué...\n",
 	"unlocked": "Animal débloqué !",
 	"unlocked_plural": "Animaux débloqués !",
@@ -19,5 +19,11 @@
 	},
 	"drag": "Glisser votre animal pour le déplacer.",
 	"escape": "Fuis la lave !",
-    "lastScore": "Dernier Score : {{score}}"
+    "lastScore": "Dernier Score : {{score}}",
+    "lastDistance": "Dernière distance",
+    "bestDistance": "Meilleure distance",
+    "rewardUnlocked": "{{character}} débloqué !",
+    "rewardHighscore": "Meilleur Score !",
+    "rewardDistance": "Meilleure Distance !",
+    "leaderboard": "Classement"
 }

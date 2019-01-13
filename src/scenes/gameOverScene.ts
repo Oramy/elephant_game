@@ -203,10 +203,10 @@ export class GameOverScene extends Phaser.Scene{
         this.spawnAnimals(0, 0, this.width, -this.height * 2, this.gainedAnimals*3)
         background = this.add.image(this.width * 0.5,this.height * 0.70, 'squareSilhouette', "gorilla.png")
         background.setScale(5)
-        background.tint = 0xFF0000
         background.setAlpha(0.8)
 
         this.returnToMenu = this.add.bitmapText(this.width * 0.15, this.height * 0.9, 'jungle', 'gotomenu', 50 * SC)
+        this.returnToMenu.tint = 0xe5e5e5
         this.returnToMenu.setAlpha(0)
         this.returnToMenu.setInteractive()
         this.input.on("gameobjectdown",  this.goToMenu.bind(this))
@@ -216,6 +216,7 @@ export class GameOverScene extends Phaser.Scene{
         // @ts-ignore
         let scoreText = this.add._bitmapText(this.width * 0.5, this.height * 0.25, 'jungle', 'Score: ' + this.score, 150 * SC)
         scoreText._setText('Score: ' + this.score)
+        scoreText.tint = 0xe5e5e5
         scoreText.setOrigin(0.5, 0.5)
         scoreText.setScale(0)
 
@@ -248,7 +249,7 @@ export class GameOverScene extends Phaser.Scene{
 
         let touchToPlay = this.add.bitmapText(this.width * 0.5, this.height * 0.5, 'jungle', 'touchtoplay',  50 * SC).setOrigin(0.5,0.5)
         touchToPlay.setAlpha(0)
-
+        touchToPlay.tint = 0xe5e5e5
         let list
         if (this.unlockList.length == 0){
             list = this.unlocked.filter((function(el){

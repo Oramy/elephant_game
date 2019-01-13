@@ -43,12 +43,12 @@ export class PauseScene extends Phaser.Scene {
 
     this.clickSound = this.sound.add('clickSound')
 
-    this.mainMenuImage = this.add.image(0, 0, "iconsw", "home.png").setScale(3 * SC, 3 * SC).setInteractive() as Image
-    this.resumeImage = this.add.image(0, 0, "iconsw", "next.png").setScale(4 * SC, 4 * SC).setInteractive() as Image
-    this.restartImage = this.add.image(0, 0, "iconsw", "return.png").setScale(3 * SC, 3 * SC).setInteractive() as Image
+    this.mainMenuImage = this.add.image(0, 0, "iconsw", "home.png").setScale(4 * SC).setInteractive() as Image
+    this.resumeImage = this.add.image(0, 0, "iconsw", "next.png").setScale(4 * SC).setInteractive() as Image
+    this.restartImage = this.add.image(0, 0, "iconsw", "return.png").setScale(4 * SC).setInteractive() as Image
 
-    Phaser.Display.Align.To.LeftCenter(this.mainMenuImage, this.resumeImage, 75)
-    Phaser.Display.Align.To.RightCenter(this.restartImage, this.resumeImage, 75)
+    Phaser.Display.Align.To.LeftCenter(this.mainMenuImage, this.resumeImage, 250 * SC)
+    Phaser.Display.Align.To.RightCenter(this.restartImage, this.resumeImage, 250 * SC)
 
     this.buttonsContainer = this.add.container(0, 0, this.mainMenuImage)
     this.buttonsContainer.add(this.resumeImage)
