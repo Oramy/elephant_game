@@ -571,7 +571,7 @@ export class Menu extends Phaser.Scene {
             // @ts-ignore
             var text = this.add.bitmapText(0, 0, 'jungle', 'lastScore', 70 * SC, {score: this.lastScore});
             text.tint = 0xe5e5e5;
-            var topZone = this.add.zone(this.width / 2, this.height / 18, this.width, this.height / 10);
+            var topZone = this.add.zone(this.width / 2, this.height * 0.065, this.width, this.height / 10);
             Phaser.Display.Align.In.Center(text, topZone);
         }
 

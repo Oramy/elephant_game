@@ -5,7 +5,6 @@ import Timeline = Phaser.Tweens.Timeline;
 
 var SC;
 export class CoinsComponent{
-    private SC;
     private coinsText: Phaser.GameObjects.BitmapText;
     private newCoinsText: any;
 
@@ -20,12 +19,15 @@ export class CoinsComponent{
     private tween: Tween;
     constructor(scene, score){
         this.scene = scene;
-        this.score = score;
-    }
-    updatePlacement(){
-        Phaser.Display.Align.In.TopRight(this.coinsText, this.topZone);
 
-        Phaser.Display.Align.In.TopRight(this.newCoinsText, this.topZone);
+        this.score = score;
+
+        SC = this.scene.sys.canvas.height / 1920
+    }
+
+    updatePlacement(){
+        this.coinsText.x = this.icon.x - 50 * SC
+        Phaser.Display.Align.In.RightCenter(this.newCoinsText, this.coinsText);
 
         this.newCoinsText.y += this.height * 0.05;
     }
@@ -118,11 +120,11 @@ export class CoinsComponent{
         this.width = scene.sys.canvas.width;
         this.height = scene.sys.canvas.height;
 
-        this.topZone = this.scene.add.zone(this.width /2,this.height/4, this.width * 0.80, this.height / 2);
+        this.topZone = this.scene.add.zone(this.width /2,this.height/4, this.width, this.height / 2);
 
-       this.coinsText = scene.add.bitmapText(0, 0, "jungle", "" + this.score, 100 * SC).setOrigin(1, 0);
+       this.coinsText = scene.add.bitmapText(0, 0, "jungle", "" + this.score, 100 * SC).setOrigin(1,0);
         this.coinsText.setTint(0x000000);
-        this.icon = scene.add.image(this.width * 0.9, this.height * 0.03, 'animalCoins').setScale(0.30 * SC).setOrigin(0, 0.5);
+        this.icon = scene.add.image(this.width * 0.54, this.height * 0.03, 'animalCoins').setScale(0.30 * SC);
 
         this.newCoinsText = scene.add.bitmapText(-300, 0, "jungle", "+ ", 100*SC).setOrigin(0,0);
         this.newCoinsText.setTint(0x000000);
