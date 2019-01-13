@@ -115,7 +115,8 @@ export class MainScene extends Phaser.Scene {
 
     private disableControl: boolean
     private lastUpdateTime: number
-    private pauseTime: number
+
+	private pauseTime: number
     private justResumed: boolean
     private lastTime: number
     private started: boolean
@@ -250,7 +251,7 @@ export class MainScene extends Phaser.Scene {
         this.scoreText.setDepth(Infinity)
 
         // @ts-ignore
-        this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x2', 100*SC).setOrigin(0, 0)
+        this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x1', 100*SC).setOrigin(0, 0)
         this.multiplierText.tint = 0xe5e5e5
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2)
         this.multiplierText.setScrollFactor(0)
@@ -264,6 +265,7 @@ export class MainScene extends Phaser.Scene {
 
         let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5)
         drag.tint = 0xe5e5e5
+
         drag.setScale(1)
         drag.setScrollFactor(0)
         drag.setDepth(Infinity)
@@ -274,7 +276,7 @@ export class MainScene extends Phaser.Scene {
         escape.setDepth(Infinity)
         escape.setAlpha(0)
 
-        let touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png')
+		let touch = this.add.image(this.width * 0.68, this.height * 0.50, 'icons', 'downLeft.png')
         touch.setDepth(Infinity)
         touch.setScale(4 * SC)
         touch.setScrollFactor(0)
@@ -338,19 +340,21 @@ export class MainScene extends Phaser.Scene {
         }, this)
 
         let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png')
-        image.setDepth(Infinity)
-        image.setScrollFactor(0)
-        image.setInteractive()
+		image.setDepth(Infinity)
+		image.setScrollFactor(0)
+		image.setInteractive()
 
-        this.input.on('gameobjectdown', (pointer, gameObject) => {
-            if (gameObject === image) {
-                if (this.started) {
+		this.input.on('gameobjectdown', (pointer, gameObject) => {
+			if (gameObject === image) {
+		    	if (this.started) {
+					this.scene.pause('MainScene')
+            	    this.scene.launch('PauseScene')
                     this.clickSound.play()
-                    this.scene.pause('MainScene')
-                    this.scene.launch('PauseScene')
-                }
-            }
-        })
+                    // @ts-ignore
+					this.scene.get('PauseScene').setPlayerData(this.playerData)
+				}
+			}
+		})
 
         this.bestDistanced = false
         this.highscored = false
@@ -367,9 +371,9 @@ export class MainScene extends Phaser.Scene {
         this.rightWall.setCollisionCategory(this.obstacleCat)
         this.rightWall.setDisplaySize(this.width * 0.5, this.height)
         this.rightWall.setVisible(false)
-    }
+	}
 
-    createElephant(): void {
+	createElephant(): void {
         this.disableControl = false
         if (this.character === undefined) {
             this.character = 'elephant'
@@ -392,7 +396,6 @@ export class MainScene extends Phaser.Scene {
 
         this.elephantDirection = new Phaser.Math.Vector2(0, 1)
         this.lastPosition = [0.5 * this.width, 0.5 * this.height]
-
     }
 
     /**
@@ -440,9 +443,9 @@ export class MainScene extends Phaser.Scene {
                 shelter.score = BASE_SCORE * multiplier
             } else {
                 shelter.score *= multiplier
-            }
+			}
 
-            if (this.tween === undefined || !this.tween.isPlaying()) {
+			if (this.tween === undefined || !this.tween.isPlaying()) {
                 this.tween = this.tweens.add({
                     targets: this.scoreText,
                     duration: 50,
@@ -568,12 +571,13 @@ export class MainScene extends Phaser.Scene {
         this.events.on('pause', function() {
             this.pauseTime = this.lastTime
         }, this)
-        this.events.on('resume', function () {
+
+		this.events.on('resume', function () {
             this.justResumed = true
-        }, this)
-        window.addEventListener('focus', this.onFocus.bind(this))
-        window.addEventListener('blur', this.onBlur.bind(this))
-        this.justResumed = false
+			this.scene.stop('PauseScene')
+		}, this)
+
+		this.justResumed = false
         this.pauseTime = 0
         this.lastUpdateTime = 0
 
@@ -581,10 +585,11 @@ export class MainScene extends Phaser.Scene {
             this.started = true
         }, this)
 
-        this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
+        if(this.playerData.values.bestDistance > 0)
+            this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
           this.playerData.values.bestDistance + "m", "Best distance")
-
-        this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
+        if(this.playerData.values.lastDistance > 0)
+            this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
           this.playerData.values.lastDistance + "m", "Last distance")
     }
 
@@ -639,17 +644,7 @@ export class MainScene extends Phaser.Scene {
         this.insideScreenObjects.push(textEl)
     }
 
-    onBlur(): void {
-        this.scene.pause('MainScene')
-        this.pauseTime = this.lastTime
-    }
-
-    onFocus(): void {
-        this.scene.resume('MainScene')
-        this.justResumed = true
-    }
-
-    update(time, delta): void {
+	update(time, delta): void {
         if (this.matter.world != null) {
             if (this.lastUpdateTime == 0) {
                 this.lastUpdateTime = time
@@ -765,9 +760,9 @@ export class MainScene extends Phaser.Scene {
 
     metersToCamera (pos: number): number {
         return pos / 35 * this.height
-    }
+	}
 
-    updateAnimals (delta): void {
+	updateAnimals (delta): void {
         this.animalSpeed += delta * ANIMAL_ACC / 1000
 
         // Following the elephant logic.
@@ -1013,9 +1008,8 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-    gameOver(): void{
-        if (!this.gameOverB) {
-            this.scene.get('GameOverScene').tweens.add({
+    stopSounds(scene = 'GameOverScene'): void {
+            this.scene.get(scene).tweens.add({
                 targets: this.instruments,
                 volume: 0,
 
@@ -1024,8 +1018,17 @@ export class MainScene extends Phaser.Scene {
 
                 onComplete: (function() {
                     this.instruments.forEach(instr => instr.stop())
-                }).bind(this)
-            })
+            }).bind(this)
+        })
+    }
+
+    fastStopSounds(): void {
+        this.instruments.forEach(instr => instr.stop())
+    }
+
+    gameOver(): void{
+        if (!this.gameOverB) {
+            this.stopSounds()
             this.updateStats()
 
             this.gameOverB = true
@@ -1105,7 +1108,6 @@ export class MainScene extends Phaser.Scene {
                     name: 'Amis.' + this.facebook.contextID,
                 })
 
-                console.log('ouf')
                 this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data))
             }
         }
