@@ -14,6 +14,7 @@ import { GameOverScene } from "./scenes/gameOverScene";
 import { CreditScene } from "./scenes/creditScene";
 import { PauseScene } from "./scenes/pauseScene";
 import { I18nPlugin } from "@koreez/phaser3-i18n";
+import { LeaderboardScene } from './scenes/leaderboardScene'
 
 // main game configuration
 
@@ -38,7 +39,7 @@ var config: any = {
     },
     type: Phaser.AUTO,
     parent: "game",
-    scene: [Preloader, Menu, MainScene, GameOverScene, PauseScene, CreditScene],
+    scene: [Preloader, Menu, MainScene, GameOverScene, PauseScene, CreditScene, LeaderboardScene],
     physics: {
       default: "matter",
       matter: {

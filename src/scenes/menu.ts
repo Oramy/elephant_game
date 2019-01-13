@@ -69,6 +69,7 @@ export class Menu extends Phaser.Scene {
     private crownId: integer
 
     private bigRankText: BitmapText;
+    private plusButton: Phaser.GameObjects.Image;
 
     constructor() {
         super('Menu');
@@ -512,7 +513,19 @@ export class Menu extends Phaser.Scene {
         let callback = this.startGame.bind(this);
         //this.input.on("pointerdown", callback);
 
+        this.plusButton = this.add.image(this.width * 0.62, this.height * 0.6, 'iconsw', 'leaderboardsComplex.png')
+        this.plusButton.setScale(2*SC)
+        this.plusButton.setTint(0xe5e5e5)
+        this.plusButton.setInteractive()
 
+
+        this.input.on('gameobjectdown', function (pointer, gameObject) {
+            if (gameObject === this.plusButton) {
+                this.clickSound.play()
+                this.scene.pause('Menu');
+                this.scene.launch('LeaderboardScene');
+            }
+        }, this);
         // @ts-ignore
         this.load.image(this.facebook.playerID, this.facebook.playerPhotoURL);
         this.load.on('complete', this.addPlayerPhoto, this);

@@ -149,6 +149,7 @@ export class MainScene extends Phaser.Scene {
     private animalIndivSaved: any
     private crown: Phaser.GameObjects.Image
 
+
     constructor() {
         super({
             key: 'MainScene',

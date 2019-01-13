@@ -86,5 +86,6 @@ export class Preloader extends Phaser.Scene{
 
     startGame () {
         this.scene.start('Menu');
+
   }
 }
