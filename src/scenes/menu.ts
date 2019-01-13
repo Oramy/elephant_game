@@ -38,6 +38,8 @@ export class Menu extends Phaser.Scene {
     private playImage: Phaser.GameObjects.Image;
     private unlocked: BitmapText;
 
+    private crown: Image;
+
     private indices = {
         'elephant': '', 'frog': 'Score over 5000 to unlock this animal.',
         'gorilla': 'Have more than 40 animals following you \n' +
@@ -64,6 +66,7 @@ export class Menu extends Phaser.Scene {
 
     private clickSound: Phaser.Sound.BaseSound;
     private buySound : Phaser.Sound.BaseSound;
+    private crownId: integer
 
     constructor() {
         super('Menu');
@@ -83,6 +86,7 @@ export class Menu extends Phaser.Scene {
     }
 
     updatePlayerDataUI() {
+        this.setCrownId(this.playerData.values. crown)
         // @ts-ignore
         this.indices['narwhal'] = this.i18n.t('animals.narwhal', {n: this.playerData.values.goldSaved})
         // @ts-ignore
@@ -326,7 +330,9 @@ export class Menu extends Phaser.Scene {
             'maxAnimalsSavedOneRun': 0,
             'maxFollowingAnimals': 0,
             'mute': false,
+            'crown': Phaser.Math.Between(1, 16),
             'lastCharacter': 'elephant',
+
             'version': CURRENT_VERSION
         };
 
@@ -339,6 +345,17 @@ export class Menu extends Phaser.Scene {
 
     update() {
         this.coinsComponent.update();
+    }
+    setCrownId(crownId){
+        this.crownId = crownId
+        this.crown.setFrame('crown' + this.crownId + '.png')
+    }
+    incrCrownId(event, gameobject){
+        if(gameobject === this.crown){
+            this.setCrownId(1 + this.crownId % 15)
+            this.playerData.values.crown = this.crownId
+        }
+
     }
 
     create() {
@@ -407,6 +424,15 @@ export class Menu extends Phaser.Scene {
         Phaser.Display.Align.In.Center(this.characterImage, this.playZone);
         Phaser.Display.Align.In.Center(this.characterSImage, this.playZone);
         Phaser.Display.Align.In.Center(this.playImage, this.playZone);
+
+
+        this.crownId = 1
+        this.crown = this.add.image(this.width / 2, 180 * SC + 2 * this.height / 8, 'crowns', 'crown' + this.crownId + ".png").setOrigin(0.5, 1)
+        this.crown.setDepth(1)
+        this.crown.setScale(1.5 * SC)
+        this.crown.setInteractive()
+
+        this.input.on('gameobjectdown', this.incrCrownId, this);
 
         this.nextCharacterImage = this.add.image(0, 0, 'squareOutline', 'frog.png');
         this.nextCharacterImage.setScale(1.8 * SC);
@@ -518,6 +544,7 @@ export class Menu extends Phaser.Scene {
         dataKeys.push('mute');
         dataKeys.push('lastCharacter');
         dataKeys.push('version');
+        dataKeys.push('crown');
 
         this.characterNames.forEach(character => dataKeys.push(character + "Count"));
         // @ts-ignore
@@ -564,6 +591,7 @@ export class Menu extends Phaser.Scene {
 
         var logo = this.add.image(this.width * 0.83, this.height * 0.9, 'logo');
         logo.setScale(1.5 * SC);
+        logo.setScale(1.5 * SC);
 
         logo.setInteractive();
 
@@ -590,6 +618,16 @@ export class Menu extends Phaser.Scene {
             targets: [this.characterImage],
             scaleX: 1.8 * 1.03 * SC,
             scaleY: 1.8 * 1.03 * SC,
+            ease: 'Quint.easeIn',
+            duration: 300,
+            yoyo: true,
+            repeat: Infinity,
+            delay: 200
+        });
+        this.tweens.add({
+            targets: [this.crown],
+            scaleX: 1.5 * 1.03 * SC,
+            scaleY: 1.5 * 1.03 * SC,
             ease: 'Quint.easeIn',
             duration: 300,
             yoyo: true,
@@ -730,7 +768,7 @@ export class Menu extends Phaser.Scene {
             repeat: 0,
             delay: 0
         });
-        Phaser.Display.Align.In.Center(profile, secondQuarterZone);
+        Phaser.Display.Align.In.Center(profile, secondQuarterZone, 0, -50*SC);
 
     }
 

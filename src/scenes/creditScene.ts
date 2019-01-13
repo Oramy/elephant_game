@@ -72,6 +72,8 @@ export class CreditScene extends Phaser.Scene{
 		"LittleRobotSoundFactory\n" +
 		"License; creativecommons.org/licenses/by/3.0/\n" +
 		"\n" +
+        "Crowns designed by Good Ware from Flaticon" +
+        "\n" +
 		"\n" +
 		"Absolue Monarchliste.";
 	private logo: Phaser.GameObjects.Image;

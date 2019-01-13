@@ -22,6 +22,7 @@ import getTintAppendFloatAlpha = Phaser.Renderer.WebGL.Utils.getTintAppendFloatA
 import Group = Phaser.GameObjects.Group
 import {Animal} from "../gameobjects/animal"
 import Zone = Phaser.GameObjects.Zone
+import PI2 = Phaser.Math.PI2
 
 function arrayRemove(arr, value) {
     return arr.filter(function(ele) {
@@ -33,7 +34,7 @@ export const ELEPHANT_SCALE = 2
 export const ANIMAL_SCALE = 3
 //1 = NO DELAY
 export const MOVE_DELAY_COEFF = 0.1
-export const DIRECTION_UPDATE_DIST_SQ = 3 ** 2
+export const DIRECTION_UPDATE_DIST_SQ = 10 ** 2
 export const ANIMAL_BASE_SPEED = 700
 export const ANIMAL_SPEED_XY_RATIO = 1/20
 export const CAMERA_BASE_SPEED = -15 // -15
@@ -43,6 +44,7 @@ export const CAMERA_ACC = -2 // -0
 export const ANIMALS_SPAWN = 5
 export const SCORE_MULTIPLIER = 1.148698355 // 2 ^ (1/5)
 export const BASE_SCORE = 10
+export const ROTATION_INERTIA = 0.8
 
 // For each frame, yOffset in percent, for the collision mesh and the image to fit together.
 export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1, 0, 0, 0, 0.05,
@@ -145,6 +147,7 @@ export class MainScene extends Phaser.Scene {
 
     private goldSaved: number
     private animalIndivSaved: any
+    private crown: Phaser.GameObjects.Image
 
     constructor() {
         super({
@@ -405,6 +408,11 @@ export class MainScene extends Phaser.Scene {
 
         this.elephantDirection = new Phaser.Math.Vector2(0, 1)
         this.lastPosition = [0.5 * this.width, 0.5 * this.height]
+
+        this.crown = this.add.image(this.width/2, this.height * 0.6, 'crowns', 'crown' + this.playerData.values.crown + '.png');
+        this.crown.setScale(ELEPHANT_SCALE * SC * 0.75)
+        this.crown.setDepth(1)
+        this.crown.setOrigin(0.5, 1.5)
     }
 
     /**
@@ -869,10 +877,21 @@ export class MainScene extends Phaser.Scene {
                 this.lastPosition = [this.input.x, this.input.y]
                 this.elephantDirection = move
             }
-
-            this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4
+            var angleA = (this.elephant.rotation + PI2) % PI2
+            var angleB = (this.elephantDirection.angle() - PI2/4) % PI2
+            if(Math.abs(angleB - angleA) %  PI2 > PI2 - (Math.abs((angleB - angleA) % PI2))){
+                if(angleA < angleB)
+                    angleA += PI2
+                else
+                    angleB += PI2
+            }
+            this.elephant.rotation = angleA * ROTATION_INERTIA
+                + (1- ROTATION_INERTIA) * angleB
             this.elephant.body.label = 'elephant'
         }
+        this.crown.setPosition(this.elephant.x, this.elephant.y)
+        this.crown.rotation = this.elephant.rotation
+
     }
 
     updateCamera(time, delta): void{

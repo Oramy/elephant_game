@@ -1,0 +1,356 @@
+{
+	"textures": [
+		{
+			"image": "crowns.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 260,
+				"h": 994
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "crown14.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 128,
+						"h": 128
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 128,
+						"h": 128
+					}
+				},
+				{
+					"filename": "crown16.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 127
+					},
+					"frame": {
+						"x": 131,
+						"y": 1,
+						"w": 128,
+						"h": 127
+					}
+				},
+				{
+					"filename": "crown6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 127
+					},
+					"frame": {
+						"x": 131,
+						"y": 130,
+						"w": 128,
+						"h": 127
+					}
+				},
+				{
+					"filename": "crown1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 1,
+						"y": 131,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown10.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 1,
+						"y": 259,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown11.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 131,
+						"y": 259,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown15.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 1,
+						"y": 387,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 131,
+						"y": 387,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 1,
+						"y": 515,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 131,
+						"y": 515,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 128,
+						"h": 126
+					},
+					"frame": {
+						"x": 1,
+						"y": 643,
+						"w": 128,
+						"h": 126
+					}
+				},
+				{
+					"filename": "crown5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 6,
+						"w": 128,
+						"h": 116
+					},
+					"frame": {
+						"x": 131,
+						"y": 643,
+						"w": 128,
+						"h": 116
+					}
+				},
+				{
+					"filename": "crown12.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 7,
+						"w": 128,
+						"h": 114
+					},
+					"frame": {
+						"x": 131,
+						"y": 761,
+						"w": 128,
+						"h": 114
+					}
+				},
+				{
+					"filename": "crown8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 7,
+						"w": 128,
+						"h": 114
+					},
+					"frame": {
+						"x": 1,
+						"y": 771,
+						"w": 128,
+						"h": 114
+					}
+				},
+				{
+					"filename": "crown13.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 10,
+						"w": 128,
+						"h": 108
+					},
+					"frame": {
+						"x": 131,
+						"y": 877,
+						"w": 128,
+						"h": 108
+					}
+				},
+				{
+					"filename": "crown9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 11,
+						"w": 128,
+						"h": 106
+					},
+					"frame": {
+						"x": 1,
+						"y": 887,
+						"w": 128,
+						"h": 106
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:fb263027389bc106cce0a85848641a9b:0febc90669aa004aee91ad4cbb44d3b7:79d34b4df941a40e348db60ec464a58c$"
+	}
+}
