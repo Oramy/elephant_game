@@ -177,7 +177,8 @@ export class MainScene extends Phaser.Scene {
         } else {
             // @ts-ignore
             if (leaderboard.name == 'Amis.' + this.facebook.contextID) {
-                        console.log("friends!!")
+                        // @ts-ignore
+                        console.log(this.facebook.contextID)
                         this.friends = leaderboard
                     }
         }
@@ -282,14 +283,20 @@ export class MainScene extends Phaser.Scene {
 
         this.touchToPlay = []
 
-        let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5)
+        let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 50*SC).setOrigin(0.5, 0.5)
         drag.tint = 0xe5e5e5
 
         drag.setScale(1)
         drag.setScrollFactor(0)
         drag.setDepth(Infinity)
 
-        let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 100*SC).setOrigin(0.5, 0.5)
+        let save = this.add.bitmapText(this.width / 2,this.height * 0.35,'jungle', 'save', 90*SC).setOrigin(0.5, 0.5)
+        save.tint = 0xe5e5e5
+        save.setScrollFactor(0)
+        save.setDepth(Infinity)
+        save.setAlpha(0)
+
+        let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 90*SC).setOrigin(0.5, 0.5)
         escape.tint = 0xe5e5e5
         escape.setScrollFactor(0)
         escape.setDepth(Infinity)
@@ -302,6 +309,7 @@ export class MainScene extends Phaser.Scene {
 
         this.touchToPlay.push(drag)
         this.touchToPlay.push(escape)
+        this.touchToPlay.push(save)
         this.touchToPlayTweens = []
         this.touchToPlayTweens.push(this.tweens.add({
             targets: touch,
@@ -313,7 +321,7 @@ export class MainScene extends Phaser.Scene {
             repeat: Infinity,
             hold: 600}))
         this.touchToPlayTweens.push(this.tweens.add({
-            targets: escape,
+            targets: [escape, save],
             alpha : 1,
             ease: 'Quad.easeIn',
             duration: 180,

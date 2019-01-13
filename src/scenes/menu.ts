@@ -569,10 +569,10 @@ export class Menu extends Phaser.Scene {
         this.input.on("gameobjectdown", (this.play).bind(this));
         if (this.lastScore !== undefined) {
             // @ts-ignore
-            var text = this.add.bitmapText(0, 0, 'jungle', 'lastScore', 70 * SC, {score: this.lastScore});
+            var text = this.add.bitmapText(0, 0, 'jungle', 'lastScore', 50 * SC, {score: this.lastScore});
             text.tint = 0xe5e5e5;
-            var topZone = this.add.zone(this.width / 2, this.height * 0.065, this.width, this.height / 10);
-            Phaser.Display.Align.In.Center(text, topZone);
+            var topZone = this.add.zone(this.width / 2, this.height / 2, this.width * 0.95, this.height  * 0.95);
+            Phaser.Display.Align.In.BottomLeft(text, topZone);
         }
 
         var leadText = this.add.bitmapText(this.width * 0.36, this.height * 0.6, 'jungle', 'leaderboard', 90 * SC).setOrigin(0.5, 0.5)

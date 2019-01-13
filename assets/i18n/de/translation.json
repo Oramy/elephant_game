@@ -1,0 +1,35 @@
+{
+	"welcome": "Willkommen {{name}}! Tippe auf dein {{character}} um zu starten.",
+	"welcome2": "Willkommen {{name}}! Tippe irgendwo auf\n den Bildschirm um zu starten.",
+	"gotomenu": "Tippe hier um zum Menü zu kommen.",
+	"touchtoplay": "Tippe auf ein Tier um damit zu spielen.",
+	"locked": "Dieses Tier ist gesperrt...\n",
+	"unlocked": "Charakter entsperrt!",
+	"unlocked_plural": "Charaktere entsperrt!",
+	"pay": "Bezahle {{price}} Tiere um diesen Charakter zu entsperren.",
+	"animals": {
+		"narwhal": "Rette 2000 goldene Tiere um dieses Tier zu entsperren.\n({{n}}/2000)",
+		"moose": "Rette 500 von diesem Typ um dieses Tier zu entsperren.\n({{n}}/500)",
+		"parrot": "Lasse 1000 in der Lava sterben um dieses Tier zu entsperren.\n({{n}}/1000)",
+		"snake": "Entkomme dem Feuer auf 5000m um dieses Tier zu entsperren.\n({{n}}/5000)",
+		"gorilla": "Habe mehr als 40 Tiere die dir folgen\num dieses Tier zu entsperren. ({{n}}/40)",
+		"giraffe": "Erziele über 20000 Punkte um dieses Tier zu entsperren.\n({{n}}/20000)",
+		"frog": "Erziele über 5000 Punkte um dieses Tier zu entsperren..\n({{n}}/5000)",
+		"hippo": "Rette 500 Tiere in einem Spiel um dieses Tier zu entsperren.\n({{n}}/500)"
+	},
+	"drag": "Ziehe dein Charakter über den Bildschirm um ihn zu bewegen.",
+	"escape": "Entkomme der Lava",
+	"save": "und rette die Tiere!",
+    "lastScore": "Letzter Score: {{score}}",
+    "lastDistance": "Letzte Strecke",
+    "bestDistance": "Beste Strecke",
+    "rewardUnlocked": "{{character}} entsperrt!",
+    "rewardHighscore": "Highscore!",
+    "rewardDistance": "Beste Strecke!",
+    "leaderboard": "Leaderboard",
+    "rank": "{{rank}}.",
+    "firstRank": ".",
+    "secondRank": "."
+	"play": "Spielen",
+	"buy": "Kaufen"
+}
