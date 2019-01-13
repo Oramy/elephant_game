@@ -304,13 +304,31 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(right, rightLine);
                 Phaser.Actions.PlaceOnLine(right2, rightLine2);
                 break;
-            case 5:// Random
-                var items = this.genBarriers(3);
-                var rect = new Rectangle(x, y, w, h);
-                Phaser.Actions.RandomRectangle(items, rect);
-                break;
-            case 6:// Nothing
+            case 5:// Ladder Right
+                var right3 = this.genBarriers(2);
+                var right2 = this.genBarriers(2);
+                var right = this.genBarriers(2);
 
+                var rightLine3 = new Line(x + w -  64 * SC, y + h / 2, x + w * 3 / 4 - 64 * SC, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 3 / 4 - 64 * SC, y + h / 4);
+                var rightLine2 = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3  / 4 - 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(right3, rightLine3);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(right2, rightLine2);
+                break;
+            case 6:// Ladder Left
+                var left3 = this.genBarriers(2);
+                var left2 = this.genBarriers(2);
+                var left = this.genBarriers(2);
+
+                var leftLine3 = new Line(x +  64 * SC, y + h / 2, x + w * 1 / 4 + 64 * SC, y + h / 2);
+                var leftLine = new Line(x + 64 * SC, y + h / 4, x + w * 1 / 4 + 64 * SC, y + h / 4);
+                var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w * 1  / 4 + 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(left3, leftLine);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
                 break;
             case 7:// Middle 1/2
                 var middle = this.genBarriers(4);
@@ -338,8 +356,8 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(left, leftLine);
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
-                left = this.genBarriers(2);
                 right = this.genBarriers(2);
+                left = this.genBarriers(2);
                 leftLine = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
                 rightLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
 
@@ -793,11 +811,34 @@ export class Prefabs{
                         break;
                 }
                 break;
-            case 5: // Random
+            case 5: // Ladder Right
+                switch (variant_id) {
+                    case 0:
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/2+ 128*SC)
 
-            case 6: // Nothing
-                this.spawnAnimals( x, y, x + w, y + h, ANIMALS_SPAWN);
-                break;
+                        this.spawnAnimal( x+w-64*SC, y+ h/4+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h/4+ 128*SC)
+
+                        this.spawnAnimal( x+w-64*SC, y+ h * 3 / 4+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h * 3 / 4+ 128*SC)
+                        break
+                }
+                break
+            case 6: // Ladder Left
+                switch (variant_id) {
+                    case 0:
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC)
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/2+ 128*SC)
+
+                        this.spawnAnimal( x+64*SC, y+ h/4+ 128*SC)
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h/4+ 128*SC)
+
+                        this.spawnAnimal( x+64*SC, y+ h * 3 / 4+ 128*SC)
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h * 3 / 4+ 128*SC)
+                        break
+                }
+                break
             case 14: //Middle 1/2 Spikes
             case 7: // Middle 1/2
                 switch (variant_id) {

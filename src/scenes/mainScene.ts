@@ -239,17 +239,19 @@ export class MainScene extends Phaser.Scene {
 
         // @ts-ignore
         this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
+        this.fps.tint = 0xe5e5e5;
         this.fps.setScrollFactor(0)
         this.fps.setDepth(Infinity)
 
         // @ts-ignore
         this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
-        this.scoreText.tint = 0xFFFFFF
+        this.scoreText.tint = 0xe5e5e5
         this.scoreText.setScrollFactor(0)
         this.scoreText.setDepth(Infinity)
 
         // @ts-ignore
         this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x2', 100*SC).setOrigin(0, 0)
+        this.multiplierText.tint = 0xe5e5e5
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2)
         this.multiplierText.setScrollFactor(0)
         this.multiplierText.setDepth(Infinity)
@@ -261,13 +263,13 @@ export class MainScene extends Phaser.Scene {
         this.touchToPlay = []
 
         let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5)
-        drag.tint = 0xFFFFFF
+        drag.tint = 0xe5e5e5
         drag.setScale(1)
         drag.setScrollFactor(0)
         drag.setDepth(Infinity)
 
         let escape = this.add.bitmapText(this.width / 2,this.height * 0.30,'jungle', 'escape', 100*SC).setOrigin(0.5, 0.5)
-        escape.tint = 0xFFFFFF
+        escape.tint = 0xe5e5e5
         escape.setScrollFactor(0)
         escape.setDepth(Infinity)
         escape.setAlpha(0)
@@ -746,7 +748,7 @@ export class MainScene extends Phaser.Scene {
 
             logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255)
             if (!isNaN(logAdvance)) {
-                this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color)
+                this.multiplierText.setTint(new Color(logAdvance, 1, 1, 1).color)
                 // @ts-ignore
                 this.multiplierText._setText('x' +  truncValue)
                 this.multiplierText.setFontSize((100 + logAdvance / 10) * SC)

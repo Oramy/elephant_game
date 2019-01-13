@@ -447,7 +447,7 @@ export class Menu extends Phaser.Scene {
 
         this.unlocked = this.add.bitmapText(0, 0, 'jungle', '');
         this.unlocked.setFontSize(70 * SC);
-        this.unlocked.tint = 0xCCCCCC;
+        this.unlocked.tint = 0xe5e5e5;
 
 
         Phaser.Display.Align.In.Center(this.unlocked, zone);
@@ -464,9 +464,10 @@ export class Menu extends Phaser.Scene {
         // @ts-ignore
         //this.facebook.getLeaderboard('Amis.'+FBInstant.context.getID());
         // @ts-ignore
-		this.touchToStart = this.add.bitmapText(0, 0, "jungle", "welcome2", 40 * SC, {name: this.facebook.playerName});
-
+		    this.touchToStart = this.add.bitmapText(0, 0, "jungle", "welcome2", 40 * SC, {name: this.facebook.playerName});
+        this.touchToStart.tint = 0xe5e5e5;
         let title = this.add.bitmapText(0, 100, "jungle", "Elephant Game", 120 * SC);
+        title.tint = 0xe5e5e5;
         let screenZone = this.add.zone(this.width / 2, this.height / 2, this.width, this.height);
     	var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
@@ -486,6 +487,7 @@ export class Menu extends Phaser.Scene {
         if (this.lastScore !== undefined) {
             // @ts-ignore
             var text = this.add.bitmapText(0, 0, 'jungle', 'lastScore', 70 * SC, {score: this.lastScore});
+            text.tint = 0xe5e5e5;
             var topZone = this.add.zone(this.width / 2, this.height / 18, this.width, this.height / 10);
             Phaser.Display.Align.In.Center(text, topZone);
         }
@@ -596,9 +598,11 @@ export class Menu extends Phaser.Scene {
         var character = this.add.image(215 * SC - 1000 * SC, y + 40 * SC, "square_nodetailsOutline", data.character + ".png");
         character.setScale(0.75 * SC);
         var rankText = this.add.bitmapText(200 * SC - 1000 * SC, y + 13 * SC, "jungle", entry.rank);
+        rankText.tint = 0xe5e5e5;
         var nameText = this.add.bitmapText(400 * SC - 1000 * SC, y, "jungle", entry.playerName);
+        nameText.tint = 0xe5e5e5;
         var scoreText = this.add.bitmapText(400 * SC - 1000 * SC, y + 50 * SC, "jungle", "Score: " + entry.scoreFormatted);
-
+        scoreText.tint = 0xe5e5e5;
 
         this.tweens.add({
             targets: character,
