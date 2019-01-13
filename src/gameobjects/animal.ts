@@ -1,6 +1,7 @@
 import {ANIMAL_SCALE, SC} from "../scenes/mainScene";
 
 export class Animal extends Phaser.Physics.Matter.Image{
+    private zombie: boolean;
     constructor(scene, x, y, atlas, frame){
         super(scene.matter.world, 0, 0, atlas,frame,{
             shape: {
@@ -10,6 +11,7 @@ export class Animal extends Phaser.Physics.Matter.Image{
             label: 'animal',
 
         });
+        this.zombie = false
     };
 
 
@@ -26,12 +28,16 @@ export class Animal extends Phaser.Physics.Matter.Image{
         this.setFrame(frame);
 
         this.body.allowRotation = false;
+        if(this.zombie)
+            scene.matter.world.add(this.body);
         this.setCollisionCategory(scene.obstacleCat);
         this.setCollidesWith([scene.elephantCat, scene.obstacleCat]);
         this.setSensor(true);
         this.tint = 0xFFFFFF;
     }
-    kill(){
+    kill(scene){
+        scene.matter.world.remove(this);
+        this.zombie = true;
         this.setActive(false);
         this.body.label = 'dead';
         this.setVisible(false);

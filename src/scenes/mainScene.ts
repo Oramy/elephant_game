@@ -681,7 +681,7 @@ export class MainScene extends Phaser.Scene {
     }
 
     killAnimal(animal): void {
-        animal.kill()
+        animal.kill(this)
 
         if (this.insideAnimals.includes(animal)) {
             this.insideAnimals.splice(this.insideAnimals.indexOf(animal), 1)
