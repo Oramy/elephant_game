@@ -299,6 +299,7 @@ export class Menu extends Phaser.Scene {
                   var characterStatus = this.playerData.get(this.character);
                   if (characterStatus == 'unlocked') {
                       this.startGame();
+
                       this.clickSound.play()
                   } else if (characterStatus == 'buyable') {
 
@@ -853,6 +854,8 @@ export class Menu extends Phaser.Scene {
 
     startGame() {
         this.scene.start('MainScene');
+
+        this.tweens.getAllTweens().forEach(tween => tween.complete(0));
         // @ts-ignore
         this.scene.get('MainScene').updateCharacter(this.character);
 

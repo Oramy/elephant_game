@@ -388,6 +388,7 @@ export class GameOverScene extends Phaser.Scene{
     }
 
     startGame(character) {
+        this.tweens.getAllTweens().forEach(tween => tween.complete(0));
         this.scene.start('MainScene')
         // @ts-ignore
         this.scene.get('MainScene').updateCharacter(character)
