@@ -260,10 +260,10 @@ export class MainScene extends Phaser.Scene {
         this.rewardTweens = []
 
         // @ts-ignore
-        this.fps = this.add._bitmapText(0, this.height- 20*SC, 'jungle', 'FPS: 60', 80 * SC).setOrigin(0, 1 );
+        /*this.fps = this.add._bitmapText(0, this.height- 20*SC, 'jungle', 'FPS: 60', 80 * SC).setOrigin(0, 1 );
         this.fps.tint = 0xe5e5e5;
         this.fps.setScrollFactor(0)
-        this.fps.setDepth(Infinity)
+        this.fps.setDepth(Infinity)*/
 
         // @ts-ignore
         this.scoreText = this.add._bitmapText(this.width / 2, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0.5, 0)
@@ -351,7 +351,7 @@ export class MainScene extends Phaser.Scene {
                 duration: 800})
 
             this.tweens.add({
-                targets: escape,
+                targets: [escape, save],
                 alpha : 0,
                 ease: 'Quad.easeOut',
                 duration: 800})
@@ -758,7 +758,7 @@ export class MainScene extends Phaser.Scene {
 
     updateUI(): void {
         // @ts-ignore
-        this.fps._setText('FPS: ' + Math.trunc(this.game.loop.actualFps))
+        //this.fps._setText('FPS: ' + Math.trunc(this.game.loop.actualFps))
         // @ts-ignore
         this.scoreText._setText('Score: ' + Math.round(this.computeScore()))
 
