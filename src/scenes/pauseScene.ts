@@ -19,6 +19,8 @@ export class PauseScene extends Phaser.Scene {
 
   private playerData: any
 
+    private clickSound: Phaser.Sound.BaseSound
+
   constructor () {
     super({
       key: "PauseScene"
@@ -38,6 +40,8 @@ export class PauseScene extends Phaser.Scene {
     this.camera = this.cameras.main
 
     this.camera.setBackgroundColor('rgba(0, 0, 0, 0.6)')
+
+    this.clickSound = this.sound.add('clickSound')
 
     this.mainMenuImage = this.add.image(0, 0, "iconsw", "home.png").setScale(3 * SC, 3 * SC).setInteractive() as Image
     this.resumeImage = this.add.image(0, 0, "iconsw", "next.png").setScale(4 * SC, 4 * SC).setInteractive() as Image
@@ -60,19 +64,29 @@ export class PauseScene extends Phaser.Scene {
 
     this.input.on('gameobjectdown', (pointer, gameObject) => {
       switch (gameObject) {
-        case this.mainMenuImage:
-          this.scene.stop('MainScene')
-          this.scene.start('Menu')
-          break
+          case this.mainMenuImage:
+              this.scene.launch('Menu')
+              // @ts-ignore
+              this.scene.get('MainScene').stopSounds('Menu')
+              // @ts-ignore
+              this.scene.get('Menu').volumeComponent.update()
+                this.scene.stop('MainScene')
+              this.scene.stop('PauseScene')
+              break
         case this.resumeImage:
-          this.resume()
+
+        this.resume()
           break
-        case this.restartImage:
-          this.scene.start('MainScene')
+          case this.restartImage:
+              // @ts-ignore
+            this.scene.get('MainScene').fastStopSounds()
+        this.scene.start('MainScene')
           // @ts-ignore
           this.scene.get('MainScene').setPlayerData(this.playerData)
           break
       }
+
+        this.clickSound.play()
     })
   }
 

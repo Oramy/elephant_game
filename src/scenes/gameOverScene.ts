@@ -35,6 +35,8 @@ export class GameOverScene extends Phaser.Scene{
     private characterFrames: string[]
     private characterNames: string[]
 
+    private clickSound: Phaser.Sound.BaseSound
+
     constructor ()
     {
         super({
@@ -174,9 +176,13 @@ export class GameOverScene extends Phaser.Scene{
             return !this.unlocked.includes(character)
         }).bind(this))
 
+
     }
 	
 	create () {
+        let unlockSound = this.sound.add('unlockSound');
+        this.clickSound = this.sound.add('clickSound')
+
         this.shuffle(this.unlocked)
         this.shuffle(this.unlockList)
 
@@ -275,9 +281,12 @@ export class GameOverScene extends Phaser.Scene{
                 duration: 500,
                 yoyo: false,
                 repeat: 0,
-                delay: 0
+                delay: 0,
+                onStart: function(){
+                    unlockSound.play()
+                }
             })
-		}
+		    }
 
         list.forEach((function (character, i){
             let characterImg
@@ -312,6 +321,7 @@ export class GameOverScene extends Phaser.Scene{
 			this.input.on('gameobjectdown', (function(event, gameobject){
                if(gameobject === characterImg){
                    this.startGame(character)
+                   this.clickSound.play()
                }
             }).bind(this))
         }).bind(this))
@@ -386,6 +396,7 @@ export class GameOverScene extends Phaser.Scene{
     goToMenu (event, gameObject) {
 		if(gameObject === this.returnToMenu) {
             this.scene.start('Menu')
+        this.clickSound.play()
 		}
 	}
 }

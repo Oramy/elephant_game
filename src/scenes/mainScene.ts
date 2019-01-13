@@ -134,6 +134,10 @@ export class MainScene extends Phaser.Scene {
     private fps: Phaser.GameObjects.BitmapText
     private instruments: Phaser.Sound.BaseSound[]
     private soundLoopsCount: number
+    private pickSound: Phaser.Sound.BaseSound
+
+    private clickSound: Phaser.Sound.BaseSound
+    private pickAnimalSound: Phaser.Sound.BaseSound
 
     constructor() {
         super({
@@ -188,7 +192,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         this.maxFollowingAnimals = 0
-	}
+    }
 
     initializeAnimals(): void{
         this.animals = this.add.group({
@@ -198,7 +202,7 @@ export class MainScene extends Phaser.Scene {
             defaultKey: 'roundQuarter',
             defaultFrame: 'elephant.png'
         })
-	}
+    }
 
     getAnimal(): Animal{
         let animal = this.animals.get()
@@ -206,7 +210,7 @@ export class MainScene extends Phaser.Scene {
         this.insideAnimals.push(animal)
 
         return animal
-	}
+    }
 
     createBackground(): void{
         this.background = this.add.tileSprite(0, 0, 1080, 1920, 'sky').setOrigin(0,0)
@@ -225,28 +229,28 @@ export class MainScene extends Phaser.Scene {
         this.lavaNextBeginTime = 0
         this.lavaNextEndTime = 0
 
-	}
+    }
 
     computeMeters(): integer{
         return Math.trunc(-this.camera.scrollY / this.height * 35)
-	}
+    }
 
     createUI(): void {
         this.rewardTweens = []
 
-		// @ts-ignore
-		this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
+        // @ts-ignore
+        this.fps = this.add._bitmapText(this.width / 2, 0, 'jungle', 'FPS: 60', 80 * SC)
         this.fps.setScrollFactor(0)
         this.fps.setDepth(Infinity)
 
-		// @ts-ignore
-		this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
+        // @ts-ignore
+        this.scoreText = this.add._bitmapText(20 * SC, 20 * SC,'jungle', 'Score: ' + this.acquiredScore, 100 * SC).setOrigin(0, 0)
         this.scoreText.tint = 0xFFFFFF
         this.scoreText.setScrollFactor(0)
         this.scoreText.setDepth(Infinity)
 
-		// @ts-ignore
-		this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x2', 100*SC).setOrigin(0, 0)
+        // @ts-ignore
+        this.multiplierText = this.add._bitmapText(this.width - 200 * SC, 0, 'jungle', 'x1', 100*SC).setOrigin(0, 0)
         this.multiplierText.setRotation(45 /360 * Phaser.Math.PI2)
         this.multiplierText.setScrollFactor(0)
         this.multiplierText.setDepth(Infinity)
@@ -258,6 +262,7 @@ export class MainScene extends Phaser.Scene {
         this.touchToPlay = []
 
 		let drag = this.add.bitmapText(this.width / 2,this.height * 0.8,'jungle', 'drag', 60*SC).setOrigin(0.5, 0.5)
+
         drag.tint = 0xFFFFFF
         drag.setScale(1)
         drag.setScrollFactor(0)
@@ -274,7 +279,7 @@ export class MainScene extends Phaser.Scene {
         touch.setScale(4 * SC)
         touch.setScrollFactor(0)
 
-		this.touchToPlay.push(drag)
+        this.touchToPlay.push(drag)
         this.touchToPlay.push(escape)
         this.touchToPlayTweens = []
         this.touchToPlayTweens.push(this.tweens.add({
@@ -307,7 +312,7 @@ export class MainScene extends Phaser.Scene {
             this.touchToPlayTweens.forEach(function(tween) {
                 tween.stop()
 
-			})
+            })
 
             this.tweens.add({
                 targets: touch,
@@ -316,20 +321,20 @@ export class MainScene extends Phaser.Scene {
                 ease: 'Quad.easeOut',
                 duration: 800})
 
-			this.tweens.add({
+            this.tweens.add({
                 targets: escape,
                 alpha : 0,
                 ease: 'Quad.easeOut',
                 duration: 800})
 
-			this.tweens.add({
+            this.tweens.add({
                 targets: drag,
                 scaleX: 0,
                 scaleY: 0,
                 ease: 'Quad.easeOut',
                 duration: 800})
 
-			this.touchToPlayTweens = []
+            this.touchToPlayTweens = []
         }, this)
 
         let image = this.add.image(this.width - 50 * SC, this.height - 50 * SC, 'iconsw', 'pause.png')
@@ -342,7 +347,8 @@ export class MainScene extends Phaser.Scene {
 		    	if (this.started) {
 					this.scene.pause('MainScene')
             	    this.scene.launch('PauseScene')
-					// @ts-ignore
+                    this.clickSound.play()
+                    // @ts-ignore
 					this.scene.get('PauseScene').setPlayerData(this.playerData)
 				}
 			}
@@ -352,9 +358,9 @@ export class MainScene extends Phaser.Scene {
         this.highscored = false
 
         this.lastMeterMark = 0
-	}
+    }
 
-	createSideWalls(): void {
+    createSideWalls(): void {
         this.leftWall = this.matter.add.sprite(-this.width * 0.9, this.height/2, 'round', 'elephant.png', { isStatic: true})
         this.leftWall.setCollisionCategory(this.obstacleCat)
         this.leftWall.setDisplaySize(this.width * 0.5, this.height)
@@ -371,14 +377,14 @@ export class MainScene extends Phaser.Scene {
             this.character = 'elephant'
         }
         this.elephant = this.matter.add.sprite(this.width/2, this.height * 0.6, 'round', this.character + '.png',
-            {
-                shape:{
-                    type:'circle',
-                    radius: 64,
+          {
+              shape:{
+                  type:'circle',
+                  radius: 64,
 
-                },
-                render: { sprite: { xOffset: 0, yOffset: ROUND_Y_OFFSETS[this.characterNames.indexOf(this.character)]} }
-            })
+              },
+              render: { sprite: { xOffset: 0, yOffset: ROUND_Y_OFFSETS[this.characterNames.indexOf(this.character)]} }
+          })
         this.elephant.setDepth(1)
         this.elephant.setScale(ELEPHANT_SCALE*SC)
         this.elephant.setCollisionCategory(this.elephantCat)
@@ -388,7 +394,6 @@ export class MainScene extends Phaser.Scene {
 
         this.elephantDirection = new Phaser.Math.Vector2(0, 1)
         this.lastPosition = [0.5 * this.width, 0.5 * this.height]
-
     }
 
     /**
@@ -403,14 +408,18 @@ export class MainScene extends Phaser.Scene {
             this.followingAnimals.push(bodyA.gameObject)
             bodyA.gameObject.setCollidesWith(this.obstacleCat)
             bodyA.gameObject.setSensor(false)
-		}
+
+            this.pickAnimalSound.play()
+        }
+
 
         if (bodyA.label == 'disableControl' && bodyB.label == 'elephant') {
             this.killElephant()
-		}
+        }
 
         if (bodyA.label == 'followingAnimal' && bodyB.label == 'shelter') {
             this.savedAnimals += 1
+            this.pickSound.play()
 
             let animal = bodyA.gameObject.frame.name
             animal = animal.slice(0, animal.length - 4)
@@ -426,11 +435,11 @@ export class MainScene extends Phaser.Scene {
             let multiplier = SCORE_MULTIPLIER
             if (bodyA.gameObject.gold) {
                 multiplier = multiplier ** 5
-			}
+            }
 
-			if (shelter.score == 0) {
+            if (shelter.score == 0) {
                 shelter.score = BASE_SCORE * multiplier
-			} else {
+            } else {
                 shelter.score *= multiplier
 			}
 
@@ -443,13 +452,18 @@ export class MainScene extends Phaser.Scene {
                     y: (20 + Math.log(shelter.score) * 5) * SC
 
                 })
-			}
+            }
 
             this.killAnimal(bodyA.gameObject)
         }
-   	}
+
+    }
 
     createSounds(): void {
+        this.clickSound = this.sound.add('clickSound')
+        this.pickSound = this.sound.add('pickCoin')
+        this.pickAnimalSound = this.sound.add('pickAnimal')
+
         this.soundLoopsCount = 0
         this.instruments = []
         this.instruments.push(this.sound.add('bass'))
@@ -533,9 +547,9 @@ export class MainScene extends Phaser.Scene {
             let pairs = event.pairs
 
             for (let i = 0, j = pairs.length; i != j; ++i) {
-            	let pair = pairs[i]
+                let pair = pairs[i]
 
-				this.checkOneSideCollision(event, pair.bodyA, pair.bodyB)
+                this.checkOneSideCollision(event, pair.bodyA, pair.bodyB)
                 this.checkOneSideCollision(event, pair.bodyB, pair.bodyA)
             }
 
@@ -544,16 +558,16 @@ export class MainScene extends Phaser.Scene {
         this.matter.world.on('collisionstart', collisionCallback)
 
         this.cameraSpeed = CAMERA_BEGIN_SPEED
-		this.animalSpeed = ANIMAL_BASE_SPEED
+        this.animalSpeed = ANIMAL_BASE_SPEED
 
-		/*this.input.on('pointerup', function () {
-		    if (this.started) {
-                this.scene.pause()
-                this.scene.launch('pausescene')
-            }
-		}, this)*/
-		this.events.on('pause', function() {
-		    this.pauseTime = this.lastTime
+        /*this.input.on('pointerup', function () {
+            if (this.started) {
+                    this.scene.pause()
+                    this.scene.launch('pausescene')
+                }
+        }, this)*/
+        this.events.on('pause', function() {
+            this.pauseTime = this.lastTime
         }, this)
 
 		this.events.on('resume', function () {
@@ -570,14 +584,14 @@ export class MainScene extends Phaser.Scene {
         }, this)
 
         this.scoreLine(-this.height / 35 * this.playerData.values.bestDistance + this.height / 2, 0x4169E1,
-            this.playerData.values.bestDistance + "m", "Best distance")
+          this.playerData.values.bestDistance + "m", "Best distance")
 
         this.scoreLine(-this.height / 35 * this.playerData.values.lastDistance + this.height / 2, 0x9b1c31,
-            this.playerData.values.lastDistance + "m", "Last distance")
+          this.playerData.values.lastDistance + "m", "Last distance")
     }
 
-	createRewardTween(text, color) {
-		// @ts-ignore
+    createRewardTween(text, color) {
+        // @ts-ignore
         let textEl = this.add._bitmapText(this.width / 2, this.height * (0.2 + 0.1 * this.rewardTweens.length), 'jungle', text, 100 * SC).setOrigin(0.5, 0.5)
         textEl.setScale(0)
         textEl.setScrollFactor(0)
@@ -594,7 +608,7 @@ export class MainScene extends Phaser.Scene {
             onComplete: (function() {
                 this.rewardTweens = this.rewardTweens.filter(t => t != tween)
             }).bind(this)
-		})
+        })
 
         this.rewardTweens.push(tween)
     }
@@ -609,23 +623,23 @@ export class MainScene extends Phaser.Scene {
             },
             x: 0,
             y: 0
-		})
+        })
         graphics.strokeLineShape(line)
 
         let x = this.width - 50 * SC
-		// @ts-ignore
-		let textEl = this.add._bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5)
+        // @ts-ignore
+        let textEl = this.add._bitmapText(x, y - 30*SC, 'jungle', rightText, 75*SC).setOrigin(1, 0.5)
         textEl.tint = color
         x = 50 * SC
 
         this.insideScreenObjects.push(textEl)
 
-		// @ts-ignore
+        // @ts-ignore
         textEl = this.add._bitmapText(x, y - 30*SC, 'jungle', leftText, 75*SC).setOrigin(0, 0.5)
         textEl.tint = color
 
         this.insideScreenObjects.push(textEl)
-	}
+    }
 
 	update(time, delta): void {
         if (this.matter.world != null) {
@@ -658,32 +672,32 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-	killAnimal(animal): void {
-		animal.kill()
+    killAnimal(animal): void {
+        animal.kill()
 
-		if (this.insideAnimals.includes(animal)) {
+        if (this.insideAnimals.includes(animal)) {
             this.insideAnimals.splice(this.insideAnimals.indexOf(animal), 1)
-		}
+        }
 
-		if (this.followingAnimals.includes(animal)) {
+        if (this.followingAnimals.includes(animal)) {
             this.followingAnimals.splice(this.followingAnimals.indexOf(animal), 1)
-		}
-	}
+        }
+    }
 
     computeMultiplier(): integer {
-		let s = 0
+        let s = 0
 
         this.followingAnimals.forEach((function(animal) {
             s += animal.gold ? 5 : 1
         }).bind(this))
 
-		let multiplier_log = Math.trunc(s / 5)
+        let multiplier_log = Math.trunc(s / 5)
         let multiplier = Math.trunc(Math.pow(2, multiplier_log))
 
-		return multiplier
-	}
+        return multiplier
+    }
 
-	updateSounds(): void {
+    updateSounds(): void {
         if (this.started && !this.gameOverB) {
             this.soundLoopsCount += 1
 
@@ -698,16 +712,16 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-	updateUI(): void {
-		// @ts-ignore
-		this.fps._setText('FPS: ' + Math.trunc(this.game.loop.actualFps))
-		// @ts-ignore
-		this.scoreText._setText('Score: ' + Math.round(this.computeScore()))
+    updateUI(): void {
+        // @ts-ignore
+        this.fps._setText('FPS: ' + Math.trunc(this.game.loop.actualFps))
+        // @ts-ignore
+        this.scoreText._setText('Score: ' + Math.round(this.computeScore()))
 
         let multiplier = this.computeMultiplier()
-		if (this.multiplier != multiplier) {
-			// @ts-ignore
-			this.multiplierText._setText(this.i18n.t('x' + multiplier))
+        if (this.multiplier != multiplier) {
+            // @ts-ignore
+            this.multiplierText._setText(this.i18n.t('x' + multiplier))
 
             this.multiplierTween = this.tweens.addCounter({
                 duration: 500,
@@ -715,31 +729,31 @@ export class MainScene extends Phaser.Scene {
                 ease: 'Cubic.easeInOut',
                 from: this.multiplier,
                 to: multiplier
-			})
+            })
 
             this.multiplier = multiplier
-		}
+        }
 
         if (this.multiplierTween !== undefined) {
             let truncValue = Math.trunc(this.multiplierTween.getValue())
-			let logAdvance : integer
+            let logAdvance : integer
 
             logAdvance = Math.trunc(Math.log2(this.multiplierTween.getValue()) / 10 * 255)
             if (!isNaN(logAdvance)) {
-				this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color)
-				// @ts-ignore
-				this.multiplierText._setText('x' +  truncValue)
+                this.multiplierText.setTint(new Color(1 - logAdvance, 1, 1, 1).color)
+                // @ts-ignore
+                this.multiplierText._setText('x' +  truncValue)
                 this.multiplierText.setFontSize((100 + logAdvance / 10) * SC)
                 this.multiplierText.setPosition(this.width, 100 * SC).setOrigin(1, 0)
             }
-		}
+        }
 
         let meters = this.computeMeters()
         if (meters > this.lastMeterMark) {
             this.lastMeterMark += 500
             this.scoreLine(-this.metersToCamera(this.lastMeterMark) + this.height/2, 0x2F4F4F, this.lastMeterMark + 'm', '')
         }
-	}
+    }
 
     metersToCamera (pos: number): number {
         return pos / 35 * this.height
@@ -769,8 +783,8 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-	computeScore():  number {
-		let score = 0
+    computeScore():  number {
+        let score = 0
         for (let i = 0; i < this.liveShelters.length; i++) {
             // @ts-ignore
             score += this.liveShelters[i].score
@@ -778,13 +792,13 @@ export class MainScene extends Phaser.Scene {
         score += this.acquiredScore
 
         return score
-	}
+    }
 
     inScreen(gameObject): boolean {
         return gameObject.y - gameObject.displayHeight / 2 < this.camera.scrollY + this.camera.height
     }
 
-	deleteOutsideScreen(): void {
+    deleteOutsideScreen(): void {
         // Checking that objects are inside the screen.
         let toDestroy = []
 
@@ -793,7 +807,7 @@ export class MainScene extends Phaser.Scene {
                 this.deadInLava += 1
                 this.killAnimal(animal)
             }
-		}).bind(this))
+        }).bind(this))
 
         this.insideScreenObjects.forEach((function(object) {
             if (!this.inScreen(object)) {
@@ -803,7 +817,7 @@ export class MainScene extends Phaser.Scene {
                     this.acquiredScore += object.score
                 }
             }
-		}).bind(this))
+        }).bind(this))
 
         this.insideScreenObjects = this.insideScreenObjects.filter((this.inScreen).bind(this))
 
@@ -812,7 +826,7 @@ export class MainScene extends Phaser.Scene {
         this.liveShelters = this.liveShelters.filter((this.inScreen).bind(this))
     }
 
-	updateElephant(): void{
+    updateElephant(): void{
         if (!this.disableControl && this.started) {
             let nx = this.input.x + this.camera.scrollX
             let ny = this.input.y + this.camera.scrollY + this.cameraSpeed
@@ -831,10 +845,10 @@ export class MainScene extends Phaser.Scene {
                 this.elephantDirection = move
             }
 
-			this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4
+            this.elephant.rotation = this.elephantDirection.angle() - Phaser.Math.PI2 / 4
             this.elephant.body.label = 'elephant'
         }
-	}
+    }
 
     updateCamera(time, delta): void{
         if (this.started) {
@@ -845,7 +859,7 @@ export class MainScene extends Phaser.Scene {
                 }
             }
             this.camera.scrollY += this.cameraSpeed
-		}
+        }
 
         this.background.tilePositionY = this.camera.scrollY / (SC * 2)
         this.lava.tilePositionX += 3
@@ -884,7 +898,7 @@ export class MainScene extends Phaser.Scene {
 
         this.leftWall.setPosition(-this.width, this.camera.scrollY + this.height/2)
         this.rightWall.setPosition(this.width * 2, this.camera.scrollY + this.height/2)
-	}
+    }
 
     private updateScrolling() : void {
         if (this.camera.scrollY < -this.spawnCount * this.height) {
@@ -896,19 +910,19 @@ export class MainScene extends Phaser.Scene {
                     this.prefabs.addObstaclesWithShelter(x, y, 0)
                 } else {
                     this.prefabs.addObstaclesWithShelter(x, y)
-				}
-			} else if (this.spawnCount == 0) {
+                }
+            } else if (this.spawnCount == 0) {
                 this.prefabs.addObstaclesAndAnimals(x, y, 0)
-			} else {
+            } else {
                 if (this.spawnCount < 50) {
                     this.prefabs.addObstaclesAndAnimals(x, y, Phaser.Math.Between(0,EASY_OBSTACLE_MAX_ID))
                 } else {
                     this.prefabs.addObstaclesAndAnimals(x, y)
-				}
-			}
+                }
+            }
 
             this.spawnCount++
-		}
+        }
 
         if (!this.inScreen(this.elephant)) {
             this.gameOver()
@@ -920,27 +934,27 @@ export class MainScene extends Phaser.Scene {
             return ele != gameObject
         })
 
-		this.followingAnimals = this.followingAnimals.filter(function(ele) {
+        this.followingAnimals = this.followingAnimals.filter(function(ele) {
             return ele != gameObject
         })
 
-		if (typeof gameObject.score !== 'undefined') {
+        if (typeof gameObject.score !== 'undefined') {
             this.acquiredScore += gameObject.score
         }
 
-		this.liveShelters = this.liveShelters.filter(function(ele) {
+        this.liveShelters = this.liveShelters.filter(function(ele) {
             return ele != gameObject
         })
 
-		gameObject.setActive(false)
+        gameObject.setActive(false)
     }
 
-	unlock(character) {
+    unlock(character) {
         if (!this.unlockList.includes(character) && this.playerData.values[character] !== 'unlocked') {
             this.unlockList.push(character)
             this.createRewardTween(character + " unlocked !", 0xEBC500)
         }
-	}
+    }
 
     updateStats() {
         if (this.followingAnimals.length >= this.maxFollowingAnimals) {
@@ -948,49 +962,51 @@ export class MainScene extends Phaser.Scene {
 
         }
 
-		let score = this.computeScore()
+        let score = this.computeScore()
 
-		if (score >= 5000) {
+        if (score >= 5000) {
             this.unlock('frog')
         }
 
-		if (score >= 20000) {
+        if (score >= 20000) {
             this.unlock('giraffe')
         }
 
-		if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
+        if (score > this.playerData.values.bestScore && this.playerData.values.bestScore > 0 && !this.highscored) {
             this.highscored = true
             this.createRewardTween("Best Highscore!", 0x4169E1)
         }
 
-		if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && this.bestDistanced) {
+        if (this.computeMeters() > this.playerData.values.bestDistance && this.playerData.values.bestDistance > 0 && this.bestDistanced) {
             this.bestDistanced = true
             this.createRewardTween("Best Distance!", 0x4169E1)
         }
         if (this.maxFollowingAnimals >= 40) {
             this.unlock('gorilla')
         }
+        if(this.playerData.values.deadInLava + this.deadInLava > 1000){
+            this.unlock('parrot')
+        }
 
         if (this.playerData.values.mooseCount >= 500) {
             this.unlock('moose')
         }
 
-		if (this.playerData.values.goldSaved >= 2000) {
+        if (this.playerData.values.goldSaved >= 2000) {
             this.unlock('narwhal')
         }
 
-		if (this.computeMeters() >= 5000) {
+        if (this.computeMeters() >= 5000) {
             this.unlock('snake')
-		}
+        }
 
         if (this.savedAnimals >= 500) {
             this.unlock('hippo')
         }
-	}
+    }
 
-    gameOver(): void{
-        if (!this.gameOverB) {
-            this.scene.get('GameOverScene').tweens.add({
+    stopSounds(scene = 'GameOverScene'): void {
+            this.scene.get(scene).tweens.add({
                 targets: this.instruments,
                 volume: 0,
 
@@ -999,19 +1015,29 @@ export class MainScene extends Phaser.Scene {
 
                 onComplete: (function() {
                     this.instruments.forEach(instr => instr.stop())
-                }).bind(this)
-			})
+            }).bind(this)
+        })
+    }
+
+    fastStopSounds(): void {
+        this.instruments.forEach(instr => instr.stop())
+    }
+
+    gameOver(): void{
+        if (!this.gameOverB) {
+            this.stopSounds()
+            this.updateStats()
 
             this.gameOverB = true
 
-			if (this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals) {
+            if (this.playerData.values.maxFollowingAnimals < this.maxFollowingAnimals) {
                 this.playerData.values.maxFollowingAnimals = this.maxFollowingAnimals
-			}
+            }
 
 
             let data = {
                 character: this.character
-			}
+            }
 
             let menu = this.scene.get("menu")
 
@@ -1037,20 +1063,19 @@ export class MainScene extends Phaser.Scene {
 
             this.playerData.values.maxAnimalsSavedOneRun = this.savedAnimals
 
-            this.updateStats()
             this.scene.pause("MainScene")
 
             // @ts-ignore
             this.highscores.on('setscore', function (key) {
                 let unlocked = []
 
-				for (let i = 0; i < this.characterNames.length; i++) {
+                for (let i = 0; i < this.characterNames.length; i++) {
                     if (this.playerData.get(this.characterNames[i]) === 'unlocked') {
                         unlocked.push(this.characterNames[i])
                     }
                 }
 
-				this.scene.get('GameOverScene').initStats(Math.trunc(this.computeScore()), this.unlockList, unlocked, this.character, oldAnimalCount, this.savedAnimals, this.playerData)
+                this.scene.get('GameOverScene').initStats(Math.trunc(this.computeScore()), this.unlockList, unlocked, this.character, oldAnimalCount, this.savedAnimals, this.playerData)
 
                 if (this.unlockList.length > 0) {
                     // @ts-ignore
@@ -1066,10 +1091,10 @@ export class MainScene extends Phaser.Scene {
                 this.scene.get('Menu').lastScore = Math.trunc(this.computeScore())
             }.bind(this), this)
 
-           	// @ts-ignore
+            // @ts-ignore
             this.facebook.on('updatefail', function(e) {
                 console.log("update failed" + e.message)
-			})
+            })
 
             this.highscores.setScore(Math.trunc(this.computeScore()), JSON.stringify(data))
             if (this.friends != null) {
@@ -1080,7 +1105,6 @@ export class MainScene extends Phaser.Scene {
                     name: 'Amis.' + this.facebook.contextID,
                 })
 
-				console.log('ouf')
                 this.friends.setScore(Math.trunc(this.computeScore()), JSON.stringify(data))
             }
         }
@@ -1099,7 +1123,7 @@ export class MainScene extends Phaser.Scene {
 
     getCharacter() {
         return this.character
-	}
+    }
 
     setPlayerData(playerData) {
         this.playerData = playerData

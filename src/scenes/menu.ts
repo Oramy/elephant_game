@@ -62,8 +62,14 @@ export class Menu extends Phaser.Scene {
     private nextImage: Phaser.GameObjects.Image;
     private prevImage: Phaser.GameObjects.Image;
 
+    private clickSound: Phaser.Sound.BaseSound;
+    private buySound : Phaser.Sound.BaseSound;
+
     constructor() {
         super('Menu');
+    }
+
+    stopSounds(): void {
     }
 
     updateCharacter(character = this.character) {
@@ -223,6 +229,7 @@ export class Menu extends Phaser.Scene {
 
     next(pointer, gameObject) {
         if (gameObject == this.nextCharacterImage || gameObject == this.nextCharacterSImage) {
+            this.clickSound.play()
             this.addMoveTween((
                 function () {
                     var ind = this.characterNames.findIndex((function (el) {
@@ -238,7 +245,7 @@ export class Menu extends Phaser.Scene {
 
     prev(pointer, gameObject) {
         if (gameObject == this.prevCharacterImage || gameObject == this.prevCharacterSImage) {
-
+            this.clickSound.play()
             this.addMoveTween((
                 function () {
                     var ind = this.characterNames.findIndex((function (el) {
@@ -252,15 +259,17 @@ export class Menu extends Phaser.Scene {
 
     play(pointer, gameObject) {
         if (this.characterImage === gameObject) {
+
             this.addMoveTween((
                 function () {
                     var characterStatus = this.playerData.get(this.character);
                     if (characterStatus == 'unlocked') {
                         this.startGame();
+                        this.clickSound.play()
                     } else if (characterStatus == 'buyable') {
 
                         if (this.playerData.values.coins >= this.prices[this.character]) {
-
+                            this.buySound.play()
                             this.coinsComponent.smoothChangeScore(-this.prices[this.character], 1).play();
                             this.playerData.values.coins -= this.prices[this.character];
                             this.playerData.values[this.character] = 'unlocked';
@@ -273,6 +282,8 @@ export class Menu extends Phaser.Scene {
     }
 
     createSave() {
+        console.log('DAMNED')
+
         var data = {
             'bear': 'buyable',
             'buffalo': 'locked',
@@ -324,7 +335,6 @@ export class Menu extends Phaser.Scene {
         //@ts-ignore
         this.facebook.saveData(data)
         this.coinsComponent.smoothChangeScore(data['coins'], 1).play()
-
     }
 
     update() {
@@ -341,6 +351,10 @@ export class Menu extends Phaser.Scene {
         SC = this.height / 1920;
         this.camera = this.cameras.main;
         var atlasTexture = this.textures.get('round');
+
+        this.clickSound = this.sound.add('clickSound')
+        this.buySound = this.sound.add('buySound')
+
         this.characterFrames = atlasTexture.getFrameNames();
         this.characterFrames = ['buffalo.png', 'chick.png', 'chicken.png', 'cow.png', 'dog.png', 'duck.png', 'elephant.png',
             'frog.png', 'giraffe.png', 'goat.png', 'hippo.png', 'horse.png', 'moose.png', 'narwhal.png', 'owl.png',
@@ -373,8 +387,6 @@ export class Menu extends Phaser.Scene {
 			} else if (leaderboard.name == 'Amis') {
 				this.friends = leaderboard;
 			}
-
-
         }).bind(this), this);
 
         var background = this.add.image(this.width / 2, this.height / 2, 'menuBackground');
@@ -481,8 +493,8 @@ export class Menu extends Phaser.Scene {
         this.input.on("gameobjectdown", (this.prev).bind(this));
         this.input.on("gameobjectdown", (this.play).bind(this));
         if (this.lastScore !== undefined) {
-            var text = this.add.bitmapText(0, 0, 'jungle', 'Last score: ' + this.lastScore);
-            text.setFontSize(70 * SC);
+            // @ts-ignore
+            var text = this.add.bitmapText(0, 0, 'jungle', 'lastScore', 70 * SC, {score: this.lastScore});
             var topZone = this.add.zone(this.width / 2, this.height / 18, this.width, this.height / 10);
             Phaser.Display.Align.In.Center(text, topZone);
         }
@@ -501,6 +513,7 @@ export class Menu extends Phaser.Scene {
         dataKeys.push('maxFollowingAnimals');
 		dataKeys.push('mute');
 		dataKeys.push('lastCharacter');
+        dataKeys.push('version');
 
         this.characterNames.forEach(character => dataKeys.push(character + "Count"));
         // @ts-ignore
@@ -521,7 +534,6 @@ export class Menu extends Phaser.Scene {
             if (this.playerData.values.version !== CURRENT_VERSION && !this.saveCreated) {
                 s = true;
                 this.createSave();
-
             } else if (this.playerData.values.coins === undefined && !this.saveCreated) {
                 this.playerData.set('coins', 0);
             }
@@ -547,6 +559,7 @@ export class Menu extends Phaser.Scene {
         logo.setInteractive();
         this.input.on('gameobjectdown', function (pointer, gameObject) {
             if (gameObject === logo) {
+                this.clickSound.play()
                 this.scene.pause('Menu');
                 this.scene.launch('CreditScene');
             }

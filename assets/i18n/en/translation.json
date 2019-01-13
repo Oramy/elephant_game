@@ -18,5 +18,6 @@
 		"hippo": "Save 500 in one run to unlock this animal.\n({{n}}/500)"
 	},
 	"drag": "Drag your character to move it.",
-	"escape": "Escape the lava!"
+	"escape": "Escape the lava!",
+    "lastScore": "Last score: {{score}}"
 }

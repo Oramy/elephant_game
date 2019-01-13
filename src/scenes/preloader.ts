@@ -76,7 +76,11 @@ export class Preloader extends Phaser.Scene{
         this.load.audio('synth2', ['assets/audio/tech/synth2.ogg', 'assets/audio/tech/synth2.mp3']);
         this.load.audio('top1', ['assets/audio/tech/top1.ogg', 'assets/audio/tech/top1.mp3']);
         this.load.audio('top2', ['assets/audio/tech/top2.ogg', 'assets/audio/tech/top2.mp3']);
-
+        this.load.audio('pickCoin', 'assets/audio/399196__spiceprogram__perc-bip.wav');
+        this.load.audio('unlockSound', 'assets/audio/270304__littlerobotsoundfactory__collect-point-00.wav');
+        this.load.audio('clickSound', 'assets/audio/425187__mabdurrahman__calculatorclick.wav')
+        this.load.audio('buySound', 'assets/audio/201159__kiddpark__cash-register.wav')
+        this.load.audio('pickAnimal', 'assets/audio/328117__greenvwbeetle__pop-8.wav')
     }
 
     startGame () {
