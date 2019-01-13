@@ -1022,7 +1022,7 @@ export class MainScene extends Phaser.Scene {
             let score = this.computeScore()
 
             if (score >= 5000) {
-                this.unlock('frog')
+                this.unlock('chicken')
             }
 
             if (score >= 20000) {

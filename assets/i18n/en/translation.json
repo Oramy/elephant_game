@@ -14,7 +14,7 @@
 		"snake": "Escape the fire on 5000m to unlock this animal.\n({{n}}/5000)",
 		"gorilla": "Have more than 40 animals following you to \nto unlock this animal. ({{n}}/40)",
 		"giraffe": "Score over 20000 to unlock this animal.\n({{n}}/20000)",
-		"frog": "Score over 5000 to unlock this animal.\n({{n}}/5000)",
+		"chicken": "Score over 5000 to unlock this animal.\n({{n}}/5000)",
 		"hippo": "Save 500 in one run to unlock this animal.\n({{n}}/500)"
 	},
 	"drag": "Drag your character to move it.",
@@ -28,5 +28,7 @@
     "leaderboard": "Leaderboard",
     "rank": "{{rank}}th",
     "firstRank": "1st",
-    "secondRank": "2nd"
+    "secondRank": "2nd",
+    "buy": "Buy",
+    "play": "Play"
 }

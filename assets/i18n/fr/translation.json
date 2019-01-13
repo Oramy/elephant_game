@@ -14,7 +14,7 @@
 		"snake": "Fuis sur plus de 5000m pour débloquer cet animal.\n({{n}}/5000)",
 		"gorilla": "Fais toi suivre par plus de 40 animaux pour\ndébloquer cet animal. ({{n}}/40)",
 		"giraffe": "Fais un score de plus 20000 pour\ndébloquer cet animal. ({{n}}/20000)",
-		"frog": "Fais un score 5000 pour débloquer cet animal.\n({{n}}/5000)",
+		"chicken": "Fais un score 5000 pour débloquer cet animal.\n({{n}}/5000)",
 		"hippo": "Sauve 500 animaux en une course pour\ndébloquer cet animal. ({{n}}/500)"
 	},
 	"drag": "Glisser votre animal pour le déplacer.",
@@ -28,5 +28,7 @@
     "leaderboard": "Classement",
     "rank": "{{rank}}ème",
     "firstRank": "1er",
-    "secondRank": "2ème"
+    "secondRank": "2ème",
+    "play": "Jouer",
+    "buy": "Acheter"
 }

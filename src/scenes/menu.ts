@@ -9,7 +9,7 @@ var SC;
 export const SQUARE_Y_OFFSETS = {'bear':0, 'buffalo':-0.015, 'chick':0, 'chicken' : 0.05, 'cow':0, 'crocodile':0, 'dog':0.1, 'duck':0, 'elephant':0.06, 'frog':0.02, 'giraffe':0.1, 'goat':0, 'gorilla':0, 'hippo':0, 'horse':0.05,
     'monkey': 0, 'moose':0.1, 'narwhal':0, 'owl':0, 'panda':0, 'parrot':0, 'penguin':0, 'pig':0, 'rabbit':0.14, 'rhino':0, 'sloth':0, 'snake':-0.05, 'walrus':-0.03, 'whale':0.02, 'zebra':0.05};
 
-const CURRENT_VERSION = 1
+const CURRENT_VERSION = 3
 
 export class Menu extends Phaser.Scene {
     private highscores: any;
@@ -41,7 +41,7 @@ export class Menu extends Phaser.Scene {
     private crown: Image;
 
     private indices = {
-        'elephant': '', 'frog': 'Score over 5000 to unlock this animal.',
+        'elephant': '', 'chicken': 'Score over 5000 to unlock this animal.',
         'gorilla': 'Have more than 40 animals following you \n' +
           '                              to unlock this animal.',
         'giraffe': 'Score over 20000 to unlock this animal.',
@@ -70,6 +70,8 @@ export class Menu extends Phaser.Scene {
 
     private bigRankText: BitmapText;
     private plusButton: Phaser.GameObjects.Image;
+
+    private actionText: BitmapText;
 
     constructor() {
         super('Menu');
@@ -103,7 +105,7 @@ export class Menu extends Phaser.Scene {
         // @ts-ignore
         this.indices['giraffe'] = this.i18n.t('animals.giraffe', {n: this.playerData.values.bestScore})
         // @ts-ignore
-        this.indices['frog'] = this.i18n.t('animals.frog', {n: this.playerData.values.bestScore})
+        this.indices['chicken'] = this.i18n.t('animals.chicken', {n: this.playerData.values.bestScore})
         // @ts-ignore
         this.indices['hippo'] = this.i18n.t('animals.hippo', {n: this.playerData.values.maxAnimalsSavedOneRun})
 
@@ -166,6 +168,17 @@ export class Menu extends Phaser.Scene {
         } else {
             this.characterImage.setVisible(true);
             this.characterSImage.setVisible(false);
+            if(this.playerData.get(this.characterNames[ind]) == 'buyable'){
+                this.characterImage.tint = 0x888888
+                // @ts-ignore
+                this.actionText.setText(this.i18n.t('buy'))
+            }
+            else
+            {
+                // @ts-ignore
+                this.actionText.setText(this.i18n.t('play'))
+                this.characterImage.tint = 0xFFFFFF
+            }
         }
         if (this.playerData.get(this.characterNames[prev]) == 'locked') {
             this.prevCharacterSImage.setVisible(true);
@@ -173,6 +186,13 @@ export class Menu extends Phaser.Scene {
         } else {
             this.prevCharacterImage.setVisible(true);
             this.prevCharacterSImage.setVisible(false);
+            if(this.playerData.get(this.characterNames[prev]) == 'buyable'){
+                this.prevCharacterImage.tint = 0x888888
+            }
+            else
+            {
+                this.prevCharacterImage.tint = 0xFFFFFF
+            }
         }
         if (this.playerData.get(this.characterNames[next]) == 'locked') {
             this.nextCharacterSImage.setVisible(true);
@@ -180,6 +200,13 @@ export class Menu extends Phaser.Scene {
         } else {
             this.nextCharacterImage.setVisible(true);
             this.nextCharacterSImage.setVisible(false);
+            if(this.playerData.get(this.characterNames[next]) == 'buyable'){
+                this.nextCharacterImage.tint = 0x888888
+            }
+            else
+            {
+                this.nextCharacterImage.tint = 0xFFFFFF
+            }
         }
         this.updatePlayerDataUI();
 
@@ -265,7 +292,7 @@ export class Menu extends Phaser.Scene {
     }
 
     play(pointer, gameObject) {
-        if (this.characterImage === gameObject) {
+        if (this.characterImage === gameObject || this.actionText === gameObject) {
 
             this.addMoveTween((
               function () {
@@ -376,8 +403,8 @@ export class Menu extends Phaser.Scene {
         this.buySound = this.sound.add('buySound')
 
         this.characterFrames = atlasTexture.getFrameNames();
-        this.characterFrames = ['buffalo.png', 'chick.png', 'chicken.png', 'cow.png', 'dog.png', 'duck.png', 'elephant.png',
-            'frog.png', 'giraffe.png', 'goat.png', 'hippo.png', 'horse.png', 'moose.png', 'narwhal.png', 'owl.png',
+        this.characterFrames = ['buffalo.png', 'chick.png',  'cow.png', 'dog.png', 'duck.png', 'elephant.png',
+            'chicken.png', 'frog.png', 'giraffe.png', 'goat.png', 'hippo.png', 'horse.png', 'moose.png', 'narwhal.png', 'owl.png',
             'parrot.png', 'penguin.png', 'pig.png', 'rabbit.png', 'rhino.png', 'sloth.png', 'snake.png', 'gorilla.png', 'walrus.png', 'zebra.png',
             'whale.png', 'panda.png', 'crocodile.png', 'monkey.png', 'bear.png']
         this.characterNames = this.characterFrames.map(function (frame) {
@@ -509,6 +536,12 @@ export class Menu extends Phaser.Scene {
         var topZone = this.add.zone(this.width / 2, 200 * SC, this.width, this.height / 2);
         Phaser.Display.Align.In.Center(this.touchToStart, screenZone);
         Phaser.Display.Align.In.Center(title, topZone);
+
+
+        this.actionText = this.add.bitmapText(this.width / 2, this.height * 0.47, "jungle", "play", 60 * SC)
+            .setOrigin(0.5, 0.5);
+        this.actionText.setInteractive()
+        this.actionText.tint = 0xe5e5e5;
 
         let callback = this.startGame.bind(this);
         //this.input.on("pointerdown", callback);

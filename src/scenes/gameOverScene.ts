@@ -176,7 +176,6 @@ export class GameOverScene extends Phaser.Scene{
             return !this.unlocked.includes(character)
         }).bind(this))
 
-
     }
 
     create () {
@@ -268,7 +267,7 @@ export class GameOverScene extends Phaser.Scene{
 
         if (this.unlockList.length != 0) {
             let charactersUnlockedText = this.add.bitmapText(this.width / 2, this.height * 0.13, 'jungle', (this.unlockList.length > 1 ? 'unlocked_plural' : 'unlocked'), 90 * SC).setOrigin(0.5, 0.5)
-            charactersUnlockedText.tint = 0xFF5757
+            charactersUnlockedText.tint = 0x96f785
             charactersUnlockedText.angle = 0
             charactersUnlockedText.setScale(100)
             charactersUnlockedText.setAlpha(0)
