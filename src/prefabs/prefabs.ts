@@ -12,9 +12,12 @@ var notused_offsets = [];
  * @param x
  * @param y
  */
-export const OBSTACLE_MAX_ID = 23;
+export const OBSTACLE_MAX_ID = 27;
 export const EASY_OBSTACLE_MAX_ID = 10;
-export const VARIANTS_MAX_ID = [4, 1, 1, 1, 1, 0, 0, 1,1,6, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1];
+export const VARIANTS_MAX_ID = [4,
+    1, 1, 1, 1, 0, 0, 1, 1, 6, 1,
+    1, 1, 4, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 1, 0, 0, 0];
 export const SHELTER_MAX_ID = 1;
 
 var SC;
@@ -356,10 +359,10 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(left, leftLine);
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
-                right = this.genBarriers(2);
+                left = this.genBarriers(2);
                 left = this.genBarriers(2);
                 leftLine = new Line(x + 64 * SC, y + h * 3 / 4, x + w / 4 + 64, y + h * 3 / 4);
-                rightLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
+                leftLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3 / 4 - 64 * SC, y + h * 3 / 4);
 
 
                 Phaser.Actions.PlaceOnLine(left, leftLine);
@@ -703,6 +706,57 @@ export class Prefabs{
                 Phaser.Actions.PlaceOnLine(right, rightLine);
 
                 break;
+            case 24:
+                var right3 = this.genBarriers(3);
+                var right2 = this.genBarriers(2);
+                var right = this.genBarriers(4);
+
+                var rightLine3 = new Line(x + w -  64 * SC, y + h / 2, x + w * 2 / 3 - 64 * SC, y + h / 2);
+                var rightLine = new Line(x + w - 64 * SC, y + h / 4, x + w * 2 / 4 - 64 * SC, y + h / 4);
+                var rightLine2 = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 3  / 4 - 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(right3, rightLine3);
+                Phaser.Actions.PlaceOnLine(right, rightLine);
+                Phaser.Actions.PlaceOnLine(right2, rightLine2);
+
+                break
+            case 25:
+                var left3 = this.genBarriers(3);
+                var left2 = this.genBarriers(2);
+                var left = this.genBarriers(4);
+
+                var leftLine3 = new Line(x +  64 * SC, y + h / 2, x + w * 1 / 3 + 64 * SC, y + h / 2);
+                var leftLine = new Line(x + 64 * SC, y + h / 4, x + w * 2 / 4 + 64 * SC, y + h / 4);
+                var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 4, x + w * 1  / 4 + 64 * SC, y + h * 3 / 4);
+
+                Phaser.Actions.PlaceOnLine(left3, leftLine3);
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
+
+                break
+            case 26:
+                var left2 = this.genBarriers(5);
+                var left = this.genBarriers(5);
+
+                var leftLine = new Line(x + w - 64 * SC, y + h * 3 / 4, x + w * 1 / 4 - 64 * SC, y + h * 3 / 4);
+                var leftLine2 = new Line(x + 64 * SC, y + h * 3 / 8, x + w * 3  / 4 + 64 * SC, y + h * 3 / 8    );
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
+
+                break
+            case 27:
+                var left2 = this.genBarriers(5);
+                var left = this.genBarriers(5);
+
+                var leftLine = new Line(x +  64 * SC, y + h * 3 / 4, x + w * 3 / 4 + 64 * SC, y + h * 3 / 4);
+                var leftLine2 = new Line(x + w - 64 * SC, y + h * 3 / 8, x + w * 1  / 4 - 64 * SC, y + h * 3 / 8    );
+
+                Phaser.Actions.PlaceOnLine(left, leftLine);
+                Phaser.Actions.PlaceOnLine(left2, leftLine2);
+
+                break
+
         }
     }
     addAnimals(x:number, y:number,
@@ -1020,6 +1074,64 @@ export class Prefabs{
                 }
 
                 break;
+            case 24:
+                switch(variant_id){
+                    case 0:
+                        this.spawnAnimal( x+w-64*SC, y+ h/2+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC-128*SC-128*SC, y+ h/2+ 128*SC)
+
+                        this.spawnAnimal( x+w-64*SC, y+ h/4+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC - 256*SC-128*SC, y+ h/4+ 128*SC)
+
+                        this.spawnAnimal( x+w-64*SC, y+ h * 3 / 4+ 128*SC)
+                        this.spawnAnimal( x+w-64*SC-128*SC, y+ h * 3 / 4+ 128*SC)
+                        break
+                }
+                break
+            case 25:
+                switch(variant_id){
+                    case 0:
+                        this.spawnAnimal( x+64*SC, y+ h/2+ 128*SC)
+                        this.spawnAnimal( x+64*SC+128*SC+128*SC, y+ h/2+ 128*SC)
+
+                        this.spawnAnimal( x+64*SC, y+ h/4+ 128*SC)
+                        this.spawnAnimal( x+64*SC + 256*SC+128*SC, y+ h/4+ 128*SC)
+
+                        this.spawnAnimal( x+64*SC, y+ h * 3 / 4+ 128*SC)
+                        this.spawnAnimal( x+64*SC+128*SC, y+ h * 3 / 4+ 128*SC)
+                        break
+                }
+                break
+            case 26:
+                switch(variant_id){
+                    case 0:
+                        let animals = this.genAnimals(3)
+                        let line = new Line(x + +128 *SC + 64*SC, y + h * 3 / 8 + 128*SC,
+                            x + w + 64*SC, y + h * 3 / 4 - 64*SC)
+                        Phaser.Actions.PlaceOnLine(animals, line)
+
+                        let animals2 = this.genAnimals(3)
+                        let line2 = new Line(x + +128 *SC + 64*SC, y + h * 3 / 8 - 128*SC,
+                            x + w + 64*SC, y)
+                        Phaser.Actions.PlaceOnLine(animals2, line2)
+                        break
+                }
+                break
+            case 27:
+                switch(variant_id){
+                    case 0:
+                        let animals = this.genAnimals(3)
+                        let line = new Line(x + w -128 *SC - 64*SC, y + h * 3 / 8 + 128*SC,
+                            x - 64*SC, y + h * 3 / 4 - 64*SC)
+                        Phaser.Actions.PlaceOnLine(animals, line)
+
+                        let animals2 = this.genAnimals(3)
+                        let line2 = new Line(x + w -128 *SC -64*SC, y + h * 3 / 8 - 128*SC,
+                            x - 64*SC, y)
+                        Phaser.Actions.PlaceOnLine(animals2, line2)
+                        break
+                }
+                break
         }
     }
 
