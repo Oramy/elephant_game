@@ -56,12 +56,10 @@ export class Preloader extends Phaser.Scene{
         this.load.atlasXML('squareOutline', 'assets/atlas/square.png', 'assets/atlas/square.xml');
         this.load.atlasXML('squareSilhouette', 'assets/atlas/squareSilhouette.png', 'assets/atlas/squareSilhouette.xml');
         this.load.atlasXML('square_nodetailsOutline', 'assets/atlas/square_nodetailsOutline.png', 'assets/atlas/square_nodetailsOutline.xml');
-        this.load.atlasXML('topdownsprites', 'assets/atlas/allSprites_default.png', 'assets/atlas/allSprites_default.xml');
         this.load.atlasXML('icons', 'assets/atlas/sheet_black1x.png', 'assets/atlas/sheet_black1x.xml');
         this.load.atlasXML('iconsw', 'assets/atlas/sheet_white1x.png', 'assets/atlas/sheet_white1x.xml');
         this.load.atlasXML('spritesheet_other', 'assets/atlas/spritesheet_other.png', 'assets/atlas/spritesheet_other.xml');
 
-        this.load.image('fire1', 'assets/particles/fire1.png');
         this.load.image('yellow', 'assets/particles/yellow.png');
         this.load.image('blue', 'assets/particles/blue.png');
         this.load.image('animalCoins', 'assets/ui/animalCoins.png');
@@ -77,10 +75,13 @@ export class Preloader extends Phaser.Scene{
         this.load.audio('synth2', ['assets/audio/tech/synth2.ogg', 'assets/audio/tech/synth2.mp3']);
         this.load.audio('top1', ['assets/audio/tech/top1.ogg', 'assets/audio/tech/top1.mp3']);
         this.load.audio('top2', ['assets/audio/tech/top2.ogg', 'assets/audio/tech/top2.mp3']);
-        this.load.audio('pickCoin', 'assets/audio/399196__spiceprogram__perc-bip.wav');
-        this.load.audio('unlockSound', 'assets/audio/270304__littlerobotsoundfactory__collect-point-00.wav');
+        this.load.audio('pickCoin', ['assets/audio/399196__spiceprogram__perc-bip.ogg',
+            'assets/audio/399196__spiceprogram__perc-bip.mp3']);
+        this.load.audio('unlockSound', ['assets/audio/270304__littlerobotsoundfactory__collect-point-00.ogg',
+            'assets/audio/270304__littlerobotsoundfactory__collect-point-00.mp3']);
         this.load.audio('clickSound', 'assets/audio/425187__mabdurrahman__calculatorclick.wav')
-        this.load.audio('buySound', 'assets/audio/201159__kiddpark__cash-register.wav')
+        this.load.audio('buySound', ['assets/audio/201159__kiddpark__cash-register.ogg',
+            'assets/audio/201159__kiddpark__cash-register.mp3'])
         this.load.audio('pickAnimal', 'assets/audio/328117__greenvwbeetle__pop-8.wav')
     }
 

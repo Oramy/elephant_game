@@ -53,6 +53,8 @@ export const ROUND_Y_OFFSETS = [0, -0.02,0, 0.05, 0, 0, 0.1, 0, -0.08, 0.05, 0.1
 export let SC
 
 export class MainScene extends Phaser.Scene {
+
+    private pauseFunction: Function;
     private elephant: Sprite
     private elephantDirection: Phaser.Math.Vector2
     // Last recorded position of the Elephant. This is used to orientate the elephant without shaking.
@@ -375,11 +377,8 @@ export class MainScene extends Phaser.Scene {
 		this.input.on('gameobjectdown', (pointer, gameObject) => {
 			if (gameObject === image) {
 		    	if (this.started) {
-					this.scene.pause('MainScene')
-            	    this.scene.launch('PauseScene')
                     this.clickSound.play()
-                    // @ts-ignore
-					this.scene.get('PauseScene').setPlayerData(this.playerData)
+					this.pauseFunction()
 				}
 			}
 		})
@@ -388,6 +387,18 @@ export class MainScene extends Phaser.Scene {
         this.highscored = false
 
         this.lastMeterMark = 0
+
+        this.pauseFunction = function(){
+            console.log('pause!!!')
+            this.scene.pause('MainScene')
+            this.scene.launch('PauseScene')
+
+            // @ts-ignore
+            this.scene.get('PauseScene').setPlayerData(this.playerData)
+        };
+        //@ts-ignore
+        this.facebook.on('pause', this.pauseFunction, this)
+        this.input.on('blur', this.pauseFunction, this)
     }
 
     createSideWalls(): void {
@@ -532,6 +543,8 @@ export class MainScene extends Phaser.Scene {
         // @ts-ignore
         this.instruments[0].mute = false
         this.instruments[0].on('looped', this.updateSounds, this)
+
+
     }
 
     create (): void {
@@ -1020,8 +1033,7 @@ export class MainScene extends Phaser.Scene {
     updateStats() {
         if(!this.gameOverB)
         {
-            // @ts-ignore
-            this.facebook.removeListener('getleaderboard', this.loadLeaderboards)
+
             if (this.followingAnimals.length >= this.maxFollowingAnimals) {
                 this.maxFollowingAnimals = this.followingAnimals.length
 
@@ -1094,6 +1106,14 @@ export class MainScene extends Phaser.Scene {
         if (!this.gameOverB) {
             this.stopSounds()
             this.updateStats()
+
+            // @ts-ignore
+            this.facebook.removeListener('getleaderboard', this.loadLeaderboards)
+            //@ts-ignore
+            this.facebook.removeListener('pause', this.pauseFunction)
+
+
+            this.input.removeListener("blur", this.pauseFunction, this, false)
 
             this.gameOverB = true
 
